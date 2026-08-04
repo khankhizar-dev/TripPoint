@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Rocket Illustration (Everything Place) -->
+    <!-- Clouds at base -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M40,160 q10,-20 30,-10 q20,-20 40,0 q20,-10 40,10 q10,20 -10,30 h-100 z" />
+
+    <!-- Rocket Body -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M85,40 q15,-20 30,0 v80 h-30 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M90,70 a10,10 0,1,0 20,0 a10,10 0,1,0 -20,0" /> <!-- Window -->
+
+    <!-- Fins -->
+    <path
+        android:fillColor="#1D4ED8"
+        android:pathData="M85,100 l-15,20 v10 h15 z M115,100 l15,20 v10 h-15 z" />
+
+    <!-- Flame -->
+    <path
+        android:fillColor="#F59E0B"
+        android:pathData="M90,125 q10,20 20,0 l-10,30 z" />
+</vector>

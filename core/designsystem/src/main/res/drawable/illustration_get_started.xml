@@ -1,0 +1,35 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Phone with Form (Get Started) -->
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#F0F7FF"
+        android:pathData="M100,100 m-80,0 a80,80 0,1,1 160,0 a80,80 0,1,1 -160,0" />
+
+    <!-- Phone -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M65,40 h70 q10,0 10,10 v110 q0,10 -10,10 h-70 q-10,0 -10,-10 v-110 q0,-10 10,-10 z" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70,50 h60 v90 h-60 z" />
+
+    <!-- Form Elements on Phone -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M90,65 a10,10 0,1,0 20,0 a10,10 0,1,0 -20,0" /> <!-- User Icon -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M75,85 h50 v5 h-50 z M75,100 h50 v5 h-50 z" /> <!-- Input Lines -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M80,120 h40 v10 h-40 z" /> <!-- Button -->
+
+    <!-- Backpack next to phone -->
+    <path
+        android:fillColor="#1D4ED8"
+        android:pathData="M145,130 h25 v40 q0,5 -5,5 h-15 q-5,0 -5,-5 z" />
+</vector>
