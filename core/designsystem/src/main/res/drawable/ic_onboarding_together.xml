@@ -3,10 +3,22 @@
     android:height="200dp"
     android:viewportWidth="200"
     android:viewportHeight="200">
+    <!-- Background Circle -->
     <path
         android:fillColor="#E1ECFA"
-        android:pathData="M100,100m-100,0a100,100 0,1 1,200 0a100,100 0,1 1,-200 0" />
+        android:pathData="M100,100m-80,0a80,80 0,1 1,160 0a80,80 0,1 1,-160 0" />
+    <!-- Three People Concept -->
     <path
         android:fillColor="#2563EB"
-        android:pathData="M70,80 Q100,20 130,80 L130,130 Q100,160 70,130 Z" />
+        android:pathData="M70,90a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M100,100a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M85,120a20,20 0,1 1,40 0a20,20 0,1 1,-40 0" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M60,140 Q100,170 140,140" />
 </vector>
