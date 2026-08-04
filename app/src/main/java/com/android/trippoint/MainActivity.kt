@@ -76,7 +76,22 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(Screen.Login.route) {
-                            Greeting(name = "Login Screen")
+                            com.android.trippoint.authentication.login.LoginRoute(
+                                onNavigateToHome = {
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onNavigateToSignUp = {
+                                    navController.navigate(Screen.Register.route)
+                                },
+                                onForgotPassword = {
+                                    // Navigate to Forgot Password
+                                }
+                            )
+                        }
+                        composable(Screen.Register.route) {
+                            Greeting(name = "Register Screen")
                         }
                         composable(Screen.Home.route) {
                             Greeting(name = "Home Screen")

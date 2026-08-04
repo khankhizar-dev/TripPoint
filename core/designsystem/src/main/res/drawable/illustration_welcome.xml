@@ -1,0 +1,47 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Clouds -->
+    <path
+        android:fillColor="#D1E4FF"
+        android:pathData="M30,30 q10,-10 20,0 q10,10 0,20 z M150,40 q15,-10 30,0 q10,15 0,25 z" />
+
+    <!-- Mountains -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M0,150 L60,50 L120,150 L180,40 L200,150 L200,200 L0,200 Z" />
+    <path
+        android:fillColor="#CBD5E1"
+        android:pathData="M40,200 L80,110 L130,200 Z" />
+
+    <!-- River -->
+    <path
+        android:strokeColor="#3B82F6"
+        android:strokeWidth="5"
+        android:strokeLineCap="round"
+        android:pathData="M60,195 Q100,165 140,195" />
+
+    <!-- Trees -->
+    <path
+        android:fillColor="#065F46"
+        android:pathData="M20,180 l10,-20 l10,20 z M40,190 l8,-15 l8,15 z M160,180 l12,-25 l12,25 z" />
+
+    <!-- Traveler -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M95,160 v-30 q0,-5 5,-5 h5 v35 z" /> <!-- Body -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M100,120a6,6 0,1,0 12,0a6,6 0,1,0 -12,0" /> <!-- Head -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M105,135 h6 v15 h-6 z" /> <!-- Backpack -->
+
+    <!-- Birds -->
+    <path
+        android:strokeColor="#64748B"
+        android:strokeWidth="1.5"
+        android:pathData="M120,30 l5,5 l5,-5 M140,20 l4,4 l4,-4" />
+</vector>

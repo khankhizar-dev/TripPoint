@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.designsystem.components.AppLogo
-import com.android.trippoint.core.designsystem.components.ErrorView
+import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
@@ -50,6 +50,28 @@ fun SplashRoute(
 
 @Composable
 fun SplashScreen(uiState: SplashContract.State) {
+    if (uiState.error != null) {
+        val illustration = when (uiState.error) {
+            SplashContract.SplashError.NoInternet -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_no_network
+            SplashContract.SplashError.ServerError -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_error
+            SplashContract.SplashError.Maintenance -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_plan
+            SplashContract.SplashError.ForceUpdate -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_trip
+        }
+
+        FullscreenStatusView(
+            title = stringResource(uiState.error.titleResId),
+            subtitle = stringResource(uiState.error.descriptionResId),
+            imageResId = illustration,
+            actionText = stringResource(com.android.trippoint.core.designsystem.R.string.core_designsystem_retry),
+            onActionClick = { /* Handle retry */ }
+        )
+        return
+    }
+
     val dimen = TripPointTheme.dimensions
     Box(
         modifier = Modifier
@@ -95,27 +117,14 @@ fun SplashScreen(uiState: SplashContract.State) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
-                if (uiState.error != null) {
-                    val retryText = stringResource(
-                        com.android.trippoint.core.designsystem.R.string.core_designsystem_retry
-                    )
-                    ErrorView(
-                        title = stringResource(uiState.error.titleResId),
-                        description = stringResource(uiState.error.descriptionResId),
-                        icon = uiState.error.icon,
-                        actionText = retryText,
-                        onActionClick = { /* Handle retry */ }
-                    )
-                } else {
-                    LoadingIndicator()
+                LoadingIndicator()
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = stringResource(uiState.splashStep.messageResId),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = stringResource(uiState.splashStep.messageResId),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))
