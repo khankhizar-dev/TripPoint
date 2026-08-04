@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,7 +23,6 @@ import com.android.trippoint.authentication.R
 import com.android.trippoint.core.designsystem.components.AppLogo
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
-import com.android.trippoint.core.designsystem.components.LoadingView
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
 
@@ -99,11 +94,14 @@ fun SplashScreen(uiState: SplashContract.State) {
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
                 if (uiState.error != null) {
+                    val retryText = stringResource(
+                        com.android.trippoint.core.designsystem.R.string.core_designsystem_retry
+                    )
                     ErrorView(
                         title = stringResource(uiState.error.titleResId),
                         description = stringResource(uiState.error.descriptionResId),
                         icon = uiState.error.icon,
-                        actionText = stringResource(com.android.trippoint.core.designsystem.R.string.core_designsystem_retry),
+                        actionText = retryText,
                         onActionClick = { /* Handle retry */ }
                     )
                 } else {

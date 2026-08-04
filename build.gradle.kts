@@ -27,26 +27,27 @@ subprojects {
         }
     }
 
-    val fileFilter = listOf(
-        "**/R.class",
-        "**/R$*.class",
-        "**/BuildConfig.*",
-        "**/Manifest*.*",
-        "**/*Test*.*",
-        "android/**/*.*",
-        "**/*$[0-9]*.*",
-        "**/*Component*.*",
-        "**/*BR*.*",
-        "**/Manifest*.*",
-        "**/*Companion*.*",
-        "**/*Module*.*",
-        "**/*Dagger*.*",
-        "**/*Hilt*.*",
-        "**/*MembersInjector*.*",
-        "**/*_Factory*.*",
-        "**/*_Provide*Factory*.*",
-        "**/*Extensions*.*"
-    )
+    val fileFilter =
+        listOf(
+            "**/R.class",
+            "**/R$*.class",
+            "**/BuildConfig.*",
+            "**/Manifest*.*",
+            "**/*Test*.*",
+            "android/**/*.*",
+            "**/*$[0-9]*.*",
+            "**/*Component*.*",
+            "**/*BR*.*",
+            "**/Manifest*.*",
+            "**/*Companion*.*",
+            "**/*Module*.*",
+            "**/*Dagger*.*",
+            "**/*Hilt*.*",
+            "**/*MembersInjector*.*",
+            "**/*_Factory*.*",
+            "**/*_Provide*Factory*.*",
+            "**/*Extensions*.*",
+        )
 
     tasks.register<JacocoReport>("jacocoTestReport") {
         dependsOn("testDebugUnitTest")
@@ -56,16 +57,19 @@ subprojects {
             html.required.set(true)
         }
 
-        val debugTree = fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-            exclude(fileFilter)
-        }
+        val debugTree =
+            fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+                exclude(fileFilter)
+            }
         val mainSrc = "${project.projectDir}/src/main/java"
 
         sourceDirectories.setFrom(files(mainSrc))
         classDirectories.setFrom(files(debugTree))
-        executionData.setFrom(fileTree(project.layout.buildDirectory.get()) {
-            include("jacoco/testDebugUnitTest.exec")
-        })
+        executionData.setFrom(
+            fileTree(project.layout.buildDirectory.get()) {
+                include("jacoco/testDebugUnitTest.exec")
+            },
+        )
     }
 }
 
