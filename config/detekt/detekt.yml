@@ -30,10 +30,11 @@ complexity:
     threshold: 600
   LongMethod:
     active: true
-    threshold: 60
+    threshold: 100
   LongParameterList:
     active: true
-    threshold: 6
+    functionThreshold: 10
+    constructorThreshold: 10
     ignoreDefaultParameters: false
     ignoreDataClasses: true
     ignoreAnnotatedParameter: []
@@ -45,7 +46,7 @@ naming:
     classPattern: '[A-Z][a-zA-Z0-9]*'
   FunctionNaming:
     active: true
-    functionPattern: '[a-z][a-zA-Z0-9]*'
+    functionPattern: '[a-zA-Z][a-zA-Z0-9]*'
     excludeClassPattern: '.*Test'
   VariableNaming:
     active: true
