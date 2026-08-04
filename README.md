@@ -12,6 +12,14 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 - **Navigation**: Navigation Compose
 - **Design System**: Custom design system in `:core:designsystem`
 
+## ⚙️ CI/CD
+
+The project uses **GitHub Actions** for continuous integration and delivery:
+- **Build & Test**: Automatically triggered on every push to `main` or `develop` branches and on pull requests.
+- **Artifacts**: Debug APKs are generated and uploaded as artifacts for every successful build.
+- **Linting**: Android Lint, **Detekt** (code smells), and **Ktlint** (formatting) are run to ensure high code quality.
+- **Code Coverage**: JaCoCo is integrated to provide test coverage reports for all modules.
+
 ## 🏗 Architecture
 
 The project follows a multi-module architecture to promote scalability and maintainability:
