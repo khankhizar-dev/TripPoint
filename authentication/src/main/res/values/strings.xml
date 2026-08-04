@@ -21,4 +21,19 @@
 
     <string name="auth_splash_error_force_update_title">Update Required</string>
     <string name="auth_splash_error_force_update_desc">A new version of TripPoint is available.</string>
+
+    <!-- Welcome & Onboarding -->
+    <string name="auth_welcome_title">Everything about your trip. One place.</string>
+    <string name="auth_welcome_subtitle">Plan, organize, collaborate, and remember every journey.</string>
+    <string name="auth_get_started">Get Started</string>
+    <string name="auth_sign_in">Sign In</string>
+    <string name="auth_next">Next</string>
+    <string name="auth_onboarding_1_title">Plan Smarter</string>
+    <string name="auth_onboarding_1_subtitle">Keep your entire itinerary, bookings, and documents organized in one place.</string>
+    <string name="auth_onboarding_2_title">Travel Together</string>
+    <string name="auth_onboarding_2_subtitle">Invite friends and family to collaborate in real-time, and stay aligned.</string>
+    <string name="auth_onboarding_3_title">Travel Offline</string>
+    <string name="auth_onboarding_3_subtitle">Access your plans, maps, and documents even without internet.</string>
+    <string name="auth_lets_get_started">Let\'s get you started!</string>
+    <string name="auth_create_account">Create Account</string>
 </resources>

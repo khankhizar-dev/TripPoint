@@ -55,6 +55,7 @@ class SplashContract {
     }
 
     sealed class Effect : UiEffect {
+        object NavigateToWelcome : Effect()
         object NavigateToLogin : Effect()
         object NavigateToHome : Effect()
     }

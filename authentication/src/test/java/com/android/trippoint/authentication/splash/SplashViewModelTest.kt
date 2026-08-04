@@ -50,14 +50,14 @@ class SplashViewModelTest {
     }
 
     @Test
-    fun `sequence ends with navigation to login`() = runTest {
+    fun `sequence ends with navigation to welcome`() = runTest {
         viewModel = SplashViewModel()
         
         viewModel.effect.test {
             // Advance past all delays (3 * 1000ms)
             advanceTimeBy(3001)
             
-            assertEquals(SplashContract.Effect.NavigateToLogin, awaitItem())
+            assertEquals(SplashContract.Effect.NavigateToWelcome, awaitItem())
             cancelAndIgnoreRemainingEvents()
         }
     }

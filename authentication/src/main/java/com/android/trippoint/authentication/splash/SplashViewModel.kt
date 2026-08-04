@@ -30,8 +30,8 @@ class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Inten
             setState { copy(splashStep = SplashContract.SplashStep.SyncingData) }
             delay(1000)
 
-            // For now, always navigate to Login
-            sendEffect(SplashContract.Effect.NavigateToLogin)
+            // Navigate to Welcome screen for the first time
+            sendEffect(SplashContract.Effect.NavigateToWelcome)
         }
     }
 }

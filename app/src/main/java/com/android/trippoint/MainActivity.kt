@@ -39,6 +39,11 @@ class MainActivity : ComponentActivity() {
                     ) {
                         composable(Screen.Splash.route) {
                             SplashRoute(
+                                onNavigateToWelcome = {
+                                    navController.navigate(Screen.Welcome.route) {
+                                        popUpTo(Screen.Splash.route) { inclusive = true }
+                                    }
+                                },
                                 onNavigateToLogin = {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(Screen.Splash.route) { inclusive = true }
@@ -47,6 +52,25 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToHome = {
                                     navController.navigate(Screen.Home.route) {
                                         popUpTo(Screen.Splash.route) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                        composable(Screen.Welcome.route) {
+                            com.android.trippoint.authentication.onboarding.WelcomeScreen(
+                                onGetStarted = {
+                                    navController.navigate(Screen.Onboarding.route)
+                                },
+                                onSignIn = {
+                                    navController.navigate(Screen.Login.route)
+                                }
+                            )
+                        }
+                        composable(Screen.Onboarding.route) {
+                            com.android.trippoint.authentication.onboarding.OnboardingScreen(
+                                onOnboardingComplete = {
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(Screen.Welcome.route) { inclusive = true }
                                     }
                                 }
                             )

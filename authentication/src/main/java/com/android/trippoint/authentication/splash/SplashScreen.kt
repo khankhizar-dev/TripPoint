@@ -28,6 +28,7 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 
 @Composable
 fun SplashRoute(
+    onNavigateToWelcome: () -> Unit,
     onNavigateToLogin: () -> Unit,
     onNavigateToHome: () -> Unit,
     viewModel: SplashViewModel = viewModel()
@@ -37,6 +38,7 @@ fun SplashRoute(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
+                is SplashContract.Effect.NavigateToWelcome -> onNavigateToWelcome()
                 is SplashContract.Effect.NavigateToLogin -> onNavigateToLogin()
                 is SplashContract.Effect.NavigateToHome -> onNavigateToHome()
             }
