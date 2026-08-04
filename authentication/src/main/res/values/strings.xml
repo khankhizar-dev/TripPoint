@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="auth_app_name">TripPoint</string>
+    <string name="auth_splash_tagline">Your journey, organized.</string>
+    <string name="auth_splash_preparing">Preparing your journey...</string>
+
+    <!-- Splash Steps -->
+    <string name="auth_splash_step_initializing">Initializing...</string>
+    <string name="auth_splash_step_checking_version">Checking Version...</string>
+    <string name="auth_splash_step_syncing">Syncing Data...</string>
+
+    <!-- Splash Errors -->
+    <string name="auth_splash_error_no_internet_title">No Internet</string>
+    <string name="auth_splash_error_no_internet_desc">Please check your connection and try again.</string>
+
+    <string name="auth_splash_error_server_title">Server Error</string>
+    <string name="auth_splash_error_server_desc">Unable to reach TripPoint. Something went wrong on our end.</string>
+
+    <string name="auth_splash_error_maintenance_title">Maintenance</string>
+    <string name="auth_splash_error_maintenance_desc">We\'re improving TripPoint. We\'ll be back shortly.</string>
+
+    <string name="auth_splash_error_force_update_title">Update Required</string>
+    <string name="auth_splash_error_force_update_desc">A new version of TripPoint is available.</string>
+</resources>

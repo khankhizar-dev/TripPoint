@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="core_designsystem_loading">Loading...</string>
+    <string name="core_designsystem_app_logo_desc">App Logo</string>
+    <string name="core_designsystem_retry">Retry</string>
+</resources>
