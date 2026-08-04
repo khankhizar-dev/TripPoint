@@ -11,65 +11,77 @@ plugins {
 
 val jacocoVersion = libs.versions.jacoco.get().toString()
 
+val fileFilter =
+    listOf(
+        "**/R.class",
+        "**/R$*.class",
+        "**/BuildConfig.*",
+        "**/Manifest*.*",
+        "**/*Test*.*",
+        "android/**/*.*",
+        "**/*$[0-9]*.*",
+        "**/*Component*.*",
+        "**/*BR*.*",
+        "**/Manifest*.*",
+        "**/*Companion*.*",
+        "**/*Module*.*",
+        "**/*Dagger*.*",
+        "**/*Hilt*.*",
+        "**/*MembersInjector*.*",
+        "**/*_Factory*.*",
+        "**/*_Provide*Factory*.*",
+        "**/*Extensions*.*",
+    )
+
 subprojects {
-    apply(plugin = "jacoco")
-    apply(plugin = "io.gitlab.arturbosch.detekt")
-    apply(plugin = "org.jlleitschuh.gradle.ktlint")
-
-    extensions.configure<JacocoPluginExtension> {
-        toolVersion = jacocoVersion
+    val subproject = this
+    plugins.withId("com.android.library") {
+        configureAndroidModule(subproject)
     }
-
-    tasks.withType<Test> {
-        extensions.configure<JacocoTaskExtension> {
-            isIncludeNoLocationClasses = true
-            excludes = listOf("jdk.internal.*")
-        }
+    plugins.withId("com.android.application") {
+        configureAndroidModule(subproject)
     }
+}
 
-    val fileFilter =
-        listOf(
-            "**/R.class",
-            "**/R$*.class",
-            "**/BuildConfig.*",
-            "**/Manifest*.*",
-            "**/*Test*.*",
-            "android/**/*.*",
-            "**/*$[0-9]*.*",
-            "**/*Component*.*",
-            "**/*BR*.*",
-            "**/Manifest*.*",
-            "**/*Companion*.*",
-            "**/*Module*.*",
-            "**/*Dagger*.*",
-            "**/*Hilt*.*",
-            "**/*MembersInjector*.*",
-            "**/*_Factory*.*",
-            "**/*_Provide*Factory*.*",
-            "**/*Extensions*.*",
-        )
+fun configureAndroidModule(project: Project) {
+    with(project) {
+        apply(plugin = "jacoco")
+        apply(plugin = "io.gitlab.arturbosch.detekt")
+        apply(plugin = "org.jlleitschuh.gradle.ktlint")
 
-    tasks.register<JacocoReport>("jacocoTestReport") {
-        dependsOn("testDebugUnitTest")
-
-        reports {
-            xml.required.set(true)
-            html.required.set(true)
+        extensions.configure<JacocoPluginExtension> {
+            toolVersion = jacocoVersion
         }
 
-        val debugTree =
-            fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
-                exclude(fileFilter)
+        tasks.withType<Test> {
+            extensions.configure<JacocoTaskExtension> {
+                isIncludeNoLocationClasses = true
+                excludes = listOf("jdk.internal.*")
             }
-        val mainSrc = "${project.projectDir}/src/main/java"
+        }
 
-        sourceDirectories.setFrom(files(mainSrc))
-        classDirectories.setFrom(files(debugTree))
-        executionData.setFrom(
-            fileTree(project.layout.buildDirectory.get()) {
-                include("jacoco/testDebugUnitTest.exec")
-            },
-        )
+        tasks.register<JacocoReport>("jacocoTestReport") {
+            dependsOn("testDebugUnitTest")
+
+            reports {
+                xml.required.set(true)
+                html.required.set(true)
+            }
+
+            val debugTree =
+                fileTree("${project.layout.buildDirectory.get()}/tmp/kotlin-classes/debug") {
+                    exclude(fileFilter)
+                }
+            val mainSrc = "${project.projectDir}/src/main/java"
+
+            sourceDirectories.setFrom(files(mainSrc))
+            classDirectories.setFrom(files(debugTree))
+            executionData.setFrom(
+                fileTree(project.layout.buildDirectory.get()) {
+                    include("jacoco/testDebugUnitTest.exec")
+                },
+            )
+        }
     }
 }
 
