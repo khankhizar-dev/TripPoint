@@ -43,17 +43,17 @@ fun OnboardingScreen(
         OnboardingItem(
             R.string.auth_onboarding_1_title,
             R.string.auth_onboarding_1_subtitle,
-            com.android.trippoint.core.designsystem.R.drawable.ic_onboarding_plan
+            com.android.trippoint.core.designsystem.R.drawable.illustration_plan
         ),
         OnboardingItem(
             R.string.auth_onboarding_2_title,
             R.string.auth_onboarding_2_subtitle,
-            com.android.trippoint.core.designsystem.R.drawable.ic_onboarding_together
+            com.android.trippoint.core.designsystem.R.drawable.illustration_travel
         ),
         OnboardingItem(
             R.string.auth_onboarding_3_title,
             R.string.auth_onboarding_3_subtitle,
-            com.android.trippoint.core.designsystem.R.drawable.ic_onboarding_offline
+            com.android.trippoint.core.designsystem.R.drawable.illustration_offline
         )
     )
 

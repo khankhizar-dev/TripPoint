@@ -31,6 +31,7 @@ fun WelcomeScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         SplashIllustration(
+            imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_welcome,
             modifier = Modifier
                 .height(400.dp)
         )

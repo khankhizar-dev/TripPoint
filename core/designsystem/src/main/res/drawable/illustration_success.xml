@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Success Circle -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M100,100m-70,0a70,70 0,1 1,140 0a70,70 0,1 1,-140 0" />
+    <!-- Checkmark -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="12"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M65,105 L90,130 L135,80" />
+    <!-- Celebration dots -->
+    <path
+        android:fillColor="#10B981"
+        android:pathData="M160,50 a4,4 0,1 0,8 0a4,4 0,1 0,-8 0 M40,60 a4,4 0,1 0,8 0a4,4 0,1 0,-8 0 M170,140 a4,4 0,1 0,8 0a4,4 0,1 0,-8 0" />
+</vector>
