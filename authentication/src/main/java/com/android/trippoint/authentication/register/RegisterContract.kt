@@ -25,6 +25,7 @@ class RegisterContract {
         val confirmPassword: String = "",
         val isPasswordVisible: Boolean = false,
         val isConfirmPasswordVisible: Boolean = false,
+        val passwordStrength: PasswordStrength = PasswordStrength.EMPTY,
         val isLoading: Boolean = false,
         val isSuccess: Boolean = false,
         val nameError: Int? = null,

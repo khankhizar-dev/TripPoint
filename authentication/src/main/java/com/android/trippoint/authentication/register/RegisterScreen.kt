@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
+import com.android.trippoint.core.designsystem.components.PasswordStrengthIndicator
+import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.components.TripPointButton
 import com.android.trippoint.core.designsystem.components.TripPointTextField
 
@@ -78,7 +80,7 @@ fun RegisterScreen(
             FullscreenStatusView(
                 title = stringResource(R.string.auth_register_success_title),
                 subtitle = stringResource(R.string.auth_register_success_subtitle),
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_everything
             )
         }
         uiState.offlineError -> {
@@ -116,6 +118,7 @@ fun RegisterScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun RegisterForm(
     uiState: RegisterContract.State,
@@ -137,6 +140,13 @@ private fun RegisterForm(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Spacer(modifier = Modifier.height(64.dp))
+
+                SplashIllustration(
+                    imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_ready,
+                    modifier = Modifier.height(200.dp)
+                )
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 Text(
                     text = stringResource(R.string.auth_register_title),
@@ -211,6 +221,15 @@ private fun RegisterForm(
                     errorMessage = uiState.passwordError?.let { stringResource(it) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
                 )
+
+                if (uiState.password.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    PasswordStrengthIndicator(
+                        progress = uiState.passwordStrength.progress,
+                        color = uiState.passwordStrength.color,
+                        label = stringResource(uiState.passwordStrength.labelResId)
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(24.dp))
 

@@ -18,7 +18,11 @@ class RegisterViewModel : BaseViewModel<RegisterContract.State, RegisterContract
                 copy(email = intent.email, emailError = null)
             }
             is RegisterContract.Intent.PasswordChanged -> setState {
-                copy(password = intent.password, passwordError = null)
+                copy(
+                    password = intent.password,
+                    passwordError = null,
+                    passwordStrength = PasswordStrength.calculate(intent.password)
+                )
             }
             is RegisterContract.Intent.ConfirmPasswordChanged -> setState {
                 copy(confirmPassword = intent.password, confirmPasswordError = null)
@@ -52,6 +56,13 @@ class RegisterViewModel : BaseViewModel<RegisterContract.State, RegisterContract
             setState { copy(passwordError = R.string.auth_register_error_password_too_short) }
             return
         }
+        
+        val passwordRegex = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$".toRegex()
+        if (!currentState.password.matches(passwordRegex)) {
+            setState { copy(passwordError = R.string.auth_register_error_password_weak_complexity) }
+            return
+        }
+
         if (currentState.password != currentState.confirmPassword) {
             setState { copy(confirmPasswordError = R.string.auth_register_error_password_mismatch) }
             return
