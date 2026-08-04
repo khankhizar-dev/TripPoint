@@ -54,6 +54,33 @@
     <string name="auth_login_error_invalid_email">Please enter a valid email address</string>
     <string name="auth_login_error_empty_password">Password cannot be empty</string>
 
+    <!-- Registration -->
+    <string name="auth_register_title">Create Account</string>
+    <string name="auth_register_subtitle">Start your journey with us today</string>
+    <string name="auth_register_name_label">Full Name</string>
+    <string name="auth_register_name_placeholder">Enter your full name</string>
+    <string name="auth_register_email_label">Email Address</string>
+    <string name="auth_register_email_placeholder">Enter your email</string>
+    <string name="auth_register_password_label">Password</string>
+    <string name="auth_register_password_placeholder">Create a password</string>
+    <string name="auth_register_confirm_password_label">Confirm Password</string>
+    <string name="auth_register_confirm_password_placeholder">Confirm your password</string>
+    <string name="auth_register_button">Sign Up</string>
+    <string name="auth_register_already_have_account">Already have an account?</string>
+    <string name="auth_register_login_link">Sign In</string>
+    <string name="auth_register_error_invalid_name">Please enter your name</string>
+    <string name="auth_register_error_password_mismatch">Passwords do not match</string>
+    <string name="auth_register_error_password_too_short">Password must be at least 8 characters</string>
+    <string name="auth_register_error_password_weak_complexity">Password must contain uppercase, lowercase, digits, and special characters</string>
+    <string name="auth_register_success_title">Account Created!</string>
+    <string name="auth_register_success_subtitle">Your adventure begins now. Redirecting...</string>
+
+    <!-- Password Strength -->
+    <string name="auth_register_password_empty"></string>
+    <string name="auth_register_password_weak">Weak password</string>
+    <string name="auth_register_password_medium">Medium password</string>
+    <string name="auth_register_password_strong">Strong password</string>
+
     <!-- Fullscreen Status -->
     <string name="auth_login_success_title">Welcome back!</string>
     <string name="auth_login_success_subtitle">Performing your login...</string>

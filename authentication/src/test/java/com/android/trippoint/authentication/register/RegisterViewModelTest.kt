@@ -108,10 +108,19 @@ class RegisterViewModelTest {
     }
 
     @Test
+    fun `register with weak complexity password shows error`() {
+        viewModel.onIntent(RegisterContract.Intent.NameChanged("John"))
+        viewModel.onIntent(RegisterContract.Intent.EmailChanged("test@example.com"))
+        viewModel.onIntent(RegisterContract.Intent.PasswordChanged("Password123")) // No special char
+        viewModel.onIntent(RegisterContract.Intent.RegisterClicked)
+        assertEquals(R.string.auth_register_error_password_weak_complexity, viewModel.uiState.value.passwordError)
+    }
+
+    @Test
     fun `register with password mismatch shows error`() {
         viewModel.onIntent(RegisterContract.Intent.NameChanged("John"))
         viewModel.onIntent(RegisterContract.Intent.EmailChanged("test@example.com"))
-        viewModel.onIntent(RegisterContract.Intent.PasswordChanged("password123"))
+        viewModel.onIntent(RegisterContract.Intent.PasswordChanged("Password@123"))
         viewModel.onIntent(RegisterContract.Intent.ConfirmPasswordChanged("different123"))
         viewModel.onIntent(RegisterContract.Intent.RegisterClicked)
         assertEquals(R.string.auth_register_error_password_mismatch, viewModel.uiState.value.confirmPasswordError)
@@ -121,8 +130,8 @@ class RegisterViewModelTest {
     fun `successful registration navigates to home`() = runTest {
         viewModel.onIntent(RegisterContract.Intent.NameChanged("John Doe"))
         viewModel.onIntent(RegisterContract.Intent.EmailChanged("test@example.com"))
-        viewModel.onIntent(RegisterContract.Intent.PasswordChanged("password123"))
-        viewModel.onIntent(RegisterContract.Intent.ConfirmPasswordChanged("password123"))
+        viewModel.onIntent(RegisterContract.Intent.PasswordChanged("Password@123"))
+        viewModel.onIntent(RegisterContract.Intent.ConfirmPasswordChanged("Password@123"))
 
         viewModel.effect.test {
             viewModel.onIntent(RegisterContract.Intent.RegisterClicked)
