@@ -20,6 +20,7 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.navigation.Screen
 
 class MainActivity : ComponentActivity() {
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -93,13 +94,33 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Register.route) {
                             com.android.trippoint.authentication.register.RegisterRoute(
                                 onNavigateToHome = {
-                                    navController.navigate(Screen.Home.route) {
-                                        popUpTo(0) { inclusive = true }
+                                    // In a real app, we might navigate to OTP first
+                                    // For now, let's say registration success leads to OTP
+                                    navController.navigate(Screen.Otp.createRoute("user@example.com")) {
+                                        popUpTo(Screen.Register.route) { inclusive = true }
                                     }
                                 },
                                 onNavigateToLogin = {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(Screen.Register.route) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                        composable(
+                            route = Screen.Otp.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("email") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val email = backStackEntry.arguments?.getString("email") ?: ""
+                            com.android.trippoint.authentication.otp.OtpRoute(
+                                email = email,
+                                onNavigateToHome = {
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(0) { inclusive = true }
                                     }
                                 }
                             )

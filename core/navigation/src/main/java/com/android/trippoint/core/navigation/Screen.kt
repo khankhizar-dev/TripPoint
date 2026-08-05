@@ -6,5 +6,8 @@ sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
     object Login : Screen("login")
     object Register : Screen("register")
+    object Otp : Screen("otp/{email}") {
+        fun createRoute(email: String) = "otp/$email"
+    }
     object Home : Screen("home")
 }
