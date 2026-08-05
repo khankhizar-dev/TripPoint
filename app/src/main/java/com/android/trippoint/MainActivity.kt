@@ -144,13 +144,22 @@ class MainActivity : ComponentActivity() {
                                 email = email,
                                 isForgotPasswordFlow = isForgotPassword,
                                 onNavigateToHome = {
-                                    navController.navigate(Screen.Home.route) {
+                                    navController.navigate(Screen.ProfileSetup.route) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
                                 onNavigateToResetPassword = {
                                     navController.navigate(Screen.ResetPassword.route) {
                                         popUpTo(Screen.Login.route) { inclusive = false }
+                                    }
+                                }
+                            )
+                        }
+                        composable(Screen.ProfileSetup.route) {
+                            com.android.trippoint.authentication.profilesetup.ProfileSetupRoute(
+                                onNavigateToHome = {
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(0) { inclusive = true }
                                     }
                                 }
                             )
