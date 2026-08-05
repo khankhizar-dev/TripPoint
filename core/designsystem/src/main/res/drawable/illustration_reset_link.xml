@@ -1,0 +1,25 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Envelope/Reset Link sent scene -->
+    <!-- Background Circle -->
+    <path
+        android:fillColor="#F0F7FF"
+        android:pathData="M100,100 m-80,0 a80,80 0,1,1 160,0 a80,80 0,1,1 -160,0" />
+
+    <!-- Envelope -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M40,70 h120 q5,0 5,5 v60 q0,5 -5,5 h-120 q-5,0 -5,-5 v-60 q0,-5 5,-5 z" />
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="2"
+        android:pathData="M40,70 L100,105 L160,70" />
+
+    <!-- Paper Plane -->
+    <path
+        android:fillColor="#1D4ED8"
+        android:pathData="M140,50 l20,10 l-15,5 z" />
+</vector>

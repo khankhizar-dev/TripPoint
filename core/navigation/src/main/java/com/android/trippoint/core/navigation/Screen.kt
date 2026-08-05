@@ -6,8 +6,11 @@ sealed class Screen(val route: String) {
     object Onboarding : Screen("onboarding")
     object Login : Screen("login")
     object Register : Screen("register")
-    object Otp : Screen("otp/{email}") {
-        fun createRoute(email: String) = "otp/$email"
+    object Otp : Screen("otp/{email}?isForgotPassword={isForgotPassword}") {
+        fun createRoute(email: String, isForgotPassword: Boolean = false) =
+            "otp/$email?isForgotPassword=$isForgotPassword"
     }
+    object ForgotPassword : Screen("forgot_password")
+    object ResetPassword : Screen("reset_password")
     object Home : Screen("home")
 }

@@ -1,17 +1,21 @@
-package com.android.trippoint.authentication.otp
+package com.android.trippoint.authentication.forgotpassword
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -20,54 +24,52 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
-import com.android.trippoint.core.designsystem.components.OtpInput
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.components.TripPointButton
+import com.android.trippoint.core.designsystem.components.TripPointTextField
 
 @Composable
-fun OtpRoute(
-    email: String,
-    onNavigateToHome: () -> Unit,
-    onNavigateToResetPassword: () -> Unit = {},
-    isForgotPasswordFlow: Boolean = false,
-    viewModel: OtpViewModel = viewModel()
+fun ForgotPasswordRoute(
+    onNavigateBack: () -> Unit,
+    onNavigateToOtp: (String) -> Unit,
+    viewModel: ForgotPasswordViewModel = viewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.isForgotPasswordFlow = isForgotPasswordFlow
         viewModel.effect.collect { effect ->
             when (effect) {
-                is OtpContract.Effect.NavigateToHome -> onNavigateToHome()
-                is OtpContract.Effect.NavigateToResetPassword -> onNavigateToResetPassword()
-                is OtpContract.Effect.ShowError -> { /* Handle error */ }
+                is ForgotPasswordContract.Effect.NavigateToLogin -> onNavigateBack()
+                is ForgotPasswordContract.Effect.NavigateToOtp -> onNavigateToOtp(effect.email)
+                is ForgotPasswordContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
     }
 
-    OtpScreen(
-        uiState = uiState.copy(email = email),
+    ForgotPasswordScreen(
+        uiState = uiState,
         onIntent = viewModel::onIntent
     )
 }
 
 @Composable
-fun OtpScreen(
-    uiState: OtpContract.State,
-    onIntent: (OtpContract.Intent) -> Unit
+fun ForgotPasswordScreen(
+    uiState: ForgotPasswordContract.State,
+    onIntent: (ForgotPasswordContract.Intent) -> Unit
 ) {
     when {
         uiState.isSuccess -> {
             FullscreenStatusView(
-                title = stringResource(R.string.auth_otp_success_title),
-                subtitle = stringResource(R.string.auth_otp_success_subtitle),
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success
+                title = stringResource(R.string.auth_forgot_password_success_title),
+                subtitle = stringResource(R.string.auth_forgot_password_success_subtitle),
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_reset_link,
+                actionText = stringResource(R.string.auth_forgot_password_open_email),
+                onActionClick = { /* Open email app */ }
             )
         }
         uiState.offlineError -> {
@@ -76,7 +78,7 @@ fun OtpScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) }
+                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) }
             )
         }
         uiState.serverError -> {
@@ -85,11 +87,11 @@ fun OtpScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) }
+                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) }
             )
         }
         else -> {
-            OtpContent(uiState, onIntent)
+            ForgotPasswordContent(uiState, onIntent)
         }
     }
 
@@ -106,10 +108,11 @@ fun OtpScreen(
 }
 
 @Composable
-private fun OtpContent(
-    uiState: OtpContract.State,
-    onIntent: (OtpContract.Intent) -> Unit
+private fun ForgotPasswordContent(
+    uiState: ForgotPasswordContract.State,
+    onIntent: (ForgotPasswordContract.Intent) -> Unit
 ) {
+    val scrollState = rememberScrollState()
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -118,7 +121,8 @@ private fun OtpContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp),
+                .padding(horizontal = 24.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.height(64.dp))
@@ -131,74 +135,49 @@ private fun OtpContent(
             Spacer(modifier = Modifier.height(32.dp))
 
             Text(
-                text = stringResource(R.string.auth_otp_title),
+                text = stringResource(R.string.auth_forgot_password_title),
                 style = MaterialTheme.typography.headlineLarge
             )
 
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = stringResource(R.string.auth_otp_subtitle, uiState.email),
+                text = stringResource(R.string.auth_forgot_password_subtitle),
                 style = MaterialTheme.typography.bodyLarge,
-                textAlign = TextAlign.Center,
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             Spacer(modifier = Modifier.height(48.dp))
 
-            OtpInput(
-                otpText = uiState.otp,
-                onOtpTextChange = { otp, isComplete ->
-                    onIntent(OtpContract.Intent.OtpChanged(otp))
-                    if (isComplete) onIntent(OtpContract.Intent.VerifyClicked)
-                }
+            TripPointTextField(
+                value = uiState.email,
+                onValueChange = { onIntent(ForgotPasswordContract.Intent.EmailChanged(it)) },
+                label = stringResource(R.string.auth_register_email_label),
+                placeholder = stringResource(R.string.auth_register_email_placeholder),
+                leadingIcon = {
+                    Icon(imageVector = Icons.Default.Email, contentDescription = null)
+                },
+                isError = uiState.emailError != null,
+                errorMessage = uiState.emailError?.let { stringResource(it) },
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
-
-            if (uiState.error != null) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(uiState.error),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.labelSmall
-                )
-            }
 
             Spacer(modifier = Modifier.height(32.dp))
 
             TripPointButton(
-                text = stringResource(R.string.auth_otp_verify_button),
-                onClick = { onIntent(OtpContract.Intent.VerifyClicked) },
-                enabled = uiState.otp.length == 6 && !uiState.isLoading
+                text = stringResource(R.string.auth_forgot_password_button),
+                onClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) },
+                enabled = uiState.email.isNotEmpty() && !uiState.isLoading
             )
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = stringResource(R.string.auth_otp_resend_prompt),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                TextButton(
-                    onClick = { onIntent(OtpContract.Intent.ResendClicked) },
-                    enabled = uiState.resendTimer == 0
-                ) {
-                    val resendText = if (uiState.resendTimer > 0) {
-                        stringResource(R.string.auth_otp_resend_timer, uiState.resendTimer)
-                    } else {
-                        stringResource(R.string.auth_otp_resend_button)
-                    }
-                    Text(
-                        text = resendText,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (uiState.resendTimer > 0) {
-                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        } else {
-                            MaterialTheme.colorScheme.primary
-                        }
-                    )
-                }
-            }
+            TripPointButton(
+                text = stringResource(R.string.auth_forgot_password_back_to_login),
+                onClick = { onIntent(ForgotPasswordContract.Intent.BackToLoginClicked) },
+                variant = com.android.trippoint.core.designsystem.components.ButtonVariant.Text
+            )
         }
     }
 }
