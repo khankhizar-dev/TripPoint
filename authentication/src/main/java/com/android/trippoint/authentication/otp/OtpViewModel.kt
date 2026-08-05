@@ -16,6 +16,8 @@ class OtpViewModel : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpCon
         startResendTimer()
     }
 
+    var isForgotPasswordFlow: Boolean = false
+
     override fun onIntent(intent: OtpContract.Intent) {
         when (intent) {
             is OtpContract.Intent.OtpChanged -> setState { copy(otp = intent.otp, error = null) }
@@ -35,7 +37,11 @@ class OtpViewModel : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpCon
             if (currentState.otp == "123456") { // Dummy correct OTP
                 setState { copy(isLoading = false, isSuccess = true) }
                 delay(2000)
-                sendEffect(OtpContract.Effect.NavigateToHome)
+                if (isForgotPasswordFlow) {
+                    sendEffect(OtpContract.Effect.NavigateToResetPassword)
+                } else {
+                    sendEffect(OtpContract.Effect.NavigateToHome)
+                }
             } else {
                 setState { copy(isLoading = false, error = R.string.auth_otp_error_invalid) }
             }

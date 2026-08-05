@@ -87,7 +87,26 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(Screen.Register.route)
                                 },
                                 onForgotPassword = {
-                                    // Navigate to Forgot Password
+                                    navController.navigate(Screen.ForgotPassword.route)
+                                }
+                            )
+                        }
+                        composable(Screen.ForgotPassword.route) {
+                            com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute(
+                                onNavigateBack = {
+                                    navController.popBackStack()
+                                },
+                                onNavigateToOtp = { email ->
+                                    navController.navigate(Screen.Otp.createRoute(email, true))
+                                }
+                            )
+                        }
+                        composable(Screen.ResetPassword.route) {
+                            com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute(
+                                onNavigateToLogin = {
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
                                 }
                             )
                         }
@@ -112,15 +131,26 @@ class MainActivity : ComponentActivity() {
                             arguments = listOf(
                                 androidx.navigation.navArgument("email") {
                                     type = androidx.navigation.NavType.StringType
+                                },
+                                androidx.navigation.navArgument("isForgotPassword") {
+                                    type = androidx.navigation.NavType.BoolType
+                                    defaultValue = false
                                 }
                             )
                         ) { backStackEntry ->
                             val email = backStackEntry.arguments?.getString("email") ?: ""
+                            val isForgotPassword = backStackEntry.arguments?.getBoolean("isForgotPassword") ?: false
                             com.android.trippoint.authentication.otp.OtpRoute(
                                 email = email,
+                                isForgotPasswordFlow = isForgotPassword,
                                 onNavigateToHome = {
                                     navController.navigate(Screen.Home.route) {
                                         popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onNavigateToResetPassword = {
+                                    navController.navigate(Screen.ResetPassword.route) {
+                                        popUpTo(Screen.Login.route) { inclusive = false }
                                     }
                                 }
                             )

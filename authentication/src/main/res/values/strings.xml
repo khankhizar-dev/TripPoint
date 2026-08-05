@@ -86,6 +86,25 @@
     <string name="auth_otp_success_title">Email Verified!</string>
     <string name="auth_otp_success_subtitle">Setting up your profile...</string>
 
+    <!-- Forgot Password -->
+    <string name="auth_forgot_password_title">Forgot Password?</string>
+    <string name="auth_forgot_password_subtitle">Enter your email address and we\'ll send you a link to reset your password.</string>
+    <string name="auth_forgot_password_button">Send Reset Link</string>
+    <string name="auth_forgot_password_back_to_login">Back to Sign In</string>
+    <string name="auth_forgot_password_success_title">Reset link sent!</string>
+    <string name="auth_forgot_password_success_subtitle">We\'ve sent a password reset link to your email address.</string>
+    <string name="auth_forgot_password_open_email">Open Email App</string>
+
+    <!-- Reset Password -->
+    <string name="auth_reset_password_title">Create New Password</string>
+    <string name="auth_reset_password_subtitle">Enter your new password below.</string>
+    <string name="auth_reset_password_button">Reset Password</string>
+    <string name="auth_reset_password_success_title">Password Updated!</string>
+    <string name="auth_reset_password_success_subtitle">Your password has been reset successfully. You can now sign in with your new password.</string>
+    <string name="auth_reset_password_link_expired_title">Link Expired</string>
+    <string name="auth_reset_password_link_expired_subtitle">This password reset link is no longer valid. Please request a new one.</string>
+    <string name="auth_reset_password_request_new">Request New Link</string>
+
     <!-- Password Strength -->
     <string name="auth_register_password_empty"></string>
     <string name="auth_register_password_weak">Weak password</string>
