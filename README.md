@@ -29,9 +29,9 @@ The project follows a multi-module architecture to promote scalability and maint
 ### Modules
 
 - **`:app`**: The main entry point. Handles top-level navigation and basic configuration.
-- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login).
+- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP).
 - **`:core:common`**: Contains base components like `BaseViewModel` for MVI.
-- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripPointTextField`), tokens, and premium illustrations.
+- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripPointTextField`, `OtpInput`, `PasswordStrengthIndicator`), tokens, and premium illustrations.
 - **`:core:navigation`**: Centralized screen definitions and navigation routes.
 - **`:core:network`**: Apollo GraphQL configuration (In progress).
 - **`:core:database`**: Local data persistence.
@@ -42,7 +42,8 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Premium Onboarding**: 3-page interactive pager with detailed, transparent-background illustrations.
 - [x] **MVI Architecture**: Fully reactive UI using `UiState`, `UiIntent`, and `UiEffect`.
 - [x] **Login System**: Email/Password validation, social login UI, and error/success states.
-- [ ] **Registration System**: (Planned next).
+- [x] **Registration System**: Multi-field registration with real-time password strength feedback and complexity enforcement.
+- [x] **OTP Verification**: Secure 6-digit code entry with an integrated resend timer and success transitions.
 - [ ] **Trip Dashboard**.
 
 ## 📖 Development Guidelines
