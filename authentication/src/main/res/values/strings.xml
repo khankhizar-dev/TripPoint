@@ -105,6 +105,26 @@
     <string name="auth_reset_password_link_expired_subtitle">This password reset link is no longer valid. Please request a new one.</string>
     <string name="auth_reset_password_request_new">Request New Link</string>
 
+    <!-- Profile Setup -->
+    <string name="auth_profile_setup_photo_title">Add Profile Photo</string>
+    <string name="auth_profile_setup_photo_subtitle">Add a photo so your friends can recognize you</string>
+    <string name="auth_profile_setup_skip">Skip for now</string>
+    <string name="auth_profile_setup_about_title">Tell us about you</string>
+    <string name="auth_profile_setup_about_subtitle">Help us personalize your experience</string>
+    <string name="auth_profile_setup_gender_label">Gender</string>
+    <string name="auth_profile_setup_dob_label">Date of Birth</string>
+    <string name="auth_profile_setup_pref_title">Preferences</string>
+    <string name="auth_profile_setup_pref_subtitle">Set your travel preferences</string>
+    <string name="auth_profile_setup_location_label">Location</string>
+    <string name="auth_profile_setup_language_label">Language</string>
+    <string name="auth_profile_setup_theme_label">Theme</string>
+    <string name="auth_profile_setup_review_title">Almost Done!</string>
+    <string name="auth_profile_setup_review_subtitle">Double check your details before we start</string>
+    <string name="auth_profile_setup_save_continue">Save &amp; Continue</string>
+    <string name="auth_profile_setup_success_title">You\'re all set!</string>
+    <string name="auth_profile_setup_success_subtitle">Let\'s start planning your next adventure.</string>
+    <string name="auth_profile_setup_go_home">Go to Home</string>
+
     <!-- Password Strength -->
     <string name="auth_register_password_empty"></string>
     <string name="auth_register_password_weak">Weak password</string>
