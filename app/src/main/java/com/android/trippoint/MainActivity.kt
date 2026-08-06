@@ -50,6 +50,16 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(Screen.Splash.route) { inclusive = true }
                                     }
                                 },
+                                onNavigateToProfileSetup = {
+                                    navController.navigate(Screen.ProfileSetup.route) {
+                                        popUpTo(Screen.Splash.route) { inclusive = true }
+                                    }
+                                },
+                                onNavigateToPermissions = {
+                                    navController.navigate(Screen.Permissions.route) {
+                                        popUpTo(Screen.Splash.route) { inclusive = true }
+                                    }
+                                },
                                 onNavigateToHome = {
                                     navController.navigate(Screen.Home.route) {
                                         popUpTo(Screen.Splash.route) { inclusive = true }
@@ -68,8 +78,8 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(Screen.Onboarding.route) {
-                            com.android.trippoint.authentication.onboarding.OnboardingScreen(
-                                onOnboardingComplete = {
+                            com.android.trippoint.authentication.onboarding.OnboardingRoute(
+                                onNavigateToLogin = {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(Screen.Welcome.route) { inclusive = true }
                                     }
@@ -158,7 +168,25 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.ProfileSetup.route) {
                             com.android.trippoint.authentication.profilesetup.ProfileSetupRoute(
                                 onNavigateToHome = {
+                                    navController.navigate(Screen.Permissions.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                        composable(Screen.Permissions.route) {
+                            com.android.trippoint.authentication.permissions.PermissionsRoute(
+                                onNavigateToHome = {
                                     navController.navigate(Screen.Home.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
+                            )
+                        }
+                        composable(Screen.SessionExpired.route) {
+                            com.android.trippoint.authentication.session.SessionExpiredScreen(
+                                onLoginAgain = {
+                                    navController.navigate(Screen.Login.route) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 }

@@ -17,14 +17,20 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.components.TripPointButton
 import kotlinx.coroutines.launch
@@ -34,6 +40,32 @@ data class OnboardingItem(
     val subtitleResId: Int,
     val imageResId: Int
 )
+
+@Composable
+fun OnboardingRoute(
+    onNavigateToLogin: () -> Unit
+) {
+    val context = LocalContext.current
+    val viewModel: OnboardingViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return OnboardingViewModel(PreferencesManager(context)) as T
+            }
+        }
+    )
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                OnboardingContract.Effect.NavigateToLogin -> onNavigateToLogin()
+            }
+        }
+    }
+
+    OnboardingScreen(
+        onOnboardingComplete = { viewModel.onIntent(OnboardingContract.Intent.OnboardingCompleted) }
+    )
+}
 
 @Composable
 fun OnboardingScreen(

@@ -16,8 +16,10 @@ turbine = "1.2.0"
 mockk = "1.13.17"
 kotlinxCoroutinesTest = "1.10.1"
 robolectric = "4.14.1"
+securityCrypto = "1.1.0"
 
 [libraries]
+androidx-security-crypto = { group = "androidx.security", name = "security-crypto", version.ref = "securityCrypto" }
 androidx-navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigationCompose" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }

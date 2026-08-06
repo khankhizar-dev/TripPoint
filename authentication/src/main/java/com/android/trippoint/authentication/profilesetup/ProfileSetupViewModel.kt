@@ -2,13 +2,15 @@ package com.android.trippoint.authentication.profilesetup
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ProfileSetupViewModel : 
-    BaseViewModel<ProfileSetupContract.State, ProfileSetupContract.Intent, ProfileSetupContract.Effect>(
-        initialState = ProfileSetupContract.State()
-    ) {
+class ProfileSetupViewModel(
+    private val preferencesManager: PreferencesManager
+) : BaseViewModel<ProfileSetupContract.State, ProfileSetupContract.Intent, ProfileSetupContract.Effect>(
+    initialState = ProfileSetupContract.State()
+) {
 
     override fun onIntent(intent: ProfileSetupContract.Intent) {
         when (intent) {
@@ -51,6 +53,7 @@ class ProfileSetupViewModel :
             setState { copy(isLoading = true) }
             // Simulate API save
             delay(1500)
+            preferencesManager.setProfileSetupCompleted(true)
             setState { copy(isLoading = false, isSuccess = true) }
             delay(2000)
             sendEffect(ProfileSetupContract.Effect.NavigateToHome)

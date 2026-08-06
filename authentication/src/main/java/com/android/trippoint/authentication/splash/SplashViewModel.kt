@@ -2,10 +2,13 @@ package com.android.trippoint.authentication.splash
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Intent, SplashContract.Effect>(
+class SplashViewModel(
+    private val preferencesManager: PreferencesManager
+) : BaseViewModel<SplashContract.State, SplashContract.Intent, SplashContract.Effect>(
     initialState = SplashContract.State()
 ) {
     init {
@@ -20,7 +23,6 @@ class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Inten
 
     private fun checkAuth() {
         viewModelScope.launch {
-            // Simulation of sequential loading steps
             setState { copy(splashStep = SplashContract.SplashStep.Initializing) }
             delay(1000)
             
@@ -30,8 +32,18 @@ class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Inten
             setState { copy(splashStep = SplashContract.SplashStep.SyncingData) }
             delay(1000)
 
-            // Navigate to Welcome screen for the first time
-            sendEffect(SplashContract.Effect.NavigateToWelcome)
+            val isOnboardingCompleted = preferencesManager.isOnboardingCompleted()
+            val isUserLoggedIn = preferencesManager.getAuthToken() != null
+            val isProfileCompleted = preferencesManager.isProfileSetupCompleted()
+            val arePermissionsRequested = preferencesManager.arePermissionsRequested()
+
+            when {
+                !isOnboardingCompleted -> sendEffect(SplashContract.Effect.NavigateToWelcome)
+                !isUserLoggedIn -> sendEffect(SplashContract.Effect.NavigateToLogin)
+                !isProfileCompleted -> sendEffect(SplashContract.Effect.NavigateToProfileSetup)
+                !arePermissionsRequested -> sendEffect(SplashContract.Effect.NavigateToPermissions)
+                else -> sendEffect(SplashContract.Effect.NavigateToHome)
+            }
         }
     }
 }
