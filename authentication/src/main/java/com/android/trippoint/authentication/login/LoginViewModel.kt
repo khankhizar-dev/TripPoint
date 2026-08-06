@@ -3,10 +3,13 @@ package com.android.trippoint.authentication.login
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class LoginViewModel : BaseViewModel<LoginContract.State, LoginContract.Intent, LoginContract.Effect>(
+class LoginViewModel(
+    private val preferencesManager: PreferencesManager
+) : BaseViewModel<LoginContract.State, LoginContract.Intent, LoginContract.Effect>(
     initialState = LoginContract.State()
 ) {
     override fun onIntent(intent: LoginContract.Intent) {
@@ -47,6 +50,7 @@ class LoginViewModel : BaseViewModel<LoginContract.State, LoginContract.Intent, 
             setState { copy(isLoading = true) }
             // Simulate network call
             delay(LOGIN_SIMULATION_DELAY)
+            preferencesManager.setAuthToken("dummy_token") // Login the user
             setState { copy(isLoading = false, isSuccess = true) }
             delay(SUCCESS_DISPLAY_DELAY)
             sendEffect(LoginContract.Effect.NavigateToHome)

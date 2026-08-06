@@ -125,6 +125,24 @@
     <string name="auth_profile_setup_success_subtitle">Let\'s start planning your next adventure.</string>
     <string name="auth_profile_setup_go_home">Go to Home</string>
 
+    <!-- Permissions -->
+    <string name="auth_permission_notifications_title">Stay Updated</string>
+    <string name="auth_permission_notifications_subtitle">Enable notifications to get real-time flight updates and trip reminders.</string>
+    <string name="auth_permission_location_title">Explore Nearby</string>
+    <string name="auth_permission_location_subtitle">Allow location access to find hidden gems and get accurate travel directions.</string>
+    <string name="auth_permission_calendar_title">Sync Your Trip</string>
+    <string name="auth_permission_calendar_subtitle">Connect your calendar to automatically organize your travel bookings.</string>
+    <string name="auth_permission_allow">Allow Access</string>
+    <string name="auth_permission_deny">Not Now</string>
+    <string name="auth_permission_all_set_title">All Set!</string>
+    <string name="auth_permission_all_set_subtitle">You\'re ready to start your journey with TripPoint.</string>
+    <string name="auth_permission_explore">Start Exploring</string>
+
+    <!-- Session Management -->
+    <string name="auth_session_expired_title">Session Expired</string>
+    <string name="auth_session_expired_subtitle">For your security, you\'ve been logged out. Please sign in again to continue.</string>
+    <string name="auth_session_login_again">Login Again</string>
+
     <!-- Password Strength -->
     <string name="auth_register_password_empty"></string>
     <string name="auth_register_password_weak">Weak password</string>

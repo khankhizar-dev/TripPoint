@@ -1,6 +1,9 @@
 package com.android.trippoint.authentication.profilesetup
 
 import app.cash.turbine.test
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import io.mockk.mockk
+import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -18,12 +21,13 @@ import org.junit.Test
 class ProfileSetupViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
     private lateinit var viewModel: ProfileSetupViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = ProfileSetupViewModel()
+        viewModel = ProfileSetupViewModel(preferencesManager)
     }
 
     @After
@@ -77,12 +81,12 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
-    fun `final step save navigates home`() = runTest {
+    fun `final step save saves status and navigates home`() = runTest {
         // Navigate to REVIEW
         viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
         viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
         viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
-
+        
         viewModel.effect.test {
             viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
             runCurrent()
@@ -92,6 +96,8 @@ class ProfileSetupViewModelTest {
             runCurrent()
             
             assertEquals(true, viewModel.uiState.value.isSuccess)
+            verify { preferencesManager.setProfileSetupCompleted(true) }
+
             advanceTimeBy(2001)
             runCurrent()
             

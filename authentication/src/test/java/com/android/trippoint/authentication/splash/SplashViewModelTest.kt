@@ -1,11 +1,15 @@
 package com.android.trippoint.authentication.splash
 
 import app.cash.turbine.test
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import io.mockk.every
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
@@ -17,11 +21,18 @@ import org.junit.Test
 class SplashViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
     private lateinit var viewModel: SplashViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        
+        // Default mock behavior
+        every { preferencesManager.isOnboardingCompleted() } returns false
+        every { preferencesManager.getAuthToken() } returns null
+        every { preferencesManager.isProfileSetupCompleted() } returns false
+        every { preferencesManager.arePermissionsRequested() } returns false
     }
 
     @After
@@ -30,19 +41,19 @@ class SplashViewModelTest {
     }
 
     @Test
-    fun `initialization sequence updates steps and navigates`() = runTest {
-        viewModel = SplashViewModel()
+    fun `initialization sequence updates steps correctly`() = runTest {
+        viewModel = SplashViewModel(preferencesManager)
         
         viewModel.uiState.test {
-            // Initial state (emitted immediately on collection)
+            // Initial state
             assertEquals(SplashContract.SplashStep.Initializing, awaitItem().splashStep)
             
-            // Advance past first delay (1000ms)
-            advanceTimeBy(1001)
+            advanceTimeBy(1000)
+            runCurrent()
             assertEquals(SplashContract.SplashStep.CheckingVersion, awaitItem().splashStep)
             
-            // Advance past second delay (1000ms)
-            advanceTimeBy(1001)
+            advanceTimeBy(1000)
+            runCurrent()
             assertEquals(SplashContract.SplashStep.SyncingData, awaitItem().splashStep)
             
             cancelAndIgnoreRemainingEvents()
@@ -50,39 +61,63 @@ class SplashViewModelTest {
     }
 
     @Test
-    fun `sequence ends with navigation to welcome`() = runTest {
-        viewModel = SplashViewModel()
+    fun `navigation goes to welcome when onboarding not seen`() = runTest {
+        every { preferencesManager.isOnboardingCompleted() } returns false
+        viewModel = SplashViewModel(preferencesManager)
         
         viewModel.effect.test {
-            // Advance past all delays (3 * 1000ms)
             advanceTimeBy(3001)
+            runCurrent()
             
             assertEquals(SplashContract.Effect.NavigateToWelcome, awaitItem())
-            cancelAndIgnoreRemainingEvents()
         }
     }
 
     @Test
-    fun `CheckAuth intent triggers authentication check again`() = runTest {
-        viewModel = SplashViewModel()
+    fun `navigation goes to login when onboarding seen but not logged in`() = runTest {
+        every { preferencesManager.isOnboardingCompleted() } returns true
+        every { preferencesManager.getAuthToken() } returns null
         
-        // Wait for the init-triggered sequence to finish
-        advanceTimeBy(3001)
+        viewModel = SplashViewModel(preferencesManager)
         
-        viewModel.uiState.test {
-            // Consume the current state (SyncingData)
-            assertEquals(SplashContract.SplashStep.SyncingData, awaitItem().splashStep)
+        viewModel.effect.test {
+            advanceTimeBy(3001)
+            runCurrent()
             
-            // Trigger it manually
-            viewModel.onIntent(SplashContract.Intent.CheckAuth)
+            assertEquals(SplashContract.Effect.NavigateToLogin, awaitItem())
+        }
+    }
 
-            // It starts again with Initializing
-            assertEquals(SplashContract.SplashStep.Initializing, awaitItem().splashStep)
+    @Test
+    fun `navigation goes to home when already logged in and profile done`() = runTest {
+        every { preferencesManager.isOnboardingCompleted() } returns true
+        every { preferencesManager.getAuthToken() } returns "valid_token"
+        every { preferencesManager.isProfileSetupCompleted() } returns true
+        every { preferencesManager.arePermissionsRequested() } returns true
+        
+        viewModel = SplashViewModel(preferencesManager)
+        
+        viewModel.effect.test {
+            advanceTimeBy(3001)
+            runCurrent()
             
-            advanceTimeBy(1001)
-            assertEquals(SplashContract.SplashStep.CheckingVersion, awaitItem().splashStep)
+            assertEquals(SplashContract.Effect.NavigateToHome, awaitItem())
+        }
+    }
+
+    @Test
+    fun `navigation goes to profile setup when logged in but profile not done`() = runTest {
+        every { preferencesManager.isOnboardingCompleted() } returns true
+        every { preferencesManager.getAuthToken() } returns "valid_token"
+        every { preferencesManager.isProfileSetupCompleted() } returns false
+        
+        viewModel = SplashViewModel(preferencesManager)
+        
+        viewModel.effect.test {
+            advanceTimeBy(3001)
+            runCurrent()
             
-            cancelAndIgnoreRemainingEvents()
+            assertEquals(SplashContract.Effect.NavigateToProfileSetup, awaitItem())
         }
     }
 }

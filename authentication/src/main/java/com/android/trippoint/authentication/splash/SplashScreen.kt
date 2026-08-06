@@ -16,10 +16,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.AppLogo
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
@@ -30,9 +34,18 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 fun SplashRoute(
     onNavigateToWelcome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToProfileSetup: () -> Unit,
+    onNavigateToPermissions: () -> Unit,
     onNavigateToHome: () -> Unit,
-    viewModel: SplashViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val viewModel: SplashViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return SplashViewModel(PreferencesManager(context)) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
@@ -40,6 +53,8 @@ fun SplashRoute(
             when (effect) {
                 is SplashContract.Effect.NavigateToWelcome -> onNavigateToWelcome()
                 is SplashContract.Effect.NavigateToLogin -> onNavigateToLogin()
+                is SplashContract.Effect.NavigateToProfileSetup -> onNavigateToProfileSetup()
+                is SplashContract.Effect.NavigateToPermissions -> onNavigateToPermissions()
                 is SplashContract.Effect.NavigateToHome -> onNavigateToHome()
             }
         }

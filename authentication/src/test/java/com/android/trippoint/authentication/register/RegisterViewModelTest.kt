@@ -2,6 +2,8 @@ package com.android.trippoint.authentication.register
 
 import app.cash.turbine.test
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -20,12 +22,13 @@ import org.junit.Test
 class RegisterViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
     private lateinit var viewModel: RegisterViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = RegisterViewModel()
+        viewModel = RegisterViewModel(preferencesManager)
     }
 
     @After

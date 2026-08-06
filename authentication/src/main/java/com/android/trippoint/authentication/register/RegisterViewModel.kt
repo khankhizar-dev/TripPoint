@@ -3,10 +3,13 @@ package com.android.trippoint.authentication.register
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class RegisterViewModel : BaseViewModel<RegisterContract.State, RegisterContract.Intent, RegisterContract.Effect>(
+class RegisterViewModel(
+    private val preferencesManager: PreferencesManager
+) : BaseViewModel<RegisterContract.State, RegisterContract.Intent, RegisterContract.Effect>(
     initialState = RegisterContract.State()
 ) {
     override fun onIntent(intent: RegisterContract.Intent) {
@@ -72,6 +75,7 @@ class RegisterViewModel : BaseViewModel<RegisterContract.State, RegisterContract
             setState { copy(isLoading = true) }
             // Simulate network call
             delay(REGISTER_SIMULATION_DELAY)
+            preferencesManager.setAuthToken("dummy_token") // Login the user
             setState { copy(isLoading = false, isSuccess = true) }
             delay(SUCCESS_DISPLAY_DELAY)
             sendEffect(RegisterContract.Effect.NavigateToHome)
