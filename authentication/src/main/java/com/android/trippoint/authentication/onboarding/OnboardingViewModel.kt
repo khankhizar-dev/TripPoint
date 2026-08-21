@@ -1,7 +1,6 @@
 package com.android.trippoint.authentication.onboarding
 
 import com.android.trippoint.core.common.BaseViewModel
-import com.android.trippoint.core.database.preferences.PreferencesManager
 
 class OnboardingViewModel(
     private val authRepository: com.android.trippoint.authentication.domain.repository.AuthRepository

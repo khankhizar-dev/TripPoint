@@ -1,7 +1,6 @@
 package com.android.trippoint.authentication.permissions
 
 import com.android.trippoint.core.common.BaseViewModel
-import com.android.trippoint.core.database.preferences.PreferencesManager
 
 class PermissionsViewModel(
     private val authRepository: com.android.trippoint.authentication.domain.repository.AuthRepository

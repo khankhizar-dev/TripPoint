@@ -1,6 +1,5 @@
 package com.android.trippoint.authentication.data.repository
 
-import com.android.trippoint.authentication.domain.model.User
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.network.AuthRemoteDataSource
 import com.android.trippoint.core.network.AuthResponse
@@ -9,7 +8,6 @@ import com.android.trippoint.core.network.UpdateProfileInput
 import com.android.trippoint.core.network.User as NetworkUser
 import io.mockk.coEvery
 import io.mockk.coVerify
-import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.runBlocking

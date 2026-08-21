@@ -49,7 +49,8 @@ fun ForgotPasswordRoute(
     val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
         authRemoteDataSource, PreferencesManager(context)
     )
-    val requestPasswordResetUseCase = com.android.trippoint.authentication.domain.usecase.RequestPasswordResetUseCase(authRepository)
+    val requestPasswordResetUseCase = com.android.trippoint.authentication.domain.usecase
+        .RequestPasswordResetUseCase(authRepository)
 
     val viewModel: ForgotPasswordViewModel = viewModel(
         factory = object : androidx.lifecycle.ViewModelProvider.Factory {
