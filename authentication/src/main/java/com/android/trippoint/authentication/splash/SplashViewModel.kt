@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SplashViewModel(
-    private val preferencesManager: PreferencesManager
+    private val getAuthStateUseCase: com.android.trippoint.authentication.domain.usecase.GetAuthStateUseCase
 ) : BaseViewModel<SplashContract.State, SplashContract.Intent, SplashContract.Effect>(
     initialState = SplashContract.State()
 ) {
@@ -30,19 +30,18 @@ class SplashViewModel(
             delay(1000)
             
             setState { copy(splashStep = SplashContract.SplashStep.SyncingData) }
-            delay(1000)
 
-            val isOnboardingCompleted = preferencesManager.isOnboardingCompleted()
-            val isUserLoggedIn = preferencesManager.getAuthToken() != null
-            val isProfileCompleted = preferencesManager.isProfileSetupCompleted()
-            val arePermissionsRequested = preferencesManager.arePermissionsRequested()
-
-            when {
-                !isOnboardingCompleted -> sendEffect(SplashContract.Effect.NavigateToWelcome)
-                !isUserLoggedIn -> sendEffect(SplashContract.Effect.NavigateToLogin)
-                !isProfileCompleted -> sendEffect(SplashContract.Effect.NavigateToProfileSetup)
-                !arePermissionsRequested -> sendEffect(SplashContract.Effect.NavigateToPermissions)
-                else -> sendEffect(SplashContract.Effect.NavigateToHome)
+            when (getAuthStateUseCase()) {
+                com.android.trippoint.authentication.domain.usecase.AuthState.ONBOARDING_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToWelcome)
+                com.android.trippoint.authentication.domain.usecase.AuthState.LOGIN_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToLogin)
+                com.android.trippoint.authentication.domain.usecase.AuthState.PROFILE_SETUP_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToProfileSetup)
+                com.android.trippoint.authentication.domain.usecase.AuthState.PERMISSIONS_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToPermissions)
+                com.android.trippoint.authentication.domain.usecase.AuthState.AUTHENTICATED -> 
+                    sendEffect(SplashContract.Effect.NavigateToHome)
             }
         }
     }

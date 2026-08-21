@@ -1,13 +1,13 @@
 package com.android.trippoint.authentication.profilesetup
 
 import app.cash.turbine.test
-import com.android.trippoint.core.database.preferences.PreferencesManager
-import io.mockk.mockk
-import io.mockk.verify
+import com.android.trippoint.authentication.domain.repository.AuthRepository
+import io.mockk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceTimeBy
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
@@ -21,13 +21,13 @@ import org.junit.Test
 class ProfileSetupViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
+    private val authRepository: AuthRepository = mockk(relaxed = true)
     private lateinit var viewModel: ProfileSetupViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = ProfileSetupViewModel(preferencesManager)
+        viewModel = ProfileSetupViewModel(authRepository)
     }
 
     @After
@@ -81,26 +81,31 @@ class ProfileSetupViewModelTest {
     }
 
     @Test
-    fun `final step save saves status and navigates home`() = runTest {
-        // Navigate to REVIEW
-        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
-        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
-        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
+    fun `final step save saves profile and navigates home`() = runTest {
+        // Setup initial data
+        viewModel.onIntent(ProfileSetupContract.Intent.FullNameChanged("John Doe"))
+        viewModel.onIntent(ProfileSetupContract.Intent.UsernameChanged("johndoe"))
         
+        // Navigate to REVIEW
+        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked) // PHOTO -> ABOUT
+        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked) // ABOUT -> PREFERENCES
+        viewModel.onIntent(ProfileSetupContract.Intent.NextClicked) // PREFERENCES -> REVIEW
+        
+        coEvery { authRepository.updateProfile(any()) } returns Result.success(true)
+
         viewModel.effect.test {
             viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)
-            runCurrent()
             
-            assertEquals(true, viewModel.uiState.value.isLoading)
-            advanceTimeBy(1501)
-            runCurrent()
+            // Advance to execute the mutation
+            advanceUntilIdle()
             
-            assertEquals(true, viewModel.uiState.value.isSuccess)
-            verify { preferencesManager.setProfileSetupCompleted(true) }
+            val state = viewModel.uiState.value
+            assertEquals("isSuccess should be true", true, state.isSuccess)
+            assertEquals("isLoading should be false", false, state.isLoading)
+            
+            coVerify { authRepository.updateProfile(any()) }
 
             advanceTimeBy(2001)
-            runCurrent()
-            
             assertEquals(ProfileSetupContract.Effect.NavigateToHome, awaitItem())
         }
     }

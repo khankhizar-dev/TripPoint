@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class LoginViewModel(
-    private val preferencesManager: PreferencesManager
+    private val loginUseCase: com.android.trippoint.authentication.domain.usecase.LoginUseCase
 ) : BaseViewModel<LoginContract.State, LoginContract.Intent, LoginContract.Effect>(
     initialState = LoginContract.State()
 ) {
@@ -48,12 +48,17 @@ class LoginViewModel(
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate network call
-            delay(LOGIN_SIMULATION_DELAY)
-            preferencesManager.setAuthToken("dummy_token") // Login the user
-            setState { copy(isLoading = false, isSuccess = true) }
-            delay(SUCCESS_DISPLAY_DELAY)
-            sendEffect(LoginContract.Effect.NavigateToHome)
+            val result = loginUseCase(currentState.email, currentState.password)
+            
+            if (result.isSuccess) {
+                val user = result.getOrNull()
+                setState { copy(isLoading = false, isSuccess = true) }
+                delay(SUCCESS_DISPLAY_DELAY)
+                // If username is null, we assume profile setup is not complete
+                sendEffect(LoginContract.Effect.NavigateToHome(user?.username != null))
+            } else {
+                setState { copy(isLoading = false, serverError = true) }
+            }
         }
     }
 

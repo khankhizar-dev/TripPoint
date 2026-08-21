@@ -46,10 +46,17 @@ fun OnboardingRoute(
     onNavigateToLogin: () -> Unit
 ) {
     val context = LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        com.android.trippoint.core.network.AuthRemoteDataSource(
+            com.android.trippoint.core.network.NetworkModule.provideTripPointApi({ null }, { null }, { _, _ -> })
+        ),
+        preferencesManager
+    )
     val viewModel: OnboardingViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return OnboardingViewModel(PreferencesManager(context)) as T
+                return OnboardingViewModel(authRepository) as T
             }
         }
     )

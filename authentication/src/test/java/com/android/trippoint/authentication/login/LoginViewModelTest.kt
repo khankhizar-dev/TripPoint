@@ -2,7 +2,9 @@ package com.android.trippoint.authentication.login
 
 import app.cash.turbine.test
 import com.android.trippoint.authentication.R
-import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.authentication.domain.model.User
+import com.android.trippoint.authentication.domain.usecase.LoginUseCase
+import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,13 +24,13 @@ import org.junit.Test
 class LoginViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
+    private val loginUseCase: LoginUseCase = mockk()
     private lateinit var viewModel: LoginViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = LoginViewModel(preferencesManager)
+        viewModel = LoginViewModel(loginUseCase)
     }
 
     @After
@@ -86,19 +88,42 @@ class LoginViewModelTest {
 
     @Test
     fun `successful login navigates to home`() = runTest {
+        val user = User("1", "test@example.com", "John", "Doe", username = "johndoe")
+        coEvery { loginUseCase(any(), any()) } returns Result.success(user)
+
         viewModel.onIntent(LoginContract.Intent.EmailChanged("test@example.com"))
         viewModel.onIntent(LoginContract.Intent.PasswordChanged("password"))
         
         viewModel.effect.test {
             viewModel.onIntent(LoginContract.Intent.LoginClicked)
-            runCurrent() // Run the launched coroutine until it hits delay
+            runCurrent()
             
-            assertEquals(true, viewModel.uiState.value.isLoading)
-            advanceTimeBy(1501)
-            runCurrent() // Run the rest of the coroutine after delay
-
             assertEquals(false, viewModel.uiState.value.isLoading)
-            assertEquals(LoginContract.Effect.NavigateToHome, awaitItem())
+            assertEquals(true, viewModel.uiState.value.isSuccess)
+            
+            advanceTimeBy(2001)
+            runCurrent()
+
+            assertEquals(LoginContract.Effect.NavigateToHome(true), awaitItem())
+        }
+    }
+
+    @Test
+    fun `successful login with incomplete profile navigates to setup`() = runTest {
+        val user = User("1", "test@example.com", "John", "Doe", username = null)
+        coEvery { loginUseCase(any(), any()) } returns Result.success(user)
+
+        viewModel.onIntent(LoginContract.Intent.EmailChanged("test@example.com"))
+        viewModel.onIntent(LoginContract.Intent.PasswordChanged("password"))
+        
+        viewModel.effect.test {
+            viewModel.onIntent(LoginContract.Intent.LoginClicked)
+            runCurrent()
+            
+            advanceTimeBy(2001)
+            runCurrent()
+
+            assertEquals(LoginContract.Effect.NavigateToHome(false), awaitItem())
         }
     }
 }

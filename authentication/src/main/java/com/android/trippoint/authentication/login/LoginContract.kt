@@ -29,7 +29,7 @@ class LoginContract {
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object NavigateToHome : Effect()
+        data class NavigateToHome(val isProfileComplete: Boolean) : Effect()
         object NavigateToSignUp : Effect()
         object NavigateToForgotPassword : Effect()
         data class ShowError(val message: String) : Effect()

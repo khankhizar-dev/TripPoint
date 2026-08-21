@@ -2,7 +2,9 @@ package com.android.trippoint.authentication.register
 
 import app.cash.turbine.test
 import com.android.trippoint.authentication.R
-import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.authentication.domain.model.User
+import com.android.trippoint.authentication.domain.usecase.RegisterUseCase
+import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -22,13 +24,13 @@ import org.junit.Test
 class RegisterViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
+    private val registerUseCase: RegisterUseCase = mockk()
     private lateinit var viewModel: RegisterViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = RegisterViewModel(preferencesManager)
+        viewModel = RegisterViewModel(registerUseCase)
     }
 
     @After
@@ -130,7 +132,10 @@ class RegisterViewModelTest {
     }
 
     @Test
-    fun `successful registration navigates to home`() = runTest {
+    fun `successful registration navigates to otp`() = runTest {
+        val user = User("1", "test@example.com", "John", "Doe")
+        coEvery { registerUseCase(any()) } returns Result.success(user)
+
         viewModel.onIntent(RegisterContract.Intent.NameChanged("John Doe"))
         viewModel.onIntent(RegisterContract.Intent.EmailChanged("test@example.com"))
         viewModel.onIntent(RegisterContract.Intent.PasswordChanged("Password@123"))
@@ -140,16 +145,12 @@ class RegisterViewModelTest {
             viewModel.onIntent(RegisterContract.Intent.RegisterClicked)
             runCurrent()
 
-            assertEquals(true, viewModel.uiState.value.isLoading)
-            advanceTimeBy(1501)
-            runCurrent()
-
             assertEquals(false, viewModel.uiState.value.isLoading)
             assertEquals(true, viewModel.uiState.value.isSuccess)
 
             advanceTimeBy(2001)
             runCurrent()
-            assertEquals(RegisterContract.Effect.NavigateToHome, awaitItem())
+            assertEquals(RegisterContract.Effect.NavigateToOtp("test@example.com"), awaitItem())
         }
     }
 

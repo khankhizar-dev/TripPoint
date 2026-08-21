@@ -51,15 +51,51 @@ import com.android.trippoint.core.designsystem.components.TripPointTextField
 
 @Composable
 fun LoginRoute(
-    onNavigateToHome: () -> Unit,
+    onNavigateToHome: (Boolean) -> Unit,
     onNavigateToSignUp: () -> Unit,
     onForgotPassword: () -> Unit,
 ) {
     val context = LocalContext.current
+    val (viewModel, uiState) = rememberLoginViewModel(context, onNavigateToHome, onNavigateToSignUp, onForgotPassword)
+
+    LoginScreen(
+        uiState = uiState,
+        onIntent = viewModel::onIntent
+    )
+}
+
+@Composable
+private fun rememberLoginViewModel(
+    context: android.content.Context,
+    onNavigateToHome: (Boolean) -> Unit,
+    onNavigateToSignUp: () -> Unit,
+    onForgotPassword: () -> Unit
+): Pair<LoginViewModel, LoginContract.State> {
+    val preferencesManager = androidx.compose.runtime.remember { PreferencesManager(context) }
+    val authRemoteDataSource = androidx.compose.runtime.remember {
+        val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+            authTokenProvider = { preferencesManager.getAuthToken() },
+            refreshTokenProvider = { preferencesManager.getRefreshToken() },
+            onTokenRefreshed = { token, refresh ->
+                preferencesManager.setAuthToken(token)
+                preferencesManager.setRefreshToken(refresh)
+            }
+        )
+        com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    }
+    val authRepository = androidx.compose.runtime.remember {
+        com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+            authRemoteDataSource, preferencesManager
+        )
+    }
+    val loginUseCase = androidx.compose.runtime.remember {
+        com.android.trippoint.authentication.domain.usecase.LoginUseCase(authRepository)
+    }
+
     val viewModel: LoginViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return LoginViewModel(PreferencesManager(context)) as T
+                return LoginViewModel(loginUseCase) as T
             }
         }
     )
@@ -68,18 +104,15 @@ fun LoginRoute(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is LoginContract.Effect.NavigateToHome -> onNavigateToHome()
+                is LoginContract.Effect.NavigateToHome -> onNavigateToHome(effect.isProfileComplete)
                 is LoginContract.Effect.NavigateToSignUp -> onNavigateToSignUp()
                 is LoginContract.Effect.NavigateToForgotPassword -> onForgotPassword()
                 is LoginContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
     }
-
-    LoginScreen(
-        uiState = uiState,
-        onIntent = viewModel::onIntent
-    )
+    
+    return Pair(viewModel, uiState)
 }
 
 @Composable

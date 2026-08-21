@@ -31,6 +31,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.PasswordStrengthIndicator
 import com.android.trippoint.core.designsystem.components.SplashIllustration
@@ -39,12 +40,34 @@ import com.android.trippoint.core.designsystem.components.TripPointTextField
 
 @Composable
 fun ResetPasswordRoute(
-    onNavigateToLogin: () -> Unit,
-    viewModel: ResetPasswordViewModel = viewModel()
+    email: String,
+    otp: String,
+    onNavigateToLogin: () -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+        authTokenProvider = { null },
+        refreshTokenProvider = { null },
+        onTokenRefreshed = { _, _ -> }
+    )
+    val authRemoteDataSource = com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        authRemoteDataSource, PreferencesManager(context)
+    )
+    val resetPasswordUseCase = com.android.trippoint.authentication.domain.usecase.ResetPasswordUseCase(authRepository)
+
+    val viewModel: ResetPasswordViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ResetPasswordViewModel(resetPasswordUseCase) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.email = email
+        viewModel.otp = otp
         viewModel.effect.collect { effect ->
             when (effect) {
                 is ResetPasswordContract.Effect.NavigateToLogin -> onNavigateToLogin()

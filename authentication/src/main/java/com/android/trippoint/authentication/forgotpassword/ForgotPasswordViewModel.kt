@@ -2,11 +2,14 @@ package com.android.trippoint.authentication.forgotpassword
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.authentication.R
+import com.android.trippoint.authentication.domain.usecase.RequestPasswordResetUseCase
 import com.android.trippoint.core.common.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ForgotPasswordViewModel : 
+class ForgotPasswordViewModel(
+    private val requestPasswordResetUseCase: RequestPasswordResetUseCase
+) : 
     BaseViewModel<ForgotPasswordContract.State, ForgotPasswordContract.Intent, ForgotPasswordContract.Effect>(
         initialState = ForgotPasswordContract.State()
     ) {
@@ -33,15 +36,19 @@ class ForgotPasswordViewModel :
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate network call
-            delay(SIMULATION_DELAY)
-            setState { copy(isLoading = false, isSuccess = true) }
-            delay(2000)
-            sendEffect(ForgotPasswordContract.Effect.NavigateToOtp(currentState.email))
+            val result = requestPasswordResetUseCase(currentState.email)
+            
+            if (result.isSuccess) {
+                setState { copy(isLoading = false, isSuccess = true) }
+                delay(SUCCESS_DISPLAY_DELAY)
+                sendEffect(ForgotPasswordContract.Effect.NavigateToOtp(currentState.email))
+            } else {
+                setState { copy(isLoading = false, serverError = true) }
+            }
         }
     }
 
     companion object {
-        private const val SIMULATION_DELAY = 1500L
+        private const val SUCCESS_DISPLAY_DELAY = 2000L
     }
 }

@@ -31,13 +31,27 @@ import com.android.trippoint.core.designsystem.components.TripPointButton
 
 @Composable
 fun PermissionsRoute(
-    onNavigateToHome: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     val context = LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        com.android.trippoint.core.network.AuthRemoteDataSource(
+            com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+                { preferencesManager.getAuthToken() }, 
+                { preferencesManager.getRefreshToken() }, 
+                { t, r -> 
+                    preferencesManager.setAuthToken(t)
+                    preferencesManager.setRefreshToken(r)
+                }
+            )
+        ),
+        preferencesManager
+    )
     val viewModel: PermissionsViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return PermissionsViewModel(PreferencesManager(context)) as T
+                return PermissionsViewModel(authRepository) as T
             }
         }
     )

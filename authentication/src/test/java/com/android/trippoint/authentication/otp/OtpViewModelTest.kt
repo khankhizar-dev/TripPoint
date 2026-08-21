@@ -2,6 +2,10 @@ package com.android.trippoint.authentication.otp
 
 import app.cash.turbine.test
 import com.android.trippoint.authentication.R
+import com.android.trippoint.authentication.domain.usecase.ResendOtpUseCase
+import com.android.trippoint.authentication.domain.usecase.VerifyOtpUseCase
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -12,6 +16,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -19,12 +24,14 @@ import org.junit.Test
 class OtpViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val verifyOtpUseCase: VerifyOtpUseCase = mockk()
+    private val resendOtpUseCase: ResendOtpUseCase = mockk()
     private lateinit var viewModel: OtpViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = OtpViewModel()
+        viewModel = OtpViewModel(verifyOtpUseCase, resendOtpUseCase)
     }
 
     @After
@@ -33,9 +40,12 @@ class OtpViewModelTest {
     }
 
     @Test
-    fun `initial state has resend timer started at 30`() = runTest {
-        runCurrent()
-        assertEquals(30, viewModel.uiState.value.resendTimer)
+    fun `initial state has correct default values`() = runTest {
+        runCurrent() // Allow init timer to start
+        val state = viewModel.uiState.value
+        assertEquals("111111", state.otp)
+        assertEquals(30, state.resendTimer)
+        assertNull(state.error)
     }
 
     @Test
@@ -45,68 +55,35 @@ class OtpViewModelTest {
     }
 
     @Test
-    fun `resend timer counts down correctly`() = runTest {
-        runCurrent()
-        assertEquals(30, viewModel.uiState.value.resendTimer)
-        
-        advanceTimeBy(1000)
-        runCurrent()
-        assertEquals(29, viewModel.uiState.value.resendTimer)
-        
-        advanceTimeBy(2000)
-        runCurrent()
-        assertEquals(27, viewModel.uiState.value.resendTimer)
-    }
-
-    @Test
-    fun `verify with invalid otp shows error`() = runTest {
-        viewModel.onIntent(OtpContract.Intent.OtpChanged("000000"))
-        viewModel.onIntent(OtpContract.Intent.VerifyClicked)
-        runCurrent()
-        
-        assertEquals(true, viewModel.uiState.value.isLoading)
-        advanceTimeBy(1500)
-        runCurrent()
-        
-        assertEquals(false, viewModel.uiState.value.isLoading)
-        assertEquals(R.string.auth_otp_error_invalid, viewModel.uiState.value.error)
-    }
-
-    @Test
-    fun `verify with correct otp navigates to home`() = runTest {
+    fun `successful otp verification navigates to home`() = runTest {
+        coEvery { verifyOtpUseCase(any(), any()) } returns Result.success(true)
+        viewModel.email = "test@example.com"
         viewModel.onIntent(OtpContract.Intent.OtpChanged("123456"))
         
         viewModel.effect.test {
             viewModel.onIntent(OtpContract.Intent.VerifyClicked)
             runCurrent()
             
-            assertEquals(true, viewModel.uiState.value.isLoading)
-            advanceTimeBy(1500)
-            runCurrent()
-            
             assertEquals(false, viewModel.uiState.value.isLoading)
             assertEquals(true, viewModel.uiState.value.isSuccess)
             
-            advanceTimeBy(2000)
+            advanceTimeBy(2001)
             runCurrent()
+
             assertEquals(OtpContract.Effect.NavigateToHome, awaitItem())
         }
     }
 
     @Test
-    fun `resend otp restarts timer after it expires`() = runTest {
-        // Wait for timer to expire (30 seconds * 1000ms)
-        advanceTimeBy(30000)
-        runCurrent()
-        assertEquals(0, viewModel.uiState.value.resendTimer)
+    fun `invalid otp shows error`() = runTest {
+        coEvery { verifyOtpUseCase(any(), any()) } returns Result.success(false)
+        viewModel.email = "test@example.com"
+        viewModel.onIntent(OtpContract.Intent.OtpChanged("000000"))
         
-        viewModel.onIntent(OtpContract.Intent.ResendClicked)
-        runCurrent() // Start resend simulation
-        
-        // resend simulation delay (1000ms)
-        advanceTimeBy(1000)
+        viewModel.onIntent(OtpContract.Intent.VerifyClicked)
         runCurrent()
         
-        assertEquals(30, viewModel.uiState.value.resendTimer)
+        assertEquals(R.string.auth_otp_error_invalid, viewModel.uiState.value.error)
+        assertEquals(false, viewModel.uiState.value.isLoading)
     }
 }

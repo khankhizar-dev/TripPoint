@@ -34,18 +34,42 @@ import com.android.trippoint.core.designsystem.components.TripPointButton
 fun OtpRoute(
     email: String,
     onNavigateToHome: () -> Unit,
-    onNavigateToResetPassword: () -> Unit = {},
-    isForgotPasswordFlow: Boolean = false,
-    viewModel: OtpViewModel = viewModel()
+    onNavigateToResetPassword: (String) -> Unit = {},
+    isForgotPasswordFlow: Boolean = false
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val preferencesManager = com.android.trippoint.core.database.preferences.PreferencesManager(context)
+    val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+        authTokenProvider = { preferencesManager.getAuthToken() },
+        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+        onTokenRefreshed = { token, refresh ->
+            preferencesManager.setAuthToken(token)
+            preferencesManager.setRefreshToken(refresh)
+        }
+    )
+    val authRemoteDataSource = com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        authRemoteDataSource, preferencesManager
+    )
+    val verifyOtpUseCase = com.android.trippoint.authentication.domain.usecase.VerifyOtpUseCase(authRepository)
+    val resendOtpUseCase = com.android.trippoint.authentication.domain.usecase.ResendOtpUseCase(authRepository)
+
+    val viewModel: OtpViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return OtpViewModel(verifyOtpUseCase, resendOtpUseCase) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
+        viewModel.email = email
         viewModel.isForgotPasswordFlow = isForgotPasswordFlow
         viewModel.effect.collect { effect ->
             when (effect) {
                 is OtpContract.Effect.NavigateToHome -> onNavigateToHome()
-                is OtpContract.Effect.NavigateToResetPassword -> onNavigateToResetPassword()
+                is OtpContract.Effect.NavigateToResetPassword -> onNavigateToResetPassword(uiState.otp)
                 is OtpContract.Effect.ShowError -> { /* Handle error */ }
             }
         }

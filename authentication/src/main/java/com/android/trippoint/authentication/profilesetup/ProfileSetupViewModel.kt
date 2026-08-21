@@ -7,7 +7,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class ProfileSetupViewModel(
-    private val preferencesManager: PreferencesManager
+    private val authRepository: com.android.trippoint.authentication.domain.repository.AuthRepository
 ) : BaseViewModel<ProfileSetupContract.State, ProfileSetupContract.Intent, ProfileSetupContract.Effect>(
     initialState = ProfileSetupContract.State()
 ) {
@@ -51,12 +51,32 @@ class ProfileSetupViewModel(
     private fun saveProfile() {
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate API save
-            delay(1500)
-            preferencesManager.setProfileSetupCompleted(true)
-            setState { copy(isLoading = false, isSuccess = true) }
-            delay(2000)
-            sendEffect(ProfileSetupContract.Effect.NavigateToHome)
+            val currentState = uiState.value
+            
+            val names = currentState.fullName.split(" ")
+            val firstName = names.firstOrNull()
+            val lastName = if (names.size > 1) names.drop(1).joinToString(" ") else null
+            
+            val input = com.android.trippoint.core.network.UpdateProfileInput(
+                firstName = firstName,
+                lastName = lastName,
+                username = currentState.username,
+                country = currentState.country,
+                currency = currentState.currency,
+                language = currentState.language,
+                timezone = currentState.timezone
+            )
+            
+            val result = authRepository.updateProfile(input)
+            
+            if (result.isSuccess && result.getOrDefault(false)) {
+                setState { copy(isLoading = false, isSuccess = true) }
+                delay(2000)
+                sendEffect(ProfileSetupContract.Effect.NavigateToHome)
+            } else {
+                setState { copy(isLoading = false) }
+                sendEffect(ProfileSetupContract.Effect.ShowError(result.exceptionOrNull()?.message ?: "Failed to save profile"))
+            }
         }
     }
 }
