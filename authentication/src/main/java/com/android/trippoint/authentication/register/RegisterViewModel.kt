@@ -8,7 +8,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class RegisterViewModel(
-    private val preferencesManager: PreferencesManager
+    private val registerUseCase: com.android.trippoint.authentication.domain.usecase.RegisterUseCase
 ) : BaseViewModel<RegisterContract.State, RegisterContract.Intent, RegisterContract.Effect>(
     initialState = RegisterContract.State()
 ) {
@@ -73,12 +73,20 @@ class RegisterViewModel(
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate network call
-            delay(REGISTER_SIMULATION_DELAY)
-            preferencesManager.setAuthToken("dummy_token") // Login the user
-            setState { copy(isLoading = false, isSuccess = true) }
-            delay(SUCCESS_DISPLAY_DELAY)
-            sendEffect(RegisterContract.Effect.NavigateToHome)
+            val input = com.android.trippoint.core.network.RegisterInput(
+                email = currentState.email,
+                password = currentState.password,
+                firstName = currentState.name.split(" ").firstOrNull() ?: "",
+                lastName = currentState.name.split(" ").getOrNull(1) ?: ""
+            )
+            val result = registerUseCase(input)
+            if (result.isSuccess) {
+                setState { copy(isLoading = false, isSuccess = true) }
+                delay(SUCCESS_DISPLAY_DELAY)
+                sendEffect(RegisterContract.Effect.NavigateToOtp(currentState.email))
+            } else {
+                setState { copy(isLoading = false, serverError = true) }
+            }
         }
     }
 

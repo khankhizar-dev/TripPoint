@@ -13,7 +13,7 @@ class OtpContract {
 
     data class State(
         val email: String = "",
-        val otp: String = "",
+        val otp: String = "111111",
         val isLoading: Boolean = false,
         val isSuccess: Boolean = false,
         val resendTimer: Int = 0,

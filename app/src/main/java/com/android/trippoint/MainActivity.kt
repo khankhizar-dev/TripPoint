@@ -88,8 +88,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Login.route) {
                             com.android.trippoint.authentication.login.LoginRoute(
-                                onNavigateToHome = {
-                                    navController.navigate(Screen.Home.route) {
+                                onNavigateToHome = { isProfileComplete ->
+                                    val destination = if (isProfileComplete) Screen.Home.route else Screen.ProfileSetup.route
+                                    navController.navigate(destination) {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
@@ -111,8 +112,22 @@ class MainActivity : ComponentActivity() {
                                 }
                             )
                         }
-                        composable(Screen.ResetPassword.route) {
+                        composable(
+                            route = Screen.ResetPassword.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("email") {
+                                    type = androidx.navigation.NavType.StringType
+                                },
+                                androidx.navigation.navArgument("otp") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val email = backStackEntry.arguments?.getString("email") ?: ""
+                            val otp = backStackEntry.arguments?.getString("otp") ?: ""
                             com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute(
+                                email = email,
+                                otp = otp,
                                 onNavigateToLogin = {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(0) { inclusive = true }
@@ -122,10 +137,8 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Register.route) {
                             com.android.trippoint.authentication.register.RegisterRoute(
-                                onNavigateToHome = {
-                                    // In a real app, we might navigate to OTP first
-                                    // For now, let's say registration success leads to OTP
-                                    navController.navigate(Screen.Otp.createRoute("user@example.com")) {
+                                onNavigateToOtp = { email ->
+                                    navController.navigate(Screen.Otp.createRoute(email)) {
                                         popUpTo(Screen.Register.route) { inclusive = true }
                                     }
                                 },
@@ -158,8 +171,8 @@ class MainActivity : ComponentActivity() {
                                         popUpTo(0) { inclusive = true }
                                     }
                                 },
-                                onNavigateToResetPassword = {
-                                    navController.navigate(Screen.ResetPassword.route) {
+                                onNavigateToResetPassword = { otp ->
+                                    navController.navigate(Screen.ResetPassword.createRoute(email, otp)) {
                                         popUpTo(Screen.Login.route) { inclusive = false }
                                     }
                                 }
@@ -193,7 +206,13 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(Screen.Home.route) {
-                            Greeting(name = "Home Screen")
+                            com.android.trippoint.ui.home.HomeRoute(
+                                onNavigateToLogin = {
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                }
+                            )
                         }
                     }
                 }
@@ -202,18 +221,10 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
 @Preview(showBackground = true)
 @Composable
 fun GreetingPreview() {
     TripPointTheme {
-        Greeting("Android")
+        // Greeting("Android")
     }
 }

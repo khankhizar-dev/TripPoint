@@ -37,7 +37,7 @@ class RegisterContract {
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object NavigateToHome : Effect()
+        data class NavigateToOtp(val email: String) : Effect()
         object NavigateToLogin : Effect()
         data class ShowError(val message: String) : Effect()
     }

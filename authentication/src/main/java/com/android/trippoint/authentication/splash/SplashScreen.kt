@@ -39,10 +39,25 @@ fun SplashRoute(
     onNavigateToHome: () -> Unit,
 ) {
     val context = LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+        authTokenProvider = { preferencesManager.getAuthToken() },
+        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+        onTokenRefreshed = { token, refresh ->
+            preferencesManager.setAuthToken(token)
+            preferencesManager.setRefreshToken(refresh)
+        }
+    )
+    val authRemoteDataSource = com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        authRemoteDataSource, preferencesManager
+    )
+    val getAuthStateUseCase = com.android.trippoint.authentication.domain.usecase.GetAuthStateUseCase(authRepository)
+
     val viewModel: SplashViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return SplashViewModel(PreferencesManager(context)) as T
+                return SplashViewModel(getAuthStateUseCase) as T
             }
         }
     )

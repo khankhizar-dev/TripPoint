@@ -1,7 +1,8 @@
 package com.android.trippoint.authentication.permissions
 
 import app.cash.turbine.test
-import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.authentication.domain.repository.AuthRepository
+import io.mockk.every
 import io.mockk.mockk
 import io.mockk.verify
 import kotlinx.coroutines.Dispatchers
@@ -19,13 +20,13 @@ import org.junit.Test
 class PermissionsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val preferencesManager: PreferencesManager = mockk(relaxed = true)
+    private val authRepository: AuthRepository = mockk(relaxed = true)
     private lateinit var viewModel: PermissionsViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = PermissionsViewModel(preferencesManager)
+        viewModel = PermissionsViewModel(authRepository)
     }
 
     @After
@@ -91,7 +92,7 @@ class PermissionsViewModelTest {
         
         viewModel.effect.test {
             viewModel.onIntent(PermissionsContract.Intent.ExploreClicked)
-            verify { preferencesManager.setPermissionsRequested(true) }
+            verify { authRepository.setPermissionsRequested(true) }
             assertEquals(PermissionsContract.Effect.NavigateToHome, awaitItem())
         }
     }

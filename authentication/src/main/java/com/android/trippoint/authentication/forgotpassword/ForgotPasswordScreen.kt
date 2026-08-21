@@ -28,6 +28,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.components.TripPointButton
@@ -36,9 +37,27 @@ import com.android.trippoint.core.designsystem.components.TripPointTextField
 @Composable
 fun ForgotPasswordRoute(
     onNavigateBack: () -> Unit,
-    onNavigateToOtp: (String) -> Unit,
-    viewModel: ForgotPasswordViewModel = viewModel()
+    onNavigateToOtp: (String) -> Unit
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+        authTokenProvider = { null },
+        refreshTokenProvider = { null },
+        onTokenRefreshed = { _, _ -> }
+    )
+    val authRemoteDataSource = com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        authRemoteDataSource, PreferencesManager(context)
+    )
+    val requestPasswordResetUseCase = com.android.trippoint.authentication.domain.usecase.RequestPasswordResetUseCase(authRepository)
+
+    val viewModel: ForgotPasswordViewModel = viewModel(
+        factory = object : androidx.lifecycle.ViewModelProvider.Factory {
+            override fun <T : androidx.lifecycle.ViewModel> create(modelClass: Class<T>): T {
+                return ForgotPasswordViewModel(requestPasswordResetUseCase) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {

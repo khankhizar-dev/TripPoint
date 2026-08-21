@@ -52,13 +52,27 @@ import com.android.trippoint.core.designsystem.components.TripPointTextField
 
 @Composable
 fun ProfileSetupRoute(
-    onNavigateToHome: () -> Unit,
+    onNavigateToHome: () -> Unit
 ) {
     val context = LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        com.android.trippoint.core.network.AuthRemoteDataSource(
+            com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+                { preferencesManager.getAuthToken() }, 
+                { preferencesManager.getRefreshToken() }, 
+                { t, r -> 
+                    preferencesManager.setAuthToken(t)
+                    preferencesManager.setRefreshToken(r)
+                }
+            )
+        ),
+        preferencesManager
+    )
     val viewModel: ProfileSetupViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return ProfileSetupViewModel(PreferencesManager(context)) as T
+                return ProfileSetupViewModel(authRepository) as T
             }
         }
     )
@@ -266,28 +280,28 @@ private fun PreferencesStep(
         value = uiState.country,
         onValueChange = { onIntent(ProfileSetupContract.Intent.CountryChanged(it)) },
         label = "Country",
-        options = listOf("United States", "United Kingdom", "India", "Canada", "Germany")
+        options = listOf("US", "GB", "IN", "CA", "DE")
     )
     Spacer(modifier = Modifier.height(24.dp))
     TripPointDropdown(
         value = uiState.currency,
         onValueChange = { onIntent(ProfileSetupContract.Intent.CurrencyChanged(it)) },
         label = "Currency",
-        options = listOf("USD ($)", "EUR (€)", "GBP (£)", "INR (₹)", "CAD ($)")
+        options = listOf("USD", "EUR", "GBP", "INR", "CAD")
     )
     Spacer(modifier = Modifier.height(24.dp))
     TripPointDropdown(
         value = uiState.language,
         onValueChange = { onIntent(ProfileSetupContract.Intent.LanguageChanged(it)) },
         label = "Language",
-        options = listOf("English", "Spanish", "French", "German", "Hindi")
+        options = listOf("EN", "ES", "FR", "DE", "HI")
     )
     Spacer(modifier = Modifier.height(24.dp))
     TripPointDropdown(
         value = uiState.timezone,
         onValueChange = { onIntent(ProfileSetupContract.Intent.TimezoneChanged(it)) },
         label = "Time Zone",
-        options = listOf("UTC-05:00 (EST)", "UTC+00:00 (GMT)", "UTC+05:30 (IST)", "UTC+01:00 (CET)")
+        options = listOf("GMT", "IST", "EST", "CET", "PST")
     )
 }
 

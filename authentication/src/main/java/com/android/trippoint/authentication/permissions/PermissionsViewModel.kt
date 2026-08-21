@@ -4,7 +4,7 @@ import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.core.database.preferences.PreferencesManager
 
 class PermissionsViewModel(
-    private val preferencesManager: PreferencesManager
+    private val authRepository: com.android.trippoint.authentication.domain.repository.AuthRepository
 ) : 
     BaseViewModel<PermissionsContract.State, PermissionsContract.Intent, PermissionsContract.Effect>(
         initialState = PermissionsContract.State()
@@ -18,7 +18,7 @@ class PermissionsViewModel(
             }
             PermissionsContract.Intent.DenyClicked -> handleNext()
             PermissionsContract.Intent.ExploreClicked -> {
-                preferencesManager.setPermissionsRequested(true)
+                authRepository.setPermissionsRequested(true)
                 sendEffect(PermissionsContract.Effect.NavigateToHome)
             }
         }

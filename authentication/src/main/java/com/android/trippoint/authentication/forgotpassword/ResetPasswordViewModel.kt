@@ -7,10 +7,15 @@ import com.android.trippoint.core.common.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ResetPasswordViewModel : 
+class ResetPasswordViewModel(
+    private val resetPasswordUseCase: com.android.trippoint.authentication.domain.usecase.ResetPasswordUseCase
+) : 
     BaseViewModel<ResetPasswordContract.State, ResetPasswordContract.Intent, ResetPasswordContract.Effect>(
         initialState = ResetPasswordContract.State()
     ) {
+    var email: String = ""
+    var otp: String = ""
+
     override fun onIntent(intent: ResetPasswordContract.Intent) {
         when (intent) {
             is ResetPasswordContract.Intent.PasswordChanged -> setState {
@@ -53,11 +58,20 @@ class ResetPasswordViewModel :
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate network call
-            delay(1500)
-            setState { copy(isLoading = false, isSuccess = true) }
-            delay(2000)
-            sendEffect(ResetPasswordContract.Effect.NavigateToLogin)
+            val input = com.android.trippoint.core.network.ResetPasswordInput(
+                email = email,
+                otp = otp,
+                newPassword = currentState.password
+            )
+            val result = resetPasswordUseCase(input)
+            
+            if (result.isSuccess) {
+                setState { copy(isLoading = false, isSuccess = true) }
+                delay(2000)
+                sendEffect(ResetPasswordContract.Effect.NavigateToLogin)
+            } else {
+                setState { copy(isLoading = false, serverError = true) }
+            }
         }
     }
 }

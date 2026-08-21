@@ -1,0 +1,72 @@
+type Query {
+  me: User
+  userDevices: [Device!]!
+}
+
+type Mutation {
+  register(input: RegisterInput!): AuthResponse!
+  login(email: String!, password: String!): AuthResponse!
+  verifyEmailOtp(input: VerifyEmailOtpInput!): Boolean!
+  resendEmailOtp: Boolean!
+  requestPasswordReset(email: String!): Boolean!
+  verifyPasswordResetOtp(input: VerifyPasswordResetOtpInput!): Boolean!
+  resetPassword(input: ResetPasswordInput!): Boolean!
+  refreshToken(input: RefreshTokenInput!): RefreshResponse!
+  logout: Boolean!
+  logoutAllDevices: Boolean!
+  changePassword(currentPassword: String!, newPassword: String!): Boolean!
+}
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String
+  lastName: String
+}
+
+type Device {
+  id: ID!
+  deviceName: String
+  platform: String
+  appVersion: String
+  lastLoginAt: String
+  createdAt: String
+}
+
+type AuthResponse {
+  user: User!
+  token: String!
+  refreshToken: String!
+}
+
+type RefreshResponse {
+  token: String!
+  refreshToken: String!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String
+  lastName: String
+}
+
+input VerifyEmailOtpInput {
+  email: String!
+  otp: String!
+}
+
+input VerifyPasswordResetOtpInput {
+  email: String!
+  otp: String!
+}
+
+input ResetPasswordInput {
+  email: String!
+  otp: String!
+  newPassword: String!
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
+}

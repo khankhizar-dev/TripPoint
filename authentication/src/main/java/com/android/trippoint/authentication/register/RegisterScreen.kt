@@ -29,6 +29,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -52,14 +53,49 @@ import com.android.trippoint.core.designsystem.components.TripPointTextField
 
 @Composable
 fun RegisterRoute(
-    onNavigateToHome: () -> Unit,
+    onNavigateToOtp: (String) -> Unit,
     onNavigateToLogin: () -> Unit,
 ) {
     val context = LocalContext.current
+    val (viewModel, uiState) = rememberRegisterViewModel(context, onNavigateToOtp, onNavigateToLogin)
+
+    RegisterScreen(
+        uiState = uiState,
+        onIntent = viewModel::onIntent
+    )
+}
+
+@Composable
+private fun rememberRegisterViewModel(
+    context: android.content.Context,
+    onNavigateToOtp: (String) -> Unit,
+    onNavigateToLogin: () -> Unit
+): Pair<RegisterViewModel, RegisterContract.State> {
+    val preferencesManager = remember { PreferencesManager(context) }
+    val authRemoteDataSource = remember {
+        val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+            authTokenProvider = { preferencesManager.getAuthToken() },
+            refreshTokenProvider = { preferencesManager.getRefreshToken() },
+            onTokenRefreshed = { token, refresh ->
+                preferencesManager.setAuthToken(token)
+                preferencesManager.setRefreshToken(refresh)
+            }
+        )
+        com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    }
+    val authRepository = remember {
+        com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+            authRemoteDataSource, preferencesManager
+        )
+    }
+    val registerUseCase = remember {
+        com.android.trippoint.authentication.domain.usecase.RegisterUseCase(authRepository)
+    }
+
     val viewModel: RegisterViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return RegisterViewModel(PreferencesManager(context)) as T
+                return RegisterViewModel(registerUseCase) as T
             }
         }
     )
@@ -68,17 +104,14 @@ fun RegisterRoute(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is RegisterContract.Effect.NavigateToHome -> onNavigateToHome()
+                is RegisterContract.Effect.NavigateToOtp -> onNavigateToOtp(effect.email)
                 is RegisterContract.Effect.NavigateToLogin -> onNavigateToLogin()
                 is RegisterContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
     }
-
-    RegisterScreen(
-        uiState = uiState,
-        onIntent = viewModel::onIntent
-    )
+    
+    return Pair(viewModel, uiState)
 }
 
 @Composable

@@ -11,7 +11,9 @@ sealed class Screen(val route: String) {
             "otp/$email?isForgotPassword=$isForgotPassword"
     }
     object ForgotPassword : Screen("forgot_password")
-    object ResetPassword : Screen("reset_password")
+    object ResetPassword : Screen("reset_password/{email}/{otp}") {
+        fun createRoute(email: String, otp: String) = "reset_password/$email/$otp"
+    }
     object ProfileSetup : Screen("profile_setup")
     object Permissions : Screen("permissions")
     object SessionExpired : Screen("session_expired")

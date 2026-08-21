@@ -2,15 +2,21 @@ package com.android.trippoint.authentication.otp
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.authentication.R
+import com.android.trippoint.authentication.domain.usecase.ResendOtpUseCase
+import com.android.trippoint.authentication.domain.usecase.VerifyOtpUseCase
 import com.android.trippoint.core.common.BaseViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class OtpViewModel : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpContract.Effect>(
+class OtpViewModel(
+    private val verifyOtpUseCase: VerifyOtpUseCase,
+    private val resendOtpUseCase: ResendOtpUseCase
+) : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpContract.Effect>(
     initialState = OtpContract.State()
 ) {
     private var timerJob: Job? = null
+    var email: String = ""
 
     init {
         startResendTimer()
@@ -32,9 +38,9 @@ class OtpViewModel : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpCon
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            // Simulate API verification
-            delay(1500)
-            if (currentState.otp == "123456") { // Dummy correct OTP
+            val result = verifyOtpUseCase(email, currentState.otp)
+            
+            if (result.isSuccess && result.getOrDefault(false)) {
                 setState { copy(isLoading = false, isSuccess = true) }
                 delay(2000)
                 if (isForgotPasswordFlow) {
@@ -52,9 +58,12 @@ class OtpViewModel : BaseViewModel<OtpContract.State, OtpContract.Intent, OtpCon
         if (uiState.value.resendTimer > 0) return
         
         viewModelScope.launch {
-            // Simulate resend API
-            delay(1000)
-            startResendTimer()
+            val result = resendOtpUseCase()
+            if (result.isSuccess && result.getOrDefault(false)) {
+                startResendTimer()
+            } else {
+                // Handle error
+            }
         }
     }
 
