@@ -2,7 +2,6 @@ package com.android.trippoint.authentication.profilesetup
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
-import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -75,7 +74,11 @@ class ProfileSetupViewModel(
                 sendEffect(ProfileSetupContract.Effect.NavigateToHome)
             } else {
                 setState { copy(isLoading = false) }
-                sendEffect(ProfileSetupContract.Effect.ShowError(result.exceptionOrNull()?.message ?: "Failed to save profile"))
+                sendEffect(
+                    ProfileSetupContract.Effect.ShowError(
+                        result.exceptionOrNull()?.message ?: "Failed to save profile"
+                    )
+                )
             }
         }
     }

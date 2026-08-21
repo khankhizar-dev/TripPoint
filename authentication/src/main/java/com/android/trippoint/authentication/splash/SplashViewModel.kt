@@ -2,7 +2,6 @@ package com.android.trippoint.authentication.splash
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
-import com.android.trippoint.core.database.preferences.PreferencesManager
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

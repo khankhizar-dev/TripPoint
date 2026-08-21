@@ -7,7 +7,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -89,7 +88,11 @@ class MainActivity : ComponentActivity() {
                         composable(Screen.Login.route) {
                             com.android.trippoint.authentication.login.LoginRoute(
                                 onNavigateToHome = { isProfileComplete ->
-                                    val destination = if (isProfileComplete) Screen.Home.route else Screen.ProfileSetup.route
+                                    val destination = if (isProfileComplete) {
+                                        Screen.Home.route
+                                    } else {
+                                        Screen.ProfileSetup.route
+                                    }
                                     navController.navigate(destination) {
                                         popUpTo(0) { inclusive = true }
                                     }
