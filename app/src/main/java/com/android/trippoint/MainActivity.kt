@@ -214,9 +214,53 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate(Screen.Login.route) {
                                         popUpTo(0) { inclusive = true }
                                     }
+                                },
+                                onNavigateToProfile = {
+                                    navController.navigate(Screen.Profile.route)
                                 }
                             )
                         }
+                        composable(Screen.Profile.route) {
+                            com.android.trippoint.ui.settings.SettingsRoute(
+                                onNavigateToLogin = {
+                                    navController.navigate(Screen.Login.route) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
+                                onNavigateToEditProfile = { navController.navigate(Screen.EditProfile.route) },
+                                onNavigateToPreferences = { navController.navigate(Screen.Preferences.route) },
+                                onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
+                                onNavigateToSecurity = { navController.navigate(Screen.Security.route) },
+                                onNavigateToSupport = { navController.navigate(Screen.Support.route) },
+                                onNavigateToAbout = { navController.navigate(Screen.About.route) }
+                            )
+                        }
+                        composable(Screen.EditProfile.route) {
+                            com.android.trippoint.ui.settings.EditProfileRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Preferences.route) {
+                            com.android.trippoint.ui.settings.PreferencesRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Notifications.route) {
+                            com.android.trippoint.ui.settings.NotificationsRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Security.route) {
+                            com.android.trippoint.ui.settings.SecurityRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Support.route) {
+                            com.android.trippoint.ui.settings.SupportRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.About.route) { com.android.trippoint.ui.settings.AboutScreen() }
                     }
                 }
             }

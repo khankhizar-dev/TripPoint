@@ -103,11 +103,39 @@ class AuthRemoteDataSource(
                 email
                 firstName
                 lastName
+                fullName
                 username
+                phoneNumber
+                dateOfBirth
+                nationality
                 profilePhotoUrl
                 country
+              }
+            }
+        """.trimIndent()
+
+        val request = GraphQlRequest(
+            query = query,
+            variables = mapOf("input" to input)
+        )
+
+        val response = api.postGraphQl(request)
+        val body = response.body()
+        if (body?.errors != null && body.errors.isNotEmpty()) {
+            android.util.Log.e("AuthRemoteDataSource", "GraphQL Errors: ${body.errors}")
+        }
+        return response.isSuccessful && body?.data?.get("updateProfile") != null
+    }
+
+    suspend fun updatePreferences(input: UpdatePreferencesInput): UserPreferences? {
+        val query = """
+            mutation UpdatePreferences(${'$'}input: UpdatePreferencesInput!) {
+              updatePreferences(input: ${'$'}input) {
                 currency
                 language
+                dateFormat
+                units
+                theme
                 timezone
               }
             }
@@ -119,7 +147,12 @@ class AuthRemoteDataSource(
         )
 
         val response = api.postGraphQl(request)
-        return response.isSuccessful && response.body()?.data?.get("updateProfile") != null
+        val body = response.body()
+        if (body?.errors != null && body.errors.isNotEmpty()) {
+            android.util.Log.e("AuthRemoteDataSource", "GraphQL Errors: ${body.errors}")
+        }
+        val data = body?.data?.get("updatePreferences") ?: return null
+        return moshi.adapter(UserPreferences::class.java).fromJsonValue(data)
     }
 
     suspend fun getMe(): User? {
@@ -130,19 +163,77 @@ class AuthRemoteDataSource(
                 email
                 firstName
                 lastName
+                fullName
                 username
+                phoneNumber
+                dateOfBirth
+                nationality
                 profilePhotoUrl
                 country
+              }
+            }
+        """.trimIndent()
+        val request = GraphQlRequest(query = query)
+        val response = api.postGraphQl(request)
+        val body = response.body()
+        if (body?.errors != null && body.errors.isNotEmpty()) {
+            android.util.Log.e("AuthRemoteDataSource", "GraphQL Errors: ${body.errors}")
+        }
+        val data = body?.data?.get("me") ?: return null
+        return moshi.adapter(User::class.java).fromJsonValue(data)
+    }
+
+    suspend fun getMyPreferences(): UserPreferences? {
+        val query = """
+            query GetMyPreferences {
+              myPreferences {
                 currency
                 language
+                dateFormat
+                units
+                theme
                 timezone
               }
             }
         """.trimIndent()
         val request = GraphQlRequest(query = query)
         val response = api.postGraphQl(request)
-        val data = response.body()?.data?.get("me") ?: return null
-        return moshi.adapter(User::class.java).fromJsonValue(data)
+        val data = response.body()?.data?.get("myPreferences") ?: return null
+        return moshi.adapter(UserPreferences::class.java).fromJsonValue(data)
+    }
+
+    suspend fun getUserDevices(): List<UserDevice> {
+        val query = """
+            query GetUserDevices {
+              userDevices {
+                id
+                deviceName
+                platform
+                appVersion
+                lastLoginAt
+                createdAt
+              }
+            }
+        """.trimIndent()
+        val request = GraphQlRequest(query = query)
+        val response = api.postGraphQl(request)
+        val data = response.body()?.data?.get("userDevices") as? List<*> ?: return emptyList()
+        val adapter = moshi.adapter(UserDevice::class.java)
+        return data.mapNotNull { adapter.fromJsonValue(it) }
+    }
+
+    suspend fun changePassword(current: String, new: String): Boolean {
+        val query = """
+            mutation ChangePassword(${'$'}current: String!, ${'$'}new: String!) {
+              changePassword(currentPassword: ${'$'}current, newPassword: ${'$'}new)
+            }
+        """.trimIndent()
+        val request = GraphQlRequest(
+            query = query,
+            variables = mapOf("current" to current, "new" to new)
+        )
+        val response = api.postGraphQl(request)
+        return response.body()?.data?.get("changePassword") as? Boolean ?: false
     }
 
     suspend fun logout(): Boolean {
@@ -158,12 +249,31 @@ data class User(
     val email: String,
     val firstName: String?,
     val lastName: String?,
+    val fullName: String? = null,
     val username: String? = null,
+    val phoneNumber: String? = null,
+    val dateOfBirth: String? = null,
+    val nationality: String? = null,
     val profilePhotoUrl: String? = null,
-    val country: String? = null,
-    val currency: String? = null,
-    val language: String? = null,
-    val timezone: String? = null
+    val country: String? = null
+)
+
+data class UserPreferences(
+    val currency: String?,
+    val language: String?,
+    val dateFormat: String?,
+    val units: String?,
+    val theme: String?,
+    val timezone: String?
+)
+
+data class UserDevice(
+    val id: String,
+    val deviceName: String?,
+    val platform: String?,
+    val appVersion: String?,
+    val lastLoginAt: String?,
+    val createdAt: String
 )
 
 data class AuthResponse(
@@ -184,8 +294,18 @@ data class UpdateProfileInput(
     val lastName: String? = null,
     val username: String? = null,
     val country: String? = null,
+    val phoneNumber: String? = null,
+    val dateOfBirth: String? = null,
+    val nationality: String? = null,
+    val profilePhotoUrl: String? = null
+)
+
+data class UpdatePreferencesInput(
     val currency: String? = null,
     val language: String? = null,
+    val dateFormat: String? = null,
+    val units: String? = null,
+    val theme: String? = null,
     val timezone: String? = null
 )
 

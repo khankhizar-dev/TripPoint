@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -26,7 +29,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.data.repository.AuthRepositoryImpl
 import com.android.trippoint.authentication.domain.model.User
-import com.android.trippoint.authentication.domain.usecase.GetMeUseCase
+import com.android.trippoint.authentication.domain.model.UserPreferences
 import com.android.trippoint.authentication.domain.usecase.LogoutUseCase
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.TripPointButton
@@ -38,7 +41,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun HomeRoute(
-    onNavigateToLogin: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToProfile: () -> Unit
 ) {
     val context = LocalContext.current
     val preferencesManager = PreferencesManager(context)
@@ -53,12 +57,11 @@ fun HomeRoute(
     val authRemoteDataSource = AuthRemoteDataSource(api)
     val authRepository = AuthRepositoryImpl(authRemoteDataSource, preferencesManager)
     val logoutUseCase = LogoutUseCase(authRepository)
-    val getMeUseCase = GetMeUseCase(authRepository)
 
     val viewModel: HomeViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return HomeViewModel(logoutUseCase, getMeUseCase) as T
+                return HomeViewModel(logoutUseCase, authRepository) as T
             }
         }
     )
@@ -66,7 +69,7 @@ fun HomeRoute(
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
-        viewModel.loadUser()
+        viewModel.loadData()
     }
 
     HomeScreen(
@@ -75,16 +78,35 @@ fun HomeRoute(
             viewModel.logout {
                 onNavigateToLogin()
             }
-        }
+        },
+        onNavigateToProfile = onNavigateToProfile
     )
 }
 
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
-    onLogout: () -> Unit
+    onLogout: () -> Unit,
+    onNavigateToProfile: () -> Unit
 ) {
-    Scaffold { innerPadding ->
+    Scaffold(
+        topBar = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalArrangement = Arrangement.End
+            ) {
+                androidx.compose.material3.IconButton(onClick = onNavigateToProfile) {
+                    androidx.compose.material3.Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -99,7 +121,7 @@ fun HomeScreen(
                 }
                 uiState.user != null -> {
                     Text(
-                        text = "Hello, ${uiState.user.firstName ?: "User"}!",
+                        text = "Hello, ${uiState.user.fullName ?: uiState.user.firstName ?: "User"}!",
                         style = MaterialTheme.typography.headlineLarge
                     )
                     Text(
@@ -116,6 +138,13 @@ fun HomeScreen(
                         )
                     }
                     
+                    if (uiState.user.phoneNumber != null) {
+                        Text(
+                            text = uiState.user.phoneNumber!!,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                    
                     Spacer(modifier = Modifier.height(16.dp))
                     
                     Column(
@@ -123,9 +152,15 @@ fun HomeScreen(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         ProfileInfoItem("Country", uiState.user.country)
-                        ProfileInfoItem("Currency", uiState.user.currency)
-                        ProfileInfoItem("Language", uiState.user.language)
-                        ProfileInfoItem("Time Zone", uiState.user.timezone)
+                        ProfileInfoItem("Nationality", uiState.user.nationality)
+                        ProfileInfoItem("Date of Birth", uiState.user.dateOfBirth)
+                        
+                        if (uiState.preferences != null) {
+                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+                            ProfileInfoItem("Currency", uiState.preferences.currency)
+                            ProfileInfoItem("Language", uiState.preferences.language)
+                            ProfileInfoItem("Time Zone", uiState.preferences.timezone)
+                        }
                     }
                 }
                 uiState.error != null -> {
@@ -164,30 +199,35 @@ private fun ProfileInfoItem(label: String, value: String?) {
 data class HomeUiState(
     val isLoading: Boolean = false,
     val user: User? = null,
+    val preferences: UserPreferences? = null,
     val error: String? = null
 )
 
 class HomeViewModel(
     private val logoutUseCase: LogoutUseCase,
-    private val getMeUseCase: GetMeUseCase
+    private val repository: com.android.trippoint.authentication.domain.repository.AuthRepository
 ) : ViewModel() {
     
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun loadUser() {
+    fun loadData() {
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true)
-            val result = getMeUseCase()
-            if (result.isSuccess) {
+            val userResult = repository.getMe()
+            val preferencesResult = repository.getMyPreferences()
+            
+            if (userResult.isSuccess) {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    user = result.getOrNull()
+                    user = userResult.getOrNull(),
+                    preferences = preferencesResult.getOrNull(),
+                    error = null
                 )
             } else {
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
-                    error = result.exceptionOrNull()?.message ?: "Failed to load profile"
+                    error = userResult.exceptionOrNull()?.message ?: "Failed to load data"
                 )
             }
         }
