@@ -30,7 +30,10 @@ import com.android.trippoint.core.network.NetworkModule
 
 @Composable
 fun SecurityRoute(
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
+    onNavigateToDevices: () -> Unit,
+    onNavigateToConnectedAccounts: () -> Unit
 ) {
     val context = LocalContext.current
     val (viewModel, uiState) = rememberSecurityViewModel(context)
@@ -38,7 +41,10 @@ fun SecurityRoute(
     SecurityScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
-        onNavigateBack = onNavigateBack
+        onNavigateBack = onNavigateBack,
+        onNavigateToChangePassword = onNavigateToChangePassword,
+        onNavigateToDevices = onNavigateToDevices,
+        onNavigateToConnectedAccounts = onNavigateToConnectedAccounts
     )
 }
 
@@ -78,7 +84,10 @@ private fun rememberSecurityViewModel(
 fun SecurityScreen(
     uiState: SecurityContract.State,
     onIntent: (SecurityContract.Intent) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToChangePassword: () -> Unit,
+    onNavigateToDevices: () -> Unit,
+    onNavigateToConnectedAccounts: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -117,7 +126,7 @@ fun SecurityScreen(
                 SettingsListItem(
                     title = "Change Password",
                     icon = Icons.Outlined.Lock,
-                    onClick = { /* Navigate to Change Password */ }
+                    onClick = onNavigateToChangePassword
                 )
                 
                 SettingsListItem(
@@ -136,13 +145,13 @@ fun SecurityScreen(
                     title = "Login Devices",
                     icon = Icons.Outlined.Devices,
                     subtitle = "${uiState.deviceCount} devices",
-                    onClick = { /* Navigate to Device List */ }
+                    onClick = onNavigateToDevices
                 )
                 
                 SettingsListItem(
                     title = "Connected Accounts",
                     icon = Icons.Outlined.People,
-                    onClick = { /* Navigate to Connected Accounts */ }
+                    onClick = onNavigateToConnectedAccounts
                 )
                 
                 SettingsListItem(

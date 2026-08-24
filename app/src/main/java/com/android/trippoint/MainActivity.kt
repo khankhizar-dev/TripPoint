@@ -252,6 +252,24 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(Screen.Security.route) {
                             com.android.trippoint.ui.settings.SecurityRoute(
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToChangePassword = { navController.navigate(Screen.ChangePassword.route) },
+                                onNavigateToDevices = { navController.navigate(Screen.Devices.route) },
+                                onNavigateToConnectedAccounts = { navController.navigate(Screen.ConnectedAccounts.route) }
+                            )
+                        }
+                        composable(Screen.ChangePassword.route) {
+                            com.android.trippoint.ui.settings.ChangePasswordRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.Devices.route) {
+                            com.android.trippoint.ui.settings.DevicesRoute(
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.ConnectedAccounts.route) {
+                            com.android.trippoint.ui.settings.ConnectedAccountsScreen(
                                 onNavigateBack = { navController.popBackStack() }
                             )
                         }
