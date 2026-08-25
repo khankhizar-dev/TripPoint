@@ -142,18 +142,7 @@ fun SettingsScreen(
 ) {
     Scaffold(
         topBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Profile",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            SettingsTopBar()
         }
     ) { innerPadding ->
         Box(
@@ -162,97 +151,164 @@ fun SettingsScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                val user = uiState.user
-                if (user != null) {
-                    ProfileHeader(
-                        name = "${user.firstName ?: ""} ${user.lastName ?: ""}".trim().ifEmpty { "User" },
-                        email = user.email,
-                        imageUrl = user.profilePhotoUrl
-                    )
-                    
-                    Button(
-                        onClick = onNavigateToEditProfile,
-                        modifier = Modifier.width(160.dp),
-                        shape = RoundedCornerShape(24.dp)
-                    ) {
-                        Text(text = "Edit Profile")
-                    }
-                    
-                    Spacer(modifier = Modifier.height(24.dp))
-                    
-                    val completionPercentage = calculateCompletion(user)
-                    CompletionCard(completionPercentage = completionPercentage)
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Column(modifier = Modifier.fillMaxWidth()) {
-                        SettingsListItem(
-                            title = "Preferences",
-                            icon = Icons.Outlined.Settings,
-                            onClick = onNavigateToPreferences
-                        )
-                        SettingsListItem(
-                            title = "Notifications",
-                            icon = Icons.Outlined.Notifications,
-                            onClick = onNavigateToNotifications
-                        )
-                        SettingsListItem(
-                            title = "Account & Security",
-                            icon = Icons.Outlined.Lock,
-                            onClick = onNavigateToSecurity
-                        )
-                        SettingsListItem(
-                            title = "Support & Help",
-                            icon = Icons.Outlined.QuestionMark,
-                            onClick = onNavigateToSupport
-                        )
-                        SettingsListItem(
-                            title = "About TripPoint",
-                            icon = Icons.Default.Info,
-                            onClick = onNavigateToAbout
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                    
-                    TextButton(onClick = { onIntent(SettingsContract.Intent.Logout) }) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.error
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = "Log Out",
-                                color = MaterialTheme.colorScheme.error,
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-                    }
-                    
-                    Spacer(modifier = Modifier.height(32.dp))
-                }
-            }
+            SettingsContent(
+                uiState = uiState,
+                onIntent = onIntent,
+                onNavigateToEditProfile = onNavigateToEditProfile,
+                onNavigateToPreferences = onNavigateToPreferences,
+                onNavigateToNotifications = onNavigateToNotifications,
+                onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToSupport = onNavigateToSupport,
+                onNavigateToAbout = onNavigateToAbout
+            )
 
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                SettingsLoadingOverlay()
             }
         }
+    }
+}
+
+@Composable
+private fun SettingsTopBar() {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "Profile",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun SettingsContent(
+    uiState: SettingsContract.State,
+    onIntent: (SettingsContract.Intent) -> Unit,
+    onNavigateToEditProfile: () -> Unit,
+    onNavigateToPreferences: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToSecurity: () -> Unit,
+    onNavigateToSupport: () -> Unit,
+    onNavigateToAbout: () -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val user = uiState.user
+        if (user != null) {
+            ProfileHeader(
+                name = "${user.firstName ?: ""} ${user.lastName ?: ""}"
+                    .trim().ifEmpty { "User" },
+                email = user.email,
+                imageUrl = user.profilePhotoUrl
+            )
+            
+            Button(
+                onClick = onNavigateToEditProfile,
+                modifier = Modifier.width(160.dp),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Text(text = "Edit Profile")
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+            
+            val completionPercentage = calculateCompletion(user)
+            CompletionCard(completionPercentage = completionPercentage)
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            SettingsOptionsList(
+                onNavigateToPreferences = onNavigateToPreferences,
+                onNavigateToNotifications = onNavigateToNotifications,
+                onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToSupport = onNavigateToSupport,
+                onNavigateToAbout = onNavigateToAbout
+            )
+            
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            LogoutButton(onLogout = { onIntent(SettingsContract.Intent.Logout) })
+            
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
+}
+
+@Composable
+private fun SettingsOptionsList(
+    onNavigateToPreferences: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
+    onNavigateToSecurity: () -> Unit,
+    onNavigateToSupport: () -> Unit,
+    onNavigateToAbout: () -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        SettingsListItem(
+            title = "Preferences",
+            icon = Icons.Outlined.Settings,
+            onClick = onNavigateToPreferences
+        )
+        SettingsListItem(
+            title = "Notifications",
+            icon = Icons.Outlined.Notifications,
+            onClick = onNavigateToNotifications
+        )
+        SettingsListItem(
+            title = "Account & Security",
+            icon = Icons.Outlined.Lock,
+            onClick = onNavigateToSecurity
+        )
+        SettingsListItem(
+            title = "Support & Help",
+            icon = Icons.Outlined.QuestionMark,
+            onClick = onNavigateToSupport
+        )
+        SettingsListItem(
+            title = "About TripPoint",
+            icon = Icons.Default.Info,
+            onClick = onNavigateToAbout
+        )
+    }
+}
+
+@Composable
+private fun LogoutButton(onLogout: () -> Unit) {
+    TextButton(onClick = onLogout) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Outlined.ExitToApp,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.error
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = "Log Out",
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+    }
+}
+
+@Composable
+private fun SettingsLoadingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }

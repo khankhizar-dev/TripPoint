@@ -1,7 +1,6 @@
 package com.android.trippoint.ui.home
 
 import com.android.trippoint.authentication.domain.model.User
-import com.android.trippoint.authentication.domain.usecase.GetMeUseCase
 import com.android.trippoint.authentication.domain.usecase.LogoutUseCase
 import io.mockk.coEvery
 import io.mockk.mockk
@@ -23,13 +22,13 @@ class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val logoutUseCase: LogoutUseCase = mockk()
-    private val getMeUseCase: GetMeUseCase = mockk()
+    private val repository: com.android.trippoint.authentication.domain.repository.AuthRepository = mockk()
     private lateinit var viewModel: HomeViewModel
 
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        viewModel = HomeViewModel(logoutUseCase, getMeUseCase)
+        viewModel = HomeViewModel(logoutUseCase, repository)
     }
 
     @After
@@ -38,11 +37,12 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `loadUser success updates state with user`() = runTest {
+    fun `loadData success updates state with user`() = runTest {
         val user = User("1", "test@example.com", "John", "Doe")
-        coEvery { getMeUseCase() } returns Result.success(user)
+        coEvery { repository.getMe() } returns Result.success(user)
+        coEvery { repository.getMyPreferences() } returns Result.success(null)
 
-        viewModel.loadUser()
+        viewModel.loadData()
         runCurrent()
 
         assertEquals(false, viewModel.uiState.value.isLoading)
@@ -51,10 +51,11 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun `loadUser failure updates state with error`() = runTest {
-        coEvery { getMeUseCase() } returns Result.failure(Exception("Network error"))
+    fun `loadData failure updates state with error`() = runTest {
+        coEvery { repository.getMe() } returns Result.failure(Exception("Network error"))
+        coEvery { repository.getMyPreferences() } returns Result.success(null)
 
-        viewModel.loadUser()
+        viewModel.loadData()
         runCurrent()
 
         assertEquals(false, viewModel.uiState.value.isLoading)

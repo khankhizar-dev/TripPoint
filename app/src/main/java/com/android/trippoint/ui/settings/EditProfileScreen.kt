@@ -131,50 +131,19 @@ fun EditProfileScreen(
     val datePickerState = rememberDatePickerState()
 
     if (showDatePicker) {
-        DatePickerDialog(
-            onDismissRequest = { showDatePicker = false },
-            confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
-                    datePickerState.selectedDateMillis?.let {
-                        val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-                            .format(Date(it))
-                        onIntent(EditProfileContract.Intent.DobChanged(formattedDate))
-                    }
-                    showDatePicker = false
-                }) {
-                    Text("OK")
-                }
-            },
-            dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
-                }
+        EditProfileDatePicker(
+            state = datePickerState,
+            onDismiss = { showDatePicker = false },
+            onConfirm = { formattedDate ->
+                onIntent(EditProfileContract.Intent.DobChanged(formattedDate))
+                showDatePicker = false
             }
-        ) {
-            DatePicker(state = datePickerState)
-        }
+        )
     }
 
     Scaffold(
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-                Text(
-                    text = "Edit Profile",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(modifier = Modifier.size(48.dp)) // To balance the back button
-            }
+            EditProfileTopBar(onNavigateBack)
         }
     ) { innerPadding ->
         Box(
@@ -183,132 +152,216 @@ fun EditProfileScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            val scrollState = rememberScrollState()
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(scrollState)
-                    .padding(horizontal = 24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                // Avatar with Edit Button
-                Box(
-                    modifier = Modifier
-                        .size(120.dp)
-                        .clickable { photoPickerLauncher.launch("image/*") },
-                    contentAlignment = Alignment.BottomEnd
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(120.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (uiState.profilePhotoUri != null) {
-                            AsyncImage(
-                                model = uiState.profilePhotoUri,
-                                contentDescription = null,
-                                modifier = Modifier.fillMaxSize(),
-                                contentScale = ContentScale.Crop
-                            )
-                        } else {
-                            Text(
-                                text = uiState.fullName.firstOrNull()?.toString()?.uppercase() ?: "?",
-                                style = MaterialTheme.typography.displayMedium,
-                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                            )
-                        }
-                    }
-                    
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary)
-                            .padding(4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.CameraAlt,
-                            contentDescription = "Edit Photo",
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                TripPointTextField(
-                    value = uiState.fullName,
-                    onValueChange = { onIntent(EditProfileContract.Intent.FullNameChanged(it)) },
-                    label = "Full Name"
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointTextField(
-                    value = uiState.email,
-                    onValueChange = { onIntent(EditProfileContract.Intent.EmailChanged(it)) },
-                    label = "Email",
-                    enabled = false // Usually email isn't directly editable without verification
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointTextField(
-                    value = uiState.phone,
-                    onValueChange = { onIntent(EditProfileContract.Intent.PhoneChanged(it)) },
-                    label = "Phone Number"
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointTextField(
-                    value = uiState.dob,
-                    onValueChange = { },
-                    label = "Date of Birth",
-                    readOnly = true,
-                    trailingIcon = {
-                        IconButton(onClick = { showDatePicker = true }) {
-                            Icon(Icons.Default.CalendarToday, contentDescription = "Select Date")
-                        }
-                    },
-                    modifier = Modifier.clickable { showDatePicker = true }
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointTextField(
-                    value = uiState.nationality,
-                    onValueChange = { onIntent(EditProfileContract.Intent.NationalityChanged(it)) },
-                    label = "Nationality"
-                )
-                
-                Spacer(modifier = Modifier.height(40.dp))
-                
-                TripPointButton(
-                    text = "Save Changes",
-                    onClick = { onIntent(EditProfileContract.Intent.SaveClicked) },
-                    enabled = !uiState.isLoading
-                )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+            EditProfileContent(
+                uiState = uiState,
+                onIntent = onIntent,
+                onEditPhoto = { photoPickerLauncher.launch("image/*") },
+                onShowDatePicker = { showDatePicker = true }
+            )
             
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                LoadingOverlay()
             }
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun EditProfileDatePicker(
+    state: androidx.compose.material3.DatePickerState,
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    DatePickerDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            androidx.compose.material3.TextButton(onClick = {
+                state.selectedDateMillis?.let {
+                    val formattedDate = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                        .format(Date(it))
+                    onConfirm(formattedDate)
+                }
+            }) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            androidx.compose.material3.TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    ) {
+        DatePicker(state = state)
+    }
+}
+
+@Composable
+private fun EditProfileTopBar(onNavigateBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onNavigateBack) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+        Text(
+            text = "Edit Profile",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.size(48.dp))
+    }
+}
+
+@Composable
+private fun EditProfileContent(
+    uiState: EditProfileContract.State,
+    onIntent: (EditProfileContract.Intent) -> Unit,
+    onEditPhoto: () -> Unit,
+    onShowDatePicker: () -> Unit
+) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(scrollState)
+            .padding(horizontal = 24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = Modifier.height(24.dp))
+        
+        ProfileAvatarEdit(
+            fullName = uiState.fullName,
+            photoUri = uiState.profilePhotoUri,
+            onEditPhoto = onEditPhoto
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        TripPointTextField(
+            value = uiState.fullName,
+            onValueChange = { onIntent(EditProfileContract.Intent.FullNameChanged(it)) },
+            label = "Full Name"
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        TripPointTextField(
+            value = uiState.email,
+            onValueChange = { onIntent(EditProfileContract.Intent.EmailChanged(it)) },
+            label = "Email",
+            enabled = false
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        TripPointTextField(
+            value = uiState.phone,
+            onValueChange = { onIntent(EditProfileContract.Intent.PhoneChanged(it)) },
+            label = "Phone Number"
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        TripPointTextField(
+            value = uiState.dob,
+            onValueChange = { },
+            label = "Date of Birth",
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = onShowDatePicker) {
+                    Icon(Icons.Default.CalendarToday, contentDescription = "Select Date")
+                }
+            },
+            modifier = Modifier.clickable { onShowDatePicker() }
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        TripPointTextField(
+            value = uiState.nationality,
+            onValueChange = { onIntent(EditProfileContract.Intent.NationalityChanged(it)) },
+            label = "Nationality"
+        )
+        
+        Spacer(modifier = Modifier.height(40.dp))
+        
+        TripPointButton(
+            text = "Save Changes",
+            onClick = { onIntent(EditProfileContract.Intent.SaveClicked) },
+            enabled = !uiState.isLoading
+        )
+        
+        Spacer(modifier = Modifier.height(32.dp))
+    }
+}
+
+@Composable
+private fun ProfileAvatarEdit(
+    fullName: String,
+    photoUri: String?,
+    onEditPhoto: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .size(120.dp)
+            .clickable { onEditPhoto() },
+        contentAlignment = Alignment.BottomEnd
+    ) {
+        Box(
+            modifier = Modifier
+                .size(120.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primaryContainer),
+            contentAlignment = Alignment.Center
+        ) {
+            if (photoUri != null) {
+                AsyncImage(
+                    model = photoUri,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Text(
+                    text = fullName.firstOrNull()?.toString()?.uppercase() ?: "?",
+                    style = MaterialTheme.typography.displayMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+        }
+        
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(4.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.CameraAlt,
+                contentDescription = "Edit Photo",
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun LoadingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }

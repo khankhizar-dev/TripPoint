@@ -84,14 +84,14 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `updateProfile saves completion status locally`() = runBlocking {
+    fun `updateProfile returns success when remote call succeeds`() = runBlocking {
         coEvery { remoteDataSource.updateProfile(any()) } returns true
 
         val input = UpdateProfileInput(firstName = "John")
         val result = repository.updateProfile(input)
 
         assertTrue(result.isSuccess)
-        verify { preferencesManager.setProfileSetupCompleted(true) }
+        assertTrue(result.getOrDefault(false))
     }
 
     @Test
@@ -102,6 +102,73 @@ class AuthRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         verify { preferencesManager.setProfileSetupCompleted(true) }
+    }
+
+    @Test
+    fun `updatePreferences returns domain preferences`() = runBlocking {
+        val networkPrefs = com.android.trippoint.core.network.UserPreferences(
+            currency = "USD",
+            language = "en",
+            dateFormat = "MM/DD/YYYY",
+            units = "IMPERIAL",
+            theme = "DARK",
+            timezone = "UTC"
+        )
+        coEvery { remoteDataSource.updatePreferences(any()) } returns networkPrefs
+
+        val result = repository.updatePreferences(com.android.trippoint.core.network.UpdatePreferencesInput())
+
+        assertTrue(result.isSuccess)
+        assertEquals("USD", result.getOrNull()?.currency)
+    }
+
+    @Test
+    fun `getMyPreferences returns domain preferences`() = runBlocking {
+        val networkPrefs = com.android.trippoint.core.network.UserPreferences(
+            currency = "INR",
+            language = "hi",
+            dateFormat = "DD/MM/YYYY",
+            units = "METRIC",
+            theme = "LIGHT",
+            timezone = "IST"
+        )
+        coEvery { remoteDataSource.getMyPreferences() } returns networkPrefs
+
+        val result = repository.getMyPreferences()
+
+        assertTrue(result.isSuccess)
+        assertEquals("INR", result.getOrNull()?.currency)
+    }
+
+    @Test
+    fun `changePassword returns success`() = runBlocking {
+        coEvery { remoteDataSource.changePassword(any(), any()) } returns true
+
+        val result = repository.changePassword("old", "new")
+
+        assertTrue(result.isSuccess)
+        assertEquals(true, result.getOrNull())
+    }
+
+    @Test
+    fun `getUserDevices returns list of devices`() = runBlocking {
+        val networkDevices = listOf(
+            com.android.trippoint.core.network.UserDevice(
+                id = "d1",
+                deviceName = "Pixel 6",
+                platform = "Android",
+                appVersion = "1.0",
+                lastLoginAt = "now",
+                createdAt = "then"
+            )
+        )
+        coEvery { remoteDataSource.getUserDevices() } returns networkDevices
+
+        val result = repository.getUserDevices()
+
+        assertTrue(result.isSuccess)
+        assertEquals(1, result.getOrNull()?.size)
+        assertEquals("Pixel 6", result.getOrNull()?.first()?.deviceName)
     }
 
     @Test

@@ -1,6 +1,5 @@
 package com.android.trippoint.ui.settings
 
-import com.android.trippoint.authentication.domain.model.User
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState

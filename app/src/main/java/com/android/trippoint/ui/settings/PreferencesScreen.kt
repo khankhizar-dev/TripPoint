@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -106,24 +105,7 @@ fun PreferencesScreen(
 ) {
     Scaffold(
         topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                IconButton(onClick = onNavigateBack) {
-                    Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-                Text(
-                    text = "Preferences",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.weight(1f),
-                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                )
-                Spacer(modifier = Modifier.size(48.dp))
-            }
+            PreferencesTopBar(onNavigateBack)
         }
     ) { innerPadding ->
         Box(
@@ -132,66 +114,114 @@ fun PreferencesScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            Column(modifier = Modifier.fillMaxSize()) {
-                SettingsListItem(
-                    title = "Currency",
-                    icon = Icons.Outlined.CurrencyExchange,
-                    subtitle = uiState.currency,
-                    onClick = { 
-                        val next = if (uiState.currency == "INR") "USD" else if (uiState.currency == "USD") "EUR" else "INR"
-                        onIntent(PreferencesContract.Intent.CurrencyChanged(next))
-                    }
-                )
-                SettingsListItem(
-                    title = "Language",
-                    icon = Icons.Outlined.Language,
-                    subtitle = if (uiState.language == "en") "English" else if (uiState.language == "hi") "Hindi" else uiState.language,
-                    onClick = { 
-                        val next = if (uiState.language == "en") "hi" else "en"
-                        onIntent(PreferencesContract.Intent.LanguageChanged(next))
-                    }
-                )
-                SettingsListItem(
-                    title = "Date Format",
-                    icon = Icons.Outlined.CalendarMonth,
-                    subtitle = uiState.dateFormat,
-                    onClick = { 
-                        val next = if (uiState.dateFormat == "DD/MM/YYYY") "MM/DD/YYYY" else "DD/MM/YYYY"
-                        onIntent(PreferencesContract.Intent.DateFormatChanged(next))
-                    }
-                )
-                SettingsListItem(
-                    title = "Units",
-                    icon = Icons.Outlined.Straighten,
-                    subtitle = if (uiState.units == "METRIC") "Metric (km, °C)" else "Imperial (mi, °F)",
-                    onClick = { 
-                        val next = if (uiState.units == "METRIC") "IMPERIAL" else "METRIC"
-                        onIntent(PreferencesContract.Intent.UnitsChanged(next))
-                    }
-                )
-                SettingsListItem(
-                    title = "Theme",
-                    icon = Icons.Outlined.DarkMode,
-                    trailingContent = {
-                        Switch(
-                            checked = uiState.isDarkTheme,
-                            onCheckedChange = { onIntent(PreferencesContract.Intent.ThemeChanged(it)) }
-                        )
-                    },
-                    onClick = { onIntent(PreferencesContract.Intent.ThemeChanged(!uiState.isDarkTheme)) }
-                )
-            }
+            PreferencesContent(uiState, onIntent)
 
             if (uiState.isLoading) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color.Black.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator()
-                }
+                PreferencesLoadingOverlay()
             }
         }
+    }
+}
+
+@Composable
+private fun PreferencesTopBar(onNavigateBack: () -> Unit) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        IconButton(onClick = onNavigateBack) {
+            Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        }
+        Text(
+            text = "Preferences",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        )
+        Spacer(modifier = Modifier.size(48.dp))
+    }
+}
+
+@Composable
+private fun PreferencesContent(
+    uiState: PreferencesContract.State,
+    onIntent: (PreferencesContract.Intent) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxSize()) {
+        SettingsListItem(
+            title = "Currency",
+            icon = Icons.Outlined.CurrencyExchange,
+            subtitle = uiState.currency,
+            onClick = { 
+                val current = uiState.currency
+                val next = if (current == "INR") {
+                    "USD"
+                } else if (current == "USD") {
+                    "EUR"
+                } else {
+                    "INR"
+                }
+                onIntent(PreferencesContract.Intent.CurrencyChanged(next))
+            }
+        )
+        SettingsListItem(
+            title = "Language",
+            icon = Icons.Outlined.Language,
+            subtitle = if (uiState.language == "en") {
+                "English"
+            } else if (uiState.language == "hi") {
+                "Hindi"
+            } else {
+                uiState.language
+            },
+            onClick = { 
+                val next = if (uiState.language == "en") "hi" else "en"
+                onIntent(PreferencesContract.Intent.LanguageChanged(next))
+            }
+        )
+        SettingsListItem(
+            title = "Date Format",
+            icon = Icons.Outlined.CalendarMonth,
+            subtitle = uiState.dateFormat,
+            onClick = { 
+                val next = if (uiState.dateFormat == "DD/MM/YYYY") "MM/DD/YYYY" else "DD/MM/YYYY"
+                onIntent(PreferencesContract.Intent.DateFormatChanged(next))
+            }
+        )
+        SettingsListItem(
+            title = "Units",
+            icon = Icons.Outlined.Straighten,
+            subtitle = if (uiState.units == "METRIC") "Metric (km, °C)" else "Imperial (mi, °F)",
+            onClick = { 
+                val next = if (uiState.units == "METRIC") "IMPERIAL" else "METRIC"
+                onIntent(PreferencesContract.Intent.UnitsChanged(next))
+            }
+        )
+        SettingsListItem(
+            title = "Theme",
+            icon = Icons.Outlined.DarkMode,
+            trailingContent = {
+                Switch(
+                    checked = uiState.isDarkTheme,
+                    onCheckedChange = { onIntent(PreferencesContract.Intent.ThemeChanged(it)) }
+                )
+            },
+            onClick = { onIntent(PreferencesContract.Intent.ThemeChanged(!uiState.isDarkTheme)) }
+        )
+    }
+}
+
+@Composable
+private fun PreferencesLoadingOverlay() {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black.copy(alpha = 0.1f)),
+        contentAlignment = Alignment.Center
+    ) {
+        CircularProgressIndicator()
     }
 }

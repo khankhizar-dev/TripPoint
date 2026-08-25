@@ -2,9 +2,10 @@ package com.android.trippoint.ui.settings
 
 import com.android.trippoint.core.common.BaseViewModel
 
-class NotificationsViewModel : BaseViewModel<NotificationsContract.State, NotificationsContract.Intent, NotificationsContract.Effect>(
-    initialState = NotificationsContract.State()
-) {
+class NotificationsViewModel : 
+    BaseViewModel<NotificationsContract.State, NotificationsContract.Intent, NotificationsContract.Effect>(
+        initialState = NotificationsContract.State()
+    ) {
     override fun onIntent(intent: NotificationsContract.Intent) {
         when (intent) {
             is NotificationsContract.Intent.PushToggled -> setState { copy(isPushEnabled = intent.enabled) }
