@@ -54,31 +54,41 @@ class ProfileSetupViewModel(
             
             val names = currentState.fullName.split(" ")
             val firstName = names.firstOrNull()
-            val lastName = if (names.size > 1) names.drop(1).joinToString(" ") else null
+            val lastName = if (names.size > 1) names.drop(1).joinToString(" ") else ""
             
-            val input = com.android.trippoint.core.network.UpdateProfileInput(
+            val profileInput = com.android.trippoint.core.network.UpdateProfileInput(
                 firstName = firstName,
                 lastName = lastName,
                 username = currentState.username,
-                country = currentState.country,
+                phoneNumber = null, // Set if you add phone field to setup
+                dateOfBirth = null, // Set if you add dob field to setup
+                nationality = null, // Set if you add nationality field to setup
+                profilePhotoUrl = currentState.profilePhotoUri,
+                country = currentState.country
+            )
+            
+            val preferencesInput = com.android.trippoint.core.network.UpdatePreferencesInput(
                 currency = currentState.currency,
                 language = currentState.language,
+                dateFormat = "DD/MM/YYYY", // Default or add to state
+                units = "METRIC", // Default or add to state
+                theme = "LIGHT", // Default or add to state
                 timezone = currentState.timezone
             )
             
-            val result = authRepository.updateProfile(input)
+            val profileResult = authRepository.updateProfile(profileInput)
+            val preferencesResult = authRepository.updatePreferences(preferencesInput)
             
-            if (result.isSuccess && result.getOrDefault(false)) {
+            if (profileResult.isSuccess && preferencesResult.isSuccess) {
                 setState { copy(isLoading = false, isSuccess = true) }
                 delay(2000)
                 sendEffect(ProfileSetupContract.Effect.NavigateToHome)
             } else {
                 setState { copy(isLoading = false) }
-                sendEffect(
-                    ProfileSetupContract.Effect.ShowError(
-                        result.exceptionOrNull()?.message ?: "Failed to save profile"
-                    )
-                )
+                val error = profileResult.exceptionOrNull()?.message 
+                    ?: preferencesResult.exceptionOrNull()?.message 
+                    ?: "Failed to save profile"
+                sendEffect(ProfileSetupContract.Effect.ShowError(error))
             }
         }
     }

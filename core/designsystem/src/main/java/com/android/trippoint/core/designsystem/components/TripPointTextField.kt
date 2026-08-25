@@ -32,7 +32,8 @@ fun TripPointTextField(
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     enabled: Boolean = true,
-    singleLine: Boolean = true
+    singleLine: Boolean = true,
+    readOnly: Boolean = false
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -55,6 +56,7 @@ fun TripPointTextField(
             keyboardOptions = keyboardOptions,
             enabled = enabled,
             singleLine = singleLine,
+            readOnly = readOnly,
             shape = RoundedCornerShape(12.dp),
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,

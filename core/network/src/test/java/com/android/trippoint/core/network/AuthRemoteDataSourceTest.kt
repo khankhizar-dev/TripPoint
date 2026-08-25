@@ -102,10 +102,7 @@ class AuthRemoteDataSourceTest {
             firstName = "John",
             lastName = "Doe",
             username = "johndoe",
-            country = "IN",
-            currency = "INR",
-            language = "EN",
-            timezone = "IST"
+            country = "IN"
         )
         val result = dataSource.updateProfile(input)
 
@@ -129,10 +126,7 @@ class AuthRemoteDataSourceTest {
                   "lastName": "Doe",
                   "username": "johndoe",
                   "profilePhotoUrl": null,
-                  "country": "IN",
-                  "currency": "INR",
-                  "language": "EN",
-                  "timezone": "IST"
+                  "country": "IN"
                 }
               }
             }
@@ -145,7 +139,6 @@ class AuthRemoteDataSourceTest {
         assertNotNull(response)
         assertEquals("test@example.com", response?.email)
         assertEquals("johndoe", response?.username)
-        assertEquals("INR", response?.currency)
     }
 
     @Test

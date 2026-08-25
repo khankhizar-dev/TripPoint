@@ -2,8 +2,8 @@ package com.android.trippoint.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryBlue = Color(0xFF2563EB)
-val PrimaryBlueLight = Color(0xFF60A5FA)
+val PrimaryBlue = Color(0xFF5B6BFF)
+val PrimaryBlueLight = Color(0xFF8B96FF)
 val Background = Color(0xFFF8FAFC) // Exact design background
 val Surface = Color(0xFFF8FAFC)
 val TextPrimary = Color(0xFF0F172A)

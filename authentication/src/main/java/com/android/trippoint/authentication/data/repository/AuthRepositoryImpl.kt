@@ -1,13 +1,17 @@
 package com.android.trippoint.authentication.data.repository
 
 import com.android.trippoint.authentication.domain.model.User
+import com.android.trippoint.authentication.domain.model.UserPreferences
 import com.android.trippoint.authentication.domain.repository.AuthRepository
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.network.AuthRemoteDataSource
 import com.android.trippoint.core.network.RegisterInput
 import com.android.trippoint.core.network.ResetPasswordInput
+import com.android.trippoint.core.network.UpdatePreferencesInput
 import com.android.trippoint.core.network.UpdateProfileInput
+import com.android.trippoint.core.network.UserDevice
 import com.android.trippoint.core.network.User as NetworkUser
+import com.android.trippoint.core.network.UserPreferences as NetworkUserPreferences
 
 class AuthRepositoryImpl(
     private val remoteDataSource: AuthRemoteDataSource,
@@ -56,8 +60,27 @@ class AuthRepositoryImpl(
         return try {
             val success = remoteDataSource.updateProfile(input)
             if (success) {
-                preferencesManager.setProfileSetupCompleted(true)
+                Result.success(true)
+            } else {
+                Result.failure(Exception("Failed to update profile. Please check your information."))
             }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun updatePreferences(input: UpdatePreferencesInput): Result<UserPreferences?> {
+        return try {
+            val response = remoteDataSource.updatePreferences(input)
+            Result.success(response?.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun changePassword(current: String, new: String): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.changePassword(current, new)
             Result.success(success)
         } catch (e: Exception) {
             Result.failure(e)
@@ -119,6 +142,24 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun getMyPreferences(): Result<UserPreferences?> {
+        return try {
+            val response = remoteDataSource.getMyPreferences()
+            Result.success(response?.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun getUserDevices(): Result<List<UserDevice>> {
+        return try {
+            val devices = remoteDataSource.getUserDevices()
+            Result.success(devices)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun logout(): Result<Boolean> {
         return try {
             val success = remoteDataSource.logout()
@@ -145,11 +186,21 @@ class AuthRepositoryImpl(
         email = email,
         firstName = firstName,
         lastName = lastName,
+        fullName = fullName,
         username = username,
+        phoneNumber = phoneNumber,
+        dateOfBirth = dateOfBirth,
+        nationality = nationality,
         profilePhotoUrl = profilePhotoUrl,
-        country = country,
+        country = country
+    )
+
+    private fun NetworkUserPreferences.toDomain(): UserPreferences = UserPreferences(
         currency = currency,
         language = language,
+        dateFormat = dateFormat,
+        units = units,
+        theme = theme,
         timezone = timezone
     )
 }

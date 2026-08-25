@@ -1,5 +1,7 @@
 package com.android.trippoint.authentication.profilesetup
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -35,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -43,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.android.trippoint.authentication.R
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
@@ -78,6 +82,12 @@ fun ProfileSetupRoute(
     )
     val uiState by viewModel.uiState.collectAsState()
 
+    val photoPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.GetContent()
+    ) { uri: android.net.Uri? ->
+        uri?.let { viewModel.onIntent(ProfileSetupContract.Intent.PhotoSelected(it.toString())) }
+    }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
@@ -89,7 +99,8 @@ fun ProfileSetupRoute(
 
     ProfileSetupScreen(
         uiState = uiState,
-        onIntent = viewModel::onIntent
+        onIntent = viewModel::onIntent,
+        onPickPhoto = { photoPickerLauncher.launch("image/*") }
     )
 }
 
@@ -97,7 +108,8 @@ fun ProfileSetupRoute(
 @Composable
 fun ProfileSetupScreen(
     uiState: ProfileSetupContract.State,
-    onIntent: (ProfileSetupContract.Intent) -> Unit
+    onIntent: (ProfileSetupContract.Intent) -> Unit,
+    onPickPhoto: () -> Unit = {}
 ) {
     if (uiState.isSuccess) {
         FullscreenStatusView(
@@ -150,7 +162,7 @@ fun ProfileSetupScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 when (uiState.currentStep) {
-                    ProfileSetupContract.Step.PHOTO -> PhotoStep(uiState, onIntent)
+                    ProfileSetupContract.Step.PHOTO -> PhotoStep(uiState, onPickPhoto)
                     ProfileSetupContract.Step.ABOUT -> AboutStep(uiState, onIntent)
                     ProfileSetupContract.Step.PREFERENCES -> PreferencesStep(uiState, onIntent)
                     ProfileSetupContract.Step.REVIEW -> ReviewStep(uiState, onIntent)
@@ -191,7 +203,7 @@ fun ProfileSetupScreen(
 @Composable
 private fun PhotoStep(
     uiState: ProfileSetupContract.State,
-    onIntent: (ProfileSetupContract.Intent) -> Unit
+    onPickPhoto: () -> Unit
 ) {
     Spacer(modifier = Modifier.height(32.dp))
     Text(
@@ -212,15 +224,24 @@ private fun PhotoStep(
             .clip(CircleShape)
             .background(MaterialTheme.colorScheme.surfaceVariant)
             .border(2.dp, MaterialTheme.colorScheme.primary, CircleShape)
-            .clickable { /* Pick photo */ },
+            .clickable { onPickPhoto() },
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = Icons.Default.AddAPhoto,
-            contentDescription = null,
-            modifier = Modifier.size(48.dp),
-            tint = MaterialTheme.colorScheme.primary
-        )
+        if (uiState.profilePhotoUri != null) {
+            AsyncImage(
+                model = uiState.profilePhotoUri,
+                contentDescription = null,
+                modifier = Modifier.fillMaxSize(),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Icon(
+                imageVector = Icons.Default.AddAPhoto,
+                contentDescription = null,
+                modifier = Modifier.size(48.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+        }
     }
 }
 
