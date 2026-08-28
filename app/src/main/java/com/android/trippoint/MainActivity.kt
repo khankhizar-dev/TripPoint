@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -17,6 +18,22 @@ import androidx.navigation.compose.rememberNavController
 import com.android.trippoint.authentication.splash.SplashRoute
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.navigation.Screen
+import com.android.trippoint.core.network.NetworkModule
+import com.android.trippoint.core.network.TripRemoteDataSource
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.trip.data.repository.TripRepositoryImpl
+import com.android.trippoint.trip.create.CreateTripRoute
+import com.android.trippoint.trip.create.CreateTripViewModel
+import com.android.trippoint.trip.details.AddDetailsRoute
+import com.android.trippoint.trip.details.AddDetailsViewModel
+import com.android.trippoint.trip.invite.InvitePeopleRoute
+import com.android.trippoint.trip.invite.InvitePeopleViewModel
+import com.android.trippoint.trip.overview.TripOverviewRoute
+import com.android.trippoint.trip.overview.TripOverviewViewModel
+import com.android.trippoint.trip.summary.TripSummaryRoute
+import com.android.trippoint.trip.summary.TripSummaryViewModel
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 
 class MainActivity : ComponentActivity() {
     @Suppress("LongMethod")
@@ -31,6 +48,20 @@ class MainActivity : ComponentActivity() {
         setContent {
             TripPointTheme {
                 val navController = rememberNavController()
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val preferencesManager = remember { PreferencesManager(context) }
+                val tripRepository = remember {
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    TripRepositoryImpl(TripRemoteDataSource(api))
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     NavHost(
                         navController = navController,
@@ -217,6 +248,121 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToProfile = {
                                     navController.navigate(Screen.Profile.route)
+                                },
+                                onNavigateToTripDetails = { tripId ->
+                                    navController.navigate(Screen.TripOverview.createRoute(tripId))
+                                },
+                                onNavigateToCreateTrip = {
+                                    navController.navigate(Screen.CreateTrip.route)
+                                }
+                            )
+                        }
+                        composable(
+                            route = Screen.TripOverview.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("tripId") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                            val viewModel: TripOverviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                factory = object : ViewModelProvider.Factory {
+                                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                        return TripOverviewViewModel(tripRepository) as T
+                                    }
+                                }
+                            )
+                            TripOverviewRoute(
+                                tripId = tripId,
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() }
+                            )
+                        }
+                        composable(Screen.CreateTrip.route) {
+                            val viewModel: CreateTripViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                factory = object : ViewModelProvider.Factory {
+                                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                        return CreateTripViewModel(tripRepository) as T
+                                    }
+                                }
+                            )
+                            CreateTripRoute(
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToAddDetails = { id ->
+                                    navController.navigate(Screen.AddDetails.createRoute(id))
+                                }
+                            )
+                        }
+                        composable(
+                            route = Screen.AddDetails.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("tripId") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                            val viewModel: AddDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+                            AddDetailsRoute(
+                                tripId = tripId,
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onSaveAndContinue = {
+                                    navController.navigate(Screen.InvitePeople.createRoute(tripId))
+                                }
+                            )
+                        }
+                        composable(
+                            route = Screen.InvitePeople.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("tripId") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                            val viewModel: InvitePeopleViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                factory = object : ViewModelProvider.Factory {
+                                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                        return InvitePeopleViewModel(tripRepository) as T
+                                    }
+                                }
+                            )
+                            InvitePeopleRoute(
+                                tripId = tripId,
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToSummary = { id ->
+                                    navController.navigate(Screen.TripSummary.createRoute(id))
+                                }
+                            )
+                        }
+                        composable(
+                            route = Screen.TripSummary.route,
+                            arguments = listOf(
+                                androidx.navigation.navArgument("tripId") {
+                                    type = androidx.navigation.NavType.StringType
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+                            val viewModel: TripSummaryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+                                factory = object : ViewModelProvider.Factory {
+                                    override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                                        return TripSummaryViewModel(tripRepository) as T
+                                    }
+                                }
+                            )
+                            TripSummaryRoute(
+                                tripId = tripId,
+                                viewModel = viewModel,
+                                onNavigateBack = { navController.popBackStack() },
+                                onNavigateToHome = {
+                                    navController.navigate(Screen.Home.route) {
+                                        popUpTo(Screen.Home.route) { inclusive = true }
+                                    }
                                 }
                             )
                         }
