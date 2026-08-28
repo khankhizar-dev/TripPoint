@@ -2,16 +2,18 @@ package com.android.trippoint.core.designsystem.theme
 
 import androidx.compose.ui.graphics.Color
 
-val PrimaryBlue = Color(0xFF5B6BFF)
-val PrimaryBlueLight = Color(0xFF8B96FF)
-val Background = Color(0xFFF8FAFC) // Exact design background
-val Surface = Color(0xFFF8FAFC)
+val PrimaryBlue = Color(0xFF2563EB)
+val PrimaryBlueLight = Color(0xFF1D89B1)
+val Accent = Color(0xFFF59E0B)
+val Background = Color(0xFFF8FAFC)
+val Surface = Color(0xFFFFFFFF)
 val TextPrimary = Color(0xFF0F172A)
 val TextSecondary = Color(0xFF64748B)
+val Border = Color(0xFFE2E8F0)
 
 // Functional Tokens
 val ErrorRed = Color(0xFFEF4444)
-val SuccessGreen = Color(0xFF10B981)
+val SuccessGreen = Color(0xFF22C55E)
 val WarningYellow = Color(0xFFF59E0B)
 val InfoBlue = Color(0xFF3B82F6)
 

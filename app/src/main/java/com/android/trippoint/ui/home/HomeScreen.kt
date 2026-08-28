@@ -1,25 +1,15 @@
 package com.android.trippoint.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,9 +22,12 @@ import com.android.trippoint.authentication.domain.model.User
 import com.android.trippoint.authentication.domain.model.UserPreferences
 import com.android.trippoint.authentication.domain.usecase.LogoutUseCase
 import com.android.trippoint.core.database.preferences.PreferencesManager
-import com.android.trippoint.core.designsystem.components.TripPointButton
 import com.android.trippoint.core.network.AuthRemoteDataSource
 import com.android.trippoint.core.network.NetworkModule
+import com.android.trippoint.core.network.TripRemoteDataSource
+import com.android.trippoint.trip.data.repository.TripRepositoryImpl
+import com.android.trippoint.trip.list.TripListRoute
+import com.android.trippoint.trip.list.TripListViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -42,7 +35,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeRoute(
     onNavigateToLogin: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToTripDetails: (String) -> Unit,
+    onNavigateToCreateTrip: () -> Unit
 ) {
     val context = LocalContext.current
     val preferencesManager = PreferencesManager(context)
@@ -58,10 +53,21 @@ fun HomeRoute(
     val authRepository = AuthRepositoryImpl(authRemoteDataSource, preferencesManager)
     val logoutUseCase = LogoutUseCase(authRepository)
 
+    val tripRemoteDataSource = TripRemoteDataSource(api)
+    val tripRepository = TripRepositoryImpl(tripRemoteDataSource)
+
     val viewModel: HomeViewModel = viewModel(
         factory = object : ViewModelProvider.Factory {
             override fun <T : ViewModel> create(modelClass: Class<T>): T {
                 return HomeViewModel(logoutUseCase, authRepository) as T
+            }
+        }
+    )
+
+    val tripListViewModel: TripListViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return TripListViewModel(tripRepository) as T
             }
         }
     )
@@ -74,111 +80,38 @@ fun HomeRoute(
 
     HomeScreen(
         uiState = uiState,
+        tripListViewModel = tripListViewModel,
         onLogout = {
             viewModel.logout {
                 onNavigateToLogin()
             }
         },
-        onNavigateToProfile = onNavigateToProfile
+        onNavigateToProfile = onNavigateToProfile,
+        onNavigateToTripDetails = onNavigateToTripDetails,
+        onNavigateToCreateTrip = onNavigateToCreateTrip
     )
 }
 
 @Composable
 fun HomeScreen(
     uiState: HomeUiState,
+    tripListViewModel: TripListViewModel,
     onLogout: () -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToTripDetails: (String) -> Unit,
+    onNavigateToCreateTrip: () -> Unit
 ) {
-    Scaffold(
-        topBar = {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                horizontalArrangement = Arrangement.End
-            ) {
-                androidx.compose.material3.IconButton(onClick = onNavigateToProfile) {
-                    androidx.compose.material3.Icon(
-                        imageVector = Icons.Default.AccountCircle,
-                        contentDescription = "Profile",
-                        tint = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            when {
-                uiState.isLoading -> {
-                    CircularProgressIndicator()
-                }
-                uiState.user != null -> {
-                    Text(
-                        text = "Hello, ${uiState.user.fullName ?: uiState.user.firstName ?: "User"}!",
-                        style = MaterialTheme.typography.headlineLarge
-                    )
-                    Text(
-                        text = uiState.user.email,
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    
-                    if (uiState.user.username != null) {
-                        Text(
-                            text = "@${uiState.user.username}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    
-                    if (uiState.user.phoneNumber != null) {
-                        Text(
-                            text = uiState.user.phoneNumber!!,
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        ProfileInfoItem("Country", uiState.user.country)
-                        ProfileInfoItem("Nationality", uiState.user.nationality)
-                        ProfileInfoItem("Date of Birth", uiState.user.dateOfBirth)
-                        
-                        if (uiState.preferences != null) {
-                            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                            ProfileInfoItem("Currency", uiState.preferences.currency)
-                            ProfileInfoItem("Language", uiState.preferences.language)
-                            ProfileInfoItem("Time Zone", uiState.preferences.timezone)
-                        }
-                    }
-                }
-                uiState.error != null -> {
-                    Text(
-                        text = uiState.error,
-                        color = MaterialTheme.colorScheme.error
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-            
-            TripPointButton(
-                text = "Logout",
-                onClick = onLogout
-            )
-        }
-    }
+    // We delegate the main UI to TripListRoute which has its own Scaffold
+    // The user greeting can be added as a custom header if we modify TripListScreen,
+    // but for now let's just show the Trip Workspace as the primary part of Home.
+    
+    TripListRoute(
+        viewModel = tripListViewModel,
+        onNavigateToDetails = onNavigateToTripDetails,
+        onNavigateToCreate = onNavigateToCreateTrip,
+        onNavigateToProfile = onNavigateToProfile,
+        userName = uiState.user?.fullName ?: uiState.user?.firstName
+    )
 }
 
 @Composable

@@ -3,4 +3,75 @@
     <string name="core_designsystem_loading">Loading...</string>
     <string name="core_designsystem_app_logo_desc">App Logo</string>
     <string name="core_designsystem_retry">Retry</string>
+
+    <!-- Trip List -->
+    <string name="trip_list_title">My Trips</string>
+    <string name="trip_list_tab_upcoming">Upcoming</string>
+    <string name="trip_list_tab_in_progress">In Progress</string>
+    <string name="trip_list_tab_completed">Completed</string>
+    <string name="trip_list_tab_drafts">Drafts</string>
+    <string name="trip_list_tab_archived">Archived</string>
+    <string name="trip_list_empty_title">No trips yet!</string>
+    <string name="trip_list_empty_desc">Create your first trip and start your adventure.</string>
+    <string name="trip_list_create_trip">Create Trip</string>
+    <string name="trip_list_search_placeholder">Search trips</string>
+
+    <!-- Trip Overview -->
+    <string name="trip_overview_title">Trip Overview</string>
+    <string name="trip_overview_tab_overview">Overview</string>
+    <string name="trip_overview_tab_timeline">Timeline</string>
+    <string name="trip_overview_tab_bookings">Bookings</string>
+    <string name="trip_overview_tab_tasks">Tasks</string>
+    <string name="trip_overview_tab_budget">Budget</string>
+    <string name="trip_overview_progress">Trip Progress</string>
+    <string name="trip_overview_quick_actions">Quick Actions</string>
+    <string name="trip_overview_action_add_booking">Add Booking</string>
+    <string name="trip_overview_action_add_task">Add Task</string>
+    <string name="trip_overview_action_add_expense">Add Expense</string>
+    <string name="trip_overview_action_add_note">Add Note</string>
+    <string name="trip_overview_travelers">Travelers</string>
+    <string name="trip_overview_budget_label">Budget</string>
+    <string name="trip_overview_tasks_label">Tasks</string>
+    <string name="trip_overview_days_left">%1$d days left</string>
+    <string name="trip_overview_view_timeline">View Full Timeline</string>
+
+    <!-- Create Trip -->
+    <string name="create_trip_title">Create Trip</string>
+    <string name="create_trip_name_label">Trip Name</string>
+    <string name="create_trip_destination_label">Destination</string>
+    <string name="create_trip_start_date_label">Start Date</string>
+    <string name="create_trip_end_date_label">End Date</string>
+    <string name="create_trip_travelers_label">Travelers</string>
+    <string name="create_trip_next_button">Next</string>
+
+    <!-- Add Details -->
+    <string name="add_details_title">Add Details</string>
+    <string name="add_details_itinerary_label">Itinerary</string>
+    <string name="add_details_bookings_label">Bookings</string>
+    <string name="add_details_tasks_label">Tasks</string>
+    <string name="add_details_budget_label">Budget</string>
+    <string name="add_details_notes_label">Notes</string>
+    <string name="add_details_documents_label">Documents</string>
+    <string name="add_details_save_button">Save &amp; Continue</string>
+
+    <!-- Invite People -->
+    <string name="invite_people_title">Invite People</string>
+    <string name="invite_people_search_placeholder">Search people</string>
+    <string name="invite_people_via_link">Invite via link</string>
+    <string name="invite_people_button">Invite</string>
+
+    <!-- Trip Summary -->
+    <string name="trip_summary_title">Trip Summary</string>
+    <string name="trip_summary_create_button">Create Trip</string>
+
+    <!-- Create Trip Refinement -->
+    <string name="create_trip_add_photo">Add Photo</string>
+
+    <!-- States & Variants -->
+    <string name="state_offline_title">You\'re offline</string>
+    <string name="state_offline_desc">Trips created will be saved locally.</string>
+    <string name="state_offline_button">Go Offline</string>
+    <string name="state_error_title">Something went wrong</string>
+    <string name="state_error_desc">Please try again later.</string>
+    <string name="state_error_button">Retry</string>
 </resources>

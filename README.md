@@ -7,10 +7,10 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 - **UI**: Jetpack Compose with Material 3
 - **Architecture**: MVI (Model-View-Intent) & Clean Architecture
 - **Dependency Injection**: Hilt (Planned)
-- **Networking**: Apollo GraphQL (Planned)
+- **Networking**: Retrofit & GraphQL (Standardized via `GraphQlRequest`)
 - **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto`)
 - **Navigation**: Navigation Compose
-- **Design System**: Custom design system in `:core:designsystem`
+- **Design System**: Centralized design system in `:core:designsystem`
 
 ## ⚙️ CI/CD & Quality
 
@@ -26,35 +26,40 @@ The project uses a production-grade quality pipeline:
 
 The project follows a multi-module architecture to promote scalability and maintainability:
 
-### Modules
-
-- **`:app`**: The main entry point. Handles top-level navigation and basic configuration.
-- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
-- **`:core:common`**: Contains base components like `BaseViewModel` for MVI.
-- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripPointTextField`, `TripPointDropdown`, `OtpInput`, `PasswordStrengthIndicator`, `FullscreenStatusView`), tokens, and premium illustrations.
+### Core Modules
+- **`:core:common`**: Contains base components like `BaseViewModel` for MVI and universal domain models (`Trip`, `Traveler`).
+- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripCard`, `TripStatusChip`), tokens, and premium illustrations.
 - **`:core:navigation`**: Centralized screen definitions and navigation routes.
-- **`:core:network`**: Apollo GraphQL configuration (In progress).
+- **`:core:network`**: GraphQL configuration and centralized remote data sources.
 - **`:core:database`**: Local data persistence and secure preference management.
 
-## 🛠 Features (In Progress)
+### Feature Modules
+- **`:app`**: The main entry point. Handles top-level navigation and app initialization.
+- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
+- **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
 
-- [x] **Branded Splash Screen**: Smooth transitions with staged initialization and intelligent persistent routing.
-- [x] **Premium Onboarding**: 3-page interactive pager with detailed, transparent-background illustrations.
-- [x] **MVI Architecture**: Fully reactive UI using `UiState`, `UiIntent`, and `UiEffect`.
-- [x] **Login System**: Email/Password validation, social login UI, and error/success states.
-- [x] **Registration System**: Multi-field registration with real-time password strength feedback and complexity enforcement.
-- [x] **OTP Verification**: Secure 6-digit code entry with an integrated resend timer and success transitions.
-- [x] **Forgot Password Flow**: Complete recovery flow including email entry, link sent illustration, and secure password reset.
-- [x] **Profile Setup**: 5-step wizard to personalize user profiles with interactive editing and dropdown preference selection.
-- [x] **Permissions Wizard**: Branded step-by-step requests for Notifications, Location, and Calendar access.
-- [x] **Session Persistence**: Secure storage of auth tokens and setup status using `EncryptedSharedPreferences`.
-- [ ] **Trip Dashboard**.
+## 🛠 Features
+
+### User Lifecycle & Auth
+- [x] **Branded Splash Screen**: Smooth transitions with intelligent persistent routing.
+- [x] **Premium Onboarding**: 3-page interactive pager with detailed illustrations.
+- [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback.
+- [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection.
+- [x] **Permissions Wizard**: Branded step-by-step requests for system access.
+
+### Trip Workspace
+- [x] **Trip Dashboard**: live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).
+- [x] **Search & Filter**: Real-time searching and tab-based status filtering.
+- [x] **Guided Creation**: Multi-step flow (`Create Trip` -> `Add Details` -> `Invite People` -> `Trip Summary`).
+- [x] **Rich Invitations**: Search from contacts or manual entry (Email/Phone) with immediate feedback.
+- [x] **Lifecycle Management**: Move trips between statuses, archive, or delete via a centralized action menu.
+- [x] **Dynamic Progress**: Real-time progress calculation based on task completion.
 
 ## 📖 Development Guidelines
 
 - **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
-- **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. Avoid hardcoded HEX colors.
-- **Illustrations**: Place high-quality vectors in `:core:designsystem` using the `illustration_*.xml` naming convention.
+- **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
+- **Testing**: Maintain high logic coverage (current `:trip` module at 100%).
 
 ---
 
