@@ -65,7 +65,10 @@ import kotlinx.coroutines.flow.collectLatest
 fun TripOverviewRoute(
     tripId: String,
     viewModel: TripOverviewViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    onNavigateToTimeline: (String) -> Unit,
+    onNavigateToAddTask: (String) -> Unit,
+    onNavigateToAddNote: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -77,6 +80,9 @@ fun TripOverviewRoute(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 TripOverviewContract.Effect.NavigateBack -> onNavigateBack()
+                is TripOverviewContract.Effect.NavigateToTimeline -> onNavigateToTimeline(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
@@ -314,20 +320,37 @@ private fun QuickActionsSection(onIntent: (TripOverviewContract.Intent) -> Unit)
         style = MaterialTheme.typography.headlineMedium
     )
     Spacer(modifier = Modifier.height(16.dp))
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        QuickActionButton(
-            text = stringResource(id = designR.string.trip_overview_action_add_booking),
-            onClick = { onIntent(TripOverviewContract.Intent.AddBookingClicked) },
-            modifier = Modifier.weight(1f)
-        )
-        QuickActionButton(
-            text = stringResource(id = designR.string.trip_overview_action_add_task),
-            onClick = { onIntent(TripOverviewContract.Intent.AddTaskClicked) },
-            modifier = Modifier.weight(1f)
-        )
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            QuickActionButton(
+                text = stringResource(id = designR.string.trip_overview_action_add_booking),
+                onClick = { onIntent(TripOverviewContract.Intent.AddBookingClicked) },
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionButton(
+                text = stringResource(id = designR.string.trip_overview_action_add_task),
+                onClick = { onIntent(TripOverviewContract.Intent.AddTaskClicked) },
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            QuickActionButton(
+                text = stringResource(id = designR.string.trip_overview_action_add_expense),
+                onClick = { onIntent(TripOverviewContract.Intent.AddExpenseClicked) },
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionButton(
+                text = stringResource(id = designR.string.trip_overview_action_add_note),
+                onClick = { onIntent(TripOverviewContract.Intent.AddNoteClicked) },
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 

@@ -18,7 +18,7 @@ class AddDetailsViewModel : BaseViewModel<
             is AddDetailsContract.Intent.LoadTrip -> loadTrip(intent.tripId)
             AddDetailsContract.Intent.SaveAndContinueClicked -> saveAndContinue()
             AddDetailsContract.Intent.BackClicked -> sendEffect(AddDetailsContract.Effect.NavigateBack)
-            is AddDetailsContract.Intent.ToggleSection -> toggleSection(intent.sectionId)
+            is AddDetailsContract.Intent.ToggleSection -> handleSectionClick(intent.sectionId)
         }
     }
 
@@ -38,13 +38,22 @@ class AddDetailsViewModel : BaseViewModel<
         }
     }
 
-    private fun toggleSection(sectionId: String) {
-        setState {
-            copy(
-                sections = sections.map {
-                    if (it.id == sectionId) it.copy(isAdded = !it.isAdded) else it
+    private fun handleSectionClick(sectionId: String) {
+        val tripId = uiState.value.tripId
+        when (sectionId) {
+            "itinerary" -> sendEffect(AddDetailsContract.Effect.NavigateToItinerary(tripId))
+            "tasks" -> sendEffect(AddDetailsContract.Effect.NavigateToTasks(tripId))
+            "notes" -> sendEffect(AddDetailsContract.Effect.NavigateToNotes(tripId))
+            else -> {
+                // For others, we still toggle the "added" state for now
+                setState {
+                    copy(
+                        sections = sections.map {
+                            if (it.id == sectionId) it.copy(isAdded = !it.isAdded) else it
+                        }
+                    )
                 }
-            )
+            }
         }
     }
 

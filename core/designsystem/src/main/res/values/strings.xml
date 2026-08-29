@@ -74,4 +74,39 @@
     <string name="state_error_title">Something went wrong</string>
     <string name="state_error_desc">Please try again later.</string>
     <string name="state_error_button">Retry</string>
+
+    <!-- Event Details -->
+    <string name="event_details_title">Event Details</string>
+    <string name="event_details_passengers">Passengers</string>
+    <string name="event_details_pnr">PNR</string>
+    <string name="event_details_terminal">Terminal</string>
+    <string name="event_details_gate">Gate</string>
+    <string name="event_details_seat">Seat</string>
+
+    <!-- Add Event -->
+    <string name="add_event_title">Add Event</string>
+    <string name="add_event_name_label">Event Name</string>
+    <string name="add_event_date_label">Date</string>
+    <string name="add_event_time_label">Time</string>
+    <string name="add_event_location_label">Location</string>
+    <string name="add_event_category_label">Category</string>
+    <string name="add_event_save_button">Save Event</string>
+
+    <!-- Add Task -->
+    <string name="add_task_title">Add Task</string>
+    <string name="add_task_name_label">Task Name</string>
+    <string name="add_task_priority_label">Priority</string>
+    <string name="add_task_priority_low">Low</string>
+    <string name="add_task_priority_medium">Medium</string>
+    <string name="add_task_priority_high">High</string>
+    <string name="add_task_reminder_label">Reminder</string>
+    <string name="add_task_save_button">Save Task</string>
+
+    <!-- Notes -->
+    <string name="notes_title">Notes</string>
+    <string name="notes_search_placeholder">Search notes</string>
+    <string name="notes_add_button">Add Note</string>
+    <string name="add_note_title">Add Note</string>
+    <string name="add_note_content_label">Content</string>
+    <string name="add_note_save_button">Save Note</string>
 </resources>

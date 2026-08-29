@@ -41,6 +41,7 @@ dependencies {
     implementation(project(":core:navigation"))
     implementation(project(":authentication"))
     implementation(project(":trip"))
+    implementation(project(":itinerary"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

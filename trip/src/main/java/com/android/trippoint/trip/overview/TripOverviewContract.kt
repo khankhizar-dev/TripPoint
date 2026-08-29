@@ -29,6 +29,9 @@ class TripOverviewContract {
 
     sealed class Effect : UiEffect {
         object NavigateBack : Effect()
+        data class NavigateToTimeline(val tripId: String) : Effect()
+        data class NavigateToAddTask(val tripId: String) : Effect()
+        data class NavigateToAddNote(val tripId: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }

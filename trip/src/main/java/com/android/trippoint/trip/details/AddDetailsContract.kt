@@ -28,6 +28,9 @@ class AddDetailsContract {
     sealed class Effect : UiEffect {
         object NavigateToHome : Effect()
         object NavigateBack : Effect()
+        data class NavigateToItinerary(val tripId: String) : Effect()
+        data class NavigateToTasks(val tripId: String) : Effect()
+        data class NavigateToNotes(val tripId: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }
