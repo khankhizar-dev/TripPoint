@@ -59,7 +59,8 @@ class ItineraryRemoteDataSource(
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "dayNumber" to dayNumber, "input" to input))
+        val variables = mapOf("tripId" to tripId, "dayNumber" to dayNumber, "input" to input)
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("updateItineraryDay") ?: return null
         return moshi.adapter(ItineraryDayDto::class.java).fromJsonValue(data)
@@ -80,68 +81,118 @@ class ItineraryRemoteDataSource(
         val query = """
             query GetItineraryActivities(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!) {
               itineraryActivities(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId) {
-                id itineraryDayId title description type startTime endTime location latitude longitude sortOrder completed createdAt updatedAt
+                id itineraryDayId title description type startTime endTime location latitude longitude
+                sortOrder completed createdAt updatedAt
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId))
+        val variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId)
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("itineraryActivities") as? List<*> ?: return emptyList()
         val adapter = moshi.adapter(ItineraryActivityDto::class.java)
         return data.mapNotNull { adapter.fromJsonValue(it) }
     }
 
-    suspend fun getItineraryActivity(tripId: String, itineraryDayId: String, activityId: String): ItineraryActivityDto? {
+    suspend fun getItineraryActivity(
+        tripId: String,
+        itineraryDayId: String,
+        activityId: String
+    ): ItineraryActivityDto? {
         val query = """
             query GetItineraryActivity(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!) {
               itineraryActivity(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, activityId: ${'$'}activityId) {
-                id itineraryDayId title description type startTime endTime location latitude longitude sortOrder completed createdAt updatedAt
+                id itineraryDayId title description type startTime endTime location latitude longitude
+                sortOrder completed createdAt updatedAt
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId))
+        val variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId)
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("itineraryActivity") ?: return null
         return moshi.adapter(ItineraryActivityDto::class.java).fromJsonValue(data)
     }
 
-    suspend fun createItineraryActivity(tripId: String, itineraryDayId: String, input: CreateItineraryActivityInput): ItineraryActivityDto? {
+    suspend fun createItineraryActivity(
+        tripId: String,
+        itineraryDayId: String,
+        input: CreateItineraryActivityInput
+    ): ItineraryActivityDto? {
         val query = """
-            mutation CreateItineraryActivity(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}input: CreateItineraryActivityInput!) {
+            mutation CreateItineraryActivity(
+                ${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}input: CreateItineraryActivityInput!
+            ) {
               createItineraryActivity(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, input: ${'$'}input) {
-                id itineraryDayId title description type startTime endTime location latitude longitude sortOrder completed createdAt updatedAt
+                id itineraryDayId title description type startTime endTime location latitude longitude
+                sortOrder completed createdAt updatedAt
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "input" to input))
+        val variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "input" to input)
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("createItineraryActivity") ?: return null
         return moshi.adapter(ItineraryActivityDto::class.java).fromJsonValue(data)
     }
 
-    suspend fun updateItineraryActivity(tripId: String, itineraryDayId: String, activityId: String, input: UpdateItineraryActivityInput): ItineraryActivityDto? {
+    suspend fun updateItineraryActivity(
+        tripId: String,
+        itineraryDayId: String,
+        activityId: String,
+        input: UpdateItineraryActivityInput
+    ): ItineraryActivityDto? {
         val query = """
-            mutation UpdateItineraryActivity(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!, ${'$'}input: UpdateItineraryActivityInput!) {
-              updateItineraryActivity(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, activityId: ${'$'}activityId, input: ${'$'}input) {
-                id itineraryDayId title description type startTime endTime location latitude longitude sortOrder completed createdAt updatedAt
+            mutation UpdateItineraryActivity(
+                ${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!, 
+                ${'$'}input: UpdateItineraryActivityInput!
+            ) {
+              updateItineraryActivity(
+                  tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, 
+                  activityId: ${'$'}activityId, input: ${'$'}input
+              ) {
+                id itineraryDayId title description type startTime endTime location latitude longitude
+                sortOrder completed createdAt updatedAt
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId, "input" to input))
+        val variables = mapOf(
+            "tripId" to tripId,
+            "itineraryDayId" to itineraryDayId,
+            "activityId" to activityId,
+            "input" to input
+        )
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("updateItineraryActivity") ?: return null
         return moshi.adapter(ItineraryActivityDto::class.java).fromJsonValue(data)
     }
 
-    suspend fun markItineraryActivityCompleted(tripId: String, itineraryDayId: String, activityId: String, completed: Boolean): ItineraryActivityDto? {
+    suspend fun markItineraryActivityCompleted(
+        tripId: String,
+        itineraryDayId: String,
+        activityId: String,
+        completed: Boolean
+    ): ItineraryActivityDto? {
         val query = """
-            mutation MarkItineraryActivityCompleted(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!, ${'$'}completed: Boolean!) {
-              markItineraryActivityCompleted(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, activityId: ${'$'}activityId, completed: ${'$'}completed) {
+            mutation MarkItineraryActivityCompleted(
+                ${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!, ${'$'}completed: Boolean!
+            ) {
+              markItineraryActivityCompleted(
+                  tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, 
+                  activityId: ${'$'}activityId, completed: ${'$'}completed
+              ) {
                 id completed updatedAt
               }
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId, "completed" to completed))
+        val variables = mapOf(
+            "tripId" to tripId,
+            "itineraryDayId" to itineraryDayId,
+            "activityId" to activityId,
+            "completed" to completed
+        )
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("markItineraryActivityCompleted") ?: return null
         return moshi.adapter(ItineraryActivityDto::class.java).fromJsonValue(data)
@@ -150,10 +201,13 @@ class ItineraryRemoteDataSource(
     suspend fun deleteItineraryActivity(tripId: String, itineraryDayId: String, activityId: String): Boolean {
         val query = """
             mutation DeleteItineraryActivity(${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!) {
-              deleteItineraryActivity(tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, activityId: ${'$'}activityId)
+              deleteItineraryActivity(
+                  tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, activityId: ${'$'}activityId
+              )
             }
         """.trimIndent()
-        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId))
+        val variables = mapOf("tripId" to tripId, "itineraryDayId" to itineraryDayId, "activityId" to activityId)
+        val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         return response.body()?.data?.get("deleteItineraryActivity") as? Boolean ?: false
     }
