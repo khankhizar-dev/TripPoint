@@ -32,28 +32,62 @@ class AddDetailsViewModelTest {
 
     @Test
     fun `load trip initializes sections`() {
-        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("1"))
-        assertEquals("1", viewModel.uiState.value.tripId)
+        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("trip123"))
+        assertEquals("trip123", viewModel.uiState.value.tripId)
         assertEquals(6, viewModel.uiState.value.sections.size)
     }
 
     @Test
-    fun `toggle section updates state`() {
-        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("1"))
-        val firstSectionId = viewModel.uiState.value.sections.first().id
-        
-        viewModel.onIntent(AddDetailsContract.Intent.ToggleSection(firstSectionId))
-        assertTrue(viewModel.uiState.value.sections.first().isAdded)
-        
-        viewModel.onIntent(AddDetailsContract.Intent.ToggleSection(firstSectionId))
-        assertEquals(false, viewModel.uiState.value.sections.first().isAdded)
+    fun `clicking itinerary sends NavigateToItinerary effect`() = runTest {
+        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("trip123"))
+        viewModel.effect.test {
+            viewModel.onIntent(AddDetailsContract.Intent.ToggleSection("itinerary"))
+            assertEquals(AddDetailsContract.Effect.NavigateToItinerary("trip123"), awaitItem())
+        }
     }
 
     @Test
-    fun `save and continue sends effect`() = runTest {
+    fun `clicking tasks sends NavigateToTasks effect`() = runTest {
+        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("trip123"))
+        viewModel.effect.test {
+            viewModel.onIntent(AddDetailsContract.Intent.ToggleSection("tasks"))
+            assertEquals(AddDetailsContract.Effect.NavigateToTasks("trip123"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `clicking notes sends NavigateToNotes effect`() = runTest {
+        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("trip123"))
+        viewModel.effect.test {
+            viewModel.onIntent(AddDetailsContract.Intent.ToggleSection("notes"))
+            assertEquals(AddDetailsContract.Effect.NavigateToNotes("trip123"), awaitItem())
+        }
+    }
+
+    @Test
+    fun `clicking budget toggles added state`() {
+        viewModel.onIntent(AddDetailsContract.Intent.LoadTrip("trip123"))
+        
+        viewModel.onIntent(AddDetailsContract.Intent.ToggleSection("budget"))
+        assertTrue(viewModel.uiState.value.sections.find { it.id == "budget" }?.isAdded == true)
+        
+        viewModel.onIntent(AddDetailsContract.Intent.ToggleSection("budget"))
+        assertEquals(false, viewModel.uiState.value.sections.find { it.id == "budget" }?.isAdded)
+    }
+
+    @Test
+    fun `save and continue sends NavigateToHome effect`() = runTest {
         viewModel.effect.test {
             viewModel.onIntent(AddDetailsContract.Intent.SaveAndContinueClicked)
             assertEquals(AddDetailsContract.Effect.NavigateToHome, awaitItem())
+        }
+    }
+
+    @Test
+    fun `back clicked sends NavigateBack effect`() = runTest {
+        viewModel.effect.test {
+            viewModel.onIntent(AddDetailsContract.Intent.BackClicked)
+            assertEquals(AddDetailsContract.Effect.NavigateBack, awaitItem())
         }
     }
 }

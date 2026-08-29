@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -41,7 +42,10 @@ fun AddDetailsRoute(
     tripId: String,
     viewModel: AddDetailsViewModel,
     onNavigateBack: () -> Unit,
-    onSaveAndContinue: () -> Unit
+    onSaveAndContinue: () -> Unit,
+    onNavigateToItinerary: (String) -> Unit,
+    onNavigateToTasks: (String) -> Unit,
+    onNavigateToNotes: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -54,6 +58,9 @@ fun AddDetailsRoute(
             when (effect) {
                 AddDetailsContract.Effect.NavigateToHome -> onSaveAndContinue()
                 AddDetailsContract.Effect.NavigateBack -> onNavigateBack()
+                is AddDetailsContract.Effect.NavigateToItinerary -> onNavigateToItinerary(effect.tripId)
+                is AddDetailsContract.Effect.NavigateToTasks -> onNavigateToTasks(effect.tripId)
+                is AddDetailsContract.Effect.NavigateToNotes -> onNavigateToNotes(effect.tripId)
                 is AddDetailsContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
@@ -135,8 +142,12 @@ private fun DetailItem(
                 text = section.title,
                 style = MaterialTheme.typography.titleMedium
             )
+            val icon = when (section.id) {
+                "itinerary", "tasks", "notes" -> Icons.AutoMirrored.Filled.ArrowForward
+                else -> if (section.isAdded) Icons.Default.Check else Icons.Default.Add
+            }
             Icon(
-                imageVector = if (section.isAdded) Icons.Default.Check else Icons.Default.Add,
+                imageVector = icon,
                 contentDescription = null,
                 tint = if (section.isAdded) {
                     MaterialTheme.colorScheme.primary

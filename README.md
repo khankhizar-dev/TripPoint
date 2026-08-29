@@ -37,6 +37,7 @@ The project follows a multi-module architecture to promote scalability and maint
 - **`:app`**: The main entry point. Handles top-level navigation and app initialization.
 - **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
 - **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
+- **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
 
 ## 🛠 Features
 
@@ -55,11 +56,19 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Lifecycle Management**: Move trips between statuses, archive, or delete via a centralized action menu.
 - [x] **Dynamic Progress**: Real-time progress calculation based on task completion.
 
+### Itinerary & Timeline
+- [x] **Chronological Timeline**: Vertical high-fidelity view with status tracking.
+- [x] **Day Management**: Monthly calendar view with day-by-day organization.
+- [x] **Activity Deep Dive**: Specialized views for Flights, Tasks, and Notes.
+- [x] **Universal Creation**: Speed Dial FAB for quick access to Events, Tasks, and Notes.
+- [x] **Interactive Tasks**: Mark activities as completed directly from the timeline with live backend syncing.
+- [x] **Advanced Filtering**: Filter itinerary by category and sort by priority or time.
+
 ## 📖 Development Guidelines
 
 - **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
 - **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
-- **Testing**: Maintain high logic coverage (current `:trip` module at 100%).
+- **Testing**: Maintain high logic coverage (current `:trip` and `:itinerary` modules at 100%).
 
 ---
 

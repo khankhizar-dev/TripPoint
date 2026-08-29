@@ -42,4 +42,29 @@ sealed class Screen(val route: String) {
     object TripSummary : Screen("trip_summary/{tripId}") {
         fun createRoute(tripId: String) = "trip_summary/$tripId"
     }
+    object TripDays : Screen("trip_days/{tripId}") {
+        fun createRoute(tripId: String) = "trip_days/$tripId"
+    }
+    object Timeline : Screen("timeline/{tripId}/{date}") {
+        fun createRoute(tripId: String, date: String) = "timeline/$tripId/$date"
+    }
+    object EventDetails : Screen("event_details/{tripId}/{dayId}/{activityId}") {
+        fun createRoute(tripId: String, dayId: String, activityId: String) = 
+            "event_details/$tripId/$dayId/$activityId"
+    }
+    object AddEvent : Screen("add_event/{tripId}/{date}") {
+        fun createRoute(tripId: String, date: String) = "add_event/$tripId/$date"
+    }
+    object AddTask : Screen("add_task/{tripId}/{date}") {
+        fun createRoute(tripId: String, date: String) = "add_task/$tripId/$date"
+    }
+    object Notes : Screen("notes/{tripId}") {
+        fun createRoute(tripId: String) = "notes/$tripId"
+    }
+    object AddNote : Screen("add_note/{tripId}") {
+        fun createRoute(tripId: String) = "add_note/$tripId"
+    }
+    object FilterSort : Screen("filter_sort/{tripId}") {
+        fun createRoute(tripId: String) = "filter_sort/$tripId"
+    }
 }

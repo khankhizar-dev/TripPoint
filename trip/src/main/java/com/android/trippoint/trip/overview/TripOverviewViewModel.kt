@@ -18,6 +18,11 @@ class TripOverviewViewModel(
             is TripOverviewContract.Intent.LoadTripDetails -> loadTripDetails(intent.tripId)
             is TripOverviewContract.Intent.TabSelected -> {
                 setState { copy(selectedTab = intent.tabIndex) }
+                if (intent.tabIndex == 1) { // Timeline tab
+                    uiState.value.trip?.id?.let {
+                        sendEffect(TripOverviewContract.Effect.NavigateToTimeline(it))
+                    }
+                }
             }
             TripOverviewContract.Intent.BackClicked -> {
                 sendEffect(TripOverviewContract.Effect.NavigateBack)
@@ -26,13 +31,17 @@ class TripOverviewViewModel(
                 // Handle action
             }
             TripOverviewContract.Intent.AddTaskClicked -> {
-                // Handle action
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddTask(it))
+                }
             }
             TripOverviewContract.Intent.AddExpenseClicked -> {
                 // Handle action
             }
             TripOverviewContract.Intent.AddNoteClicked -> {
-                // Handle action
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddNote(it))
+                }
             }
             is TripOverviewContract.Intent.UpdateStatus -> updateTripStatus(intent.status)
             TripOverviewContract.Intent.ArchiveTrip -> archiveTrip()

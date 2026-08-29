@@ -7,6 +7,8 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -26,7 +28,8 @@ fun TripPointButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     variant: ButtonVariant = ButtonVariant.Primary,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    isLoading: Boolean = false
 ) {
     val commonModifier = modifier
         .fillMaxWidth()
@@ -37,36 +40,60 @@ fun TripPointButton(
             Button(
                 onClick = onClick,
                 modifier = commonModifier,
-                enabled = enabled,
+                enabled = enabled && !isLoading,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = Color.White
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.titleMedium.copy(color = Color.White))
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(text = text, style = MaterialTheme.typography.titleMedium.copy(color = Color.White))
+                }
             }
         }
         ButtonVariant.Secondary -> {
             OutlinedButton(
                 onClick = onClick,
                 modifier = commonModifier,
-                enabled = enabled,
+                enabled = enabled && !isLoading,
                 shape = RoundedCornerShape(12.dp),
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.primary
                 )
             ) {
-                Text(text = text, style = MaterialTheme.typography.titleMedium)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(text = text, style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
         ButtonVariant.Text -> {
             TextButton(
                 onClick = onClick,
                 modifier = commonModifier,
-                enabled = enabled
+                enabled = enabled && !isLoading
             ) {
-                Text(text = text, style = MaterialTheme.typography.titleMedium)
+                if (isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = MaterialTheme.colorScheme.primary,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(text = text, style = MaterialTheme.typography.titleMedium)
+                }
             }
         }
     }

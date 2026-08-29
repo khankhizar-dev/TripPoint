@@ -1,97 +1,59 @@
-# UI for Trip List and Trip Overview
+# UI for Timeline/Itinerary Module
 
-Implement the Trip List and Trip Overview screens based on the high-fidelity designs, following the project's MVI architecture and design system guidelines.
+Implement the Day View and Trip Days UI for the new `:itinerary` module based on the high-fidelity designs.
 
 ## User Review Required
 
 > [!IMPORTANT]
-> - I will update the design system tokens (colors and typography) to match the provided developer handoff exactly.
-> - New components will be added to `:core:designsystem`.
-> - Screens will be implemented in `:app` under `com.android.trippoint.ui.trips`.
-> - Strings will be added to the universal `strings.xml` in the `:app` module.
+> - A new module `:itinerary` has been created.
+> - The design for "Day View" (chronological vertical timeline) and "Trip Days" (calendar + day list) are being implemented.
+> - Mock data is used for now as per the "start ui" instruction.
 
 ## Proposed Changes
 
 ---
 
-### Core Components & Design System
+### Project Structure
 
-#### [MODIFY] [Color.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/designsystem/src/main/java/com/android/trippoint/core/designsystem/theme/Color.kt)
-Update color tokens to match the design handoff:
-- Primary: #2563EB
-- Secondary: #1D89B1
-- Accent: #F59E0B
-- Surface: #FFFFFF
-- Background: #F8FAFC
-- TextPrimary: #0F172A
-- TextSecondary: #64748B
-- Border: #E2E8F0
-- Error: #EF4444
-- Success: #22C55E
+#### [NEW] [Module :itinerary](file:///Users/khizarkhan/StudioProjects/TripPoint/itinerary)
+Created a new Android Library module for itinerary features.
 
-#### [MODIFY] [Type.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/designsystem/src/main/java/com/android/trippoint/core/designsystem/theme/Type.kt)
-Update typography to match the design handoff:
-- Display Large: 32/40 Bold
-- Headline Medium: 20/28 SemiBold
-- Title Medium: 16/24 Medium
-- Body Large: 14/20 Regular
-- Body Medium: 12/16 Regular
-- Label: 11/16 Medium
+#### [MODIFY] [settings.gradle.kts](file:///Users/khizarkhan/StudioProjects/TripPoint/settings.gradle.kts)
+Included `:itinerary` module.
 
-#### [NEW] [TripCard.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/designsystem/src/main/java/com/android/trippoint/core/designsystem/components/TripCard.kt)
-Implement the trip card component for the list.
-
-#### [NEW] [TripStatusChip.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/designsystem/src/main/java/com/android/trippoint/core/designsystem/components/TripStatusChip.kt)
-Implement status chips (Upcoming, In Progress, Completed).
+#### [MODIFY] [app/build.gradle.kts](file:///Users/khizarkhan/StudioProjects/TripPoint/app/build.gradle.kts)
+Added `:itinerary` as a dependency.
 
 ---
 
-### Data Models
+### Navigation
 
-#### [NEW] [Trip.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/common/src/main/java/com/android/trippoint/core/common/model/Trip.kt)
-Define `Trip`, `Traveler`, and `TripStatus` models.
+#### [MODIFY] [Screen.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/core/navigation/src/main/java/com/android/trippoint/core/navigation/Screen.kt)
+Add routes:
+- `TripDays`: "trip_days/{tripId}"
+- `Timeline`: "timeline/{tripId}/{date}"
 
----
-
-### Strings
-
-#### [MODIFY] [strings.xml](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/res/values/strings.xml)
-Add all strings for Trip List and Trip Overview (e.g., titles, tabs, labels, actions).
+#### [MODIFY] [MainActivity.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/MainActivity.kt)
+Add `composable` entries for the new routes.
 
 ---
 
-### Trip List Feature
+### Itinerary Features
 
-#### [NEW] [TripListContract.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripListContract.kt)
-Define `State`, `Intent`, and `Effect` for the Trip List.
+#### [NEW] [Timeline Models](file:///Users/khizarkhan/StudioProjects/TripPoint/itinerary/src/main/java/com/android/trippoint/itinerary/domain/model/TimelineModels.kt)
+Defined `TimelineEvent` and `TripDay` models.
 
-#### [NEW] [TripListViewModel.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripListViewModel.kt)
-Implement logic for fetching trips and handling intents.
+#### [NEW] [Day View](file:///Users/khizarkhan/StudioProjects/TripPoint/itinerary/src/main/java/com/android/trippoint/itinerary/day)
+Implemented `TimelineContract`, `TimelineViewModel`, and `TimelineScreen` with a vertical chronological timeline.
 
-#### [NEW] [TripListScreen.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripListScreen.kt)
-Implement the Compose UI for the Trip List.
-
----
-
-### Trip Overview Feature
-
-#### [NEW] [TripOverviewContract.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripOverviewContract.kt)
-Define `State`, `Intent`, and `Effect` for the Trip Overview.
-
-#### [NEW] [TripOverviewViewModel.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripOverviewViewModel.kt)
-Implement logic for fetching trip details and handling intents.
-
-#### [NEW] [TripOverviewScreen.kt](file:///Users/khizarkhan/StudioProjects/TripPoint/app/src/main/java/com/android/trippoint/ui/trips/TripOverviewScreen.kt)
-Implement the Compose UI for the Trip Overview.
+#### [NEW] [Trip Days](file:///Users/khizarkhan/StudioProjects/TripPoint/itinerary/src/main/java/com/android/trippoint/itinerary/list)
+Implemented `TripDaysContract`, `TripDaysViewModel`, and `TripDaysScreen` with a month calendar and day list.
 
 ---
 
 ## Verification Plan
 
-### Automated Tests
-- N/A (UI implementation focusing on Compose)
-
 ### Manual Verification
-- Render Compose Previews for both screens.
-- Verify that strings are correctly pulled from `strings.xml`.
-- Verify that colors and typography match the design handoff.
+- Navigate to Trip Days screen and verify the calendar and list layout.
+- Click on a day and verify navigation to the Day View (Timeline).
+- Verify the vertical timeline styling (colors, dots, connectors).
