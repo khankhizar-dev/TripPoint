@@ -60,6 +60,7 @@ class AuthRepositoryImpl(
         return try {
             val success = remoteDataSource.updateProfile(input)
             if (success) {
+                preferencesManager.setProfileSetupCompleted(true)
                 Result.success(true)
             } else {
                 Result.failure(Exception("Failed to update profile. Please check your information."))
@@ -137,7 +138,8 @@ class AuthRepositoryImpl(
             }
             Result.success(user?.toDomain())
         } catch (e: Exception) {
-            preferencesManager.clearSession()
+            // Do NOT clear session on network errors or other transient issues.
+            // Let the caller handle the failure (e.g. show offline state).
             Result.failure(e)
         }
     }

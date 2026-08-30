@@ -97,7 +97,8 @@ fun SplashScreen(uiState: SplashContract.State) {
             subtitle = stringResource(uiState.error.descriptionResId),
             imageResId = illustration,
             actionText = stringResource(com.android.trippoint.core.designsystem.R.string.core_designsystem_retry),
-            onActionClick = { /* Handle retry */ }
+            onActionClick = { /* Handle retry */ },
+            modifier = Modifier.fillMaxSize()
         )
         return
     }

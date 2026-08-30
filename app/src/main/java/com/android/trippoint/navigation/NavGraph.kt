@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import com.android.trippoint.authentication.splash.SplashRoute
 import com.android.trippoint.core.navigation.Screen
 import com.android.trippoint.itinerary.add.AddEventRoute
@@ -188,7 +189,7 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
-    composable(Screen.Permissions.route) {
+    dialog(Screen.Permissions.route) {
         com.android.trippoint.authentication.permissions.PermissionsRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {

@@ -1,13 +1,16 @@
 package com.android.trippoint.authentication.permissions
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -80,29 +83,43 @@ fun PermissionsScreen(
     onIntent: (PermissionsContract.Intent) -> Unit
 ) {
     if (uiState.isAllSet) {
-        FullscreenStatusView(
-            title = stringResource(R.string.auth_permission_all_set_title),
-            subtitle = stringResource(R.string.auth_permission_all_set_subtitle),
-            imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success,
-            actionText = stringResource(R.string.auth_permission_explore),
-            onActionClick = { onIntent(PermissionsContract.Intent.ExploreClicked) }
-        )
+        Surface(
+            modifier = Modifier
+                .padding(24.dp)
+                .fillMaxWidth()
+                .wrapContentHeight(),
+            shape = RoundedCornerShape(28.dp),
+            color = MaterialTheme.colorScheme.surface,
+            tonalElevation = 6.dp
+        ) {
+            FullscreenStatusView(
+                title = stringResource(R.string.auth_permission_all_set_title),
+                subtitle = stringResource(R.string.auth_permission_all_set_subtitle),
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success,
+                actionText = stringResource(R.string.auth_permission_explore),
+                onActionClick = { onIntent(PermissionsContract.Intent.ExploreClicked) },
+                includeBackground = false,
+                modifier = Modifier.wrapContentHeight()
+            )
+        }
         return
     }
 
-    Box(
+    Surface(
         modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .padding(24.dp)
+            .fillMaxWidth()
+            .wrapContentHeight(),
+        shape = RoundedCornerShape(28.dp),
+        color = MaterialTheme.colorScheme.surface,
+        tonalElevation = 6.dp
     ) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
+                .padding(24.dp)
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Spacer(modifier = Modifier.height(64.dp))
-
             val scene = when (uiState.currentStep) {
                 PermissionsContract.Step.NOTIFICATIONS -> PermissionScene(
                     titleResId = R.string.auth_permission_notifications_title,
@@ -123,14 +140,14 @@ fun PermissionsScreen(
 
             SplashIllustration(
                 imageResId = scene.imageResId,
-                modifier = Modifier.height(240.dp)
+                modifier = Modifier.height(180.dp)
             )
 
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(32.dp))
 
             Text(
                 text = stringResource(scene.titleResId),
-                style = MaterialTheme.typography.headlineLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center
             )
 
@@ -138,27 +155,25 @@ fun PermissionsScreen(
 
             Text(
                 text = stringResource(scene.subtitleResId),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
-            Spacer(modifier = Modifier.weight(1f))
+            Spacer(modifier = Modifier.height(32.dp))
 
             TripPointButton(
                 text = stringResource(R.string.auth_permission_allow),
                 onClick = { onIntent(PermissionsContract.Intent.AllowClicked) }
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             TripPointButton(
                 text = stringResource(R.string.auth_permission_deny),
                 onClick = { onIntent(PermissionsContract.Intent.DenyClicked) },
                 variant = ButtonVariant.Text
             )
-
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }

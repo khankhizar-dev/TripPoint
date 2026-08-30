@@ -89,7 +89,8 @@ fun ForgotPasswordScreen(
                 subtitle = stringResource(R.string.auth_forgot_password_success_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_reset_link,
                 actionText = stringResource(R.string.auth_forgot_password_open_email),
-                onActionClick = { /* Open email app */ }
+                onActionClick = { /* Open email app */ },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.offlineError -> {
@@ -98,7 +99,8 @@ fun ForgotPasswordScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) }
+                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.serverError -> {
@@ -107,7 +109,8 @@ fun ForgotPasswordScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) }
+                onActionClick = { onIntent(ForgotPasswordContract.Intent.SendLinkClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         else -> {

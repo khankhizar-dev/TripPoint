@@ -125,7 +125,8 @@ fun LoginScreen(
             FullscreenStatusView(
                 title = stringResource(R.string.auth_login_success_title),
                 subtitle = stringResource(R.string.auth_login_success_subtitle),
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success,
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.offlineError -> {
@@ -134,7 +135,8 @@ fun LoginScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(LoginContract.Intent.LoginClicked) }
+                onActionClick = { onIntent(LoginContract.Intent.LoginClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.serverError -> {
@@ -143,7 +145,8 @@ fun LoginScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(LoginContract.Intent.LoginClicked) }
+                onActionClick = { onIntent(LoginContract.Intent.LoginClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         else -> {

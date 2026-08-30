@@ -91,7 +91,8 @@ fun OtpScreen(
             FullscreenStatusView(
                 title = stringResource(R.string.auth_otp_success_title),
                 subtitle = stringResource(R.string.auth_otp_success_subtitle),
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success,
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.offlineError -> {
@@ -100,7 +101,8 @@ fun OtpScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) }
+                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.serverError -> {
@@ -109,7 +111,8 @@ fun OtpScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) }
+                onActionClick = { onIntent(OtpContract.Intent.VerifyClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         else -> {

@@ -94,7 +94,8 @@ fun ResetPasswordScreen(
                 subtitle = stringResource(R.string.auth_reset_password_success_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_success,
                 actionText = stringResource(R.string.auth_forgot_password_back_to_login),
-                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) }
+                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.isLinkExpired -> {
@@ -103,7 +104,8 @@ fun ResetPasswordScreen(
                 subtitle = stringResource(R.string.auth_reset_password_link_expired_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_reset_password_request_new),
-                onActionClick = { onIntent(ResetPasswordContract.Intent.RequestNewLinkClicked) }
+                onActionClick = { onIntent(ResetPasswordContract.Intent.RequestNewLinkClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.offlineError -> {
@@ -112,7 +114,8 @@ fun ResetPasswordScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) }
+                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.serverError -> {
@@ -121,7 +124,8 @@ fun ResetPasswordScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) }
+                onActionClick = { onIntent(ResetPasswordContract.Intent.ResetClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         else -> {

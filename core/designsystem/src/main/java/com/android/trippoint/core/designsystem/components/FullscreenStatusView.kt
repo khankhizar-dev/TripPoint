@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
@@ -15,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.android.trippoint.core.designsystem.theme.TripPointTheme
 
 @Composable
 fun FullscreenStatusView(
@@ -24,20 +22,25 @@ fun FullscreenStatusView(
     @DrawableRes imageResId: Int,
     modifier: Modifier = Modifier,
     actionText: String? = null,
-    onActionClick: (() -> Unit)? = null
+    onActionClick: (() -> Unit)? = null,
+    includeBackground: Boolean = true
 ) {
-    val dimen = TripPointTheme.dimensions
+    val bgModifier = if (includeBackground) {
+        Modifier.background(MaterialTheme.colorScheme.background)
+    } else {
+        Modifier
+    }
+    
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
+            .then(bgModifier)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
         SplashIllustration(
             imageResId = imageResId,
-            modifier = Modifier.height(300.dp)
+            modifier = Modifier.height(240.dp)
         )
         
         Spacer(modifier = Modifier.height(32.dp))
