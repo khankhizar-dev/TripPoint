@@ -84,7 +84,7 @@ class AuthRepositoryImplTest {
     }
 
     @Test
-    fun `updateProfile returns success when remote call succeeds`() = runBlocking {
+    fun `updateProfile returns success and updates pref when remote call succeeds`() = runBlocking {
         coEvery { remoteDataSource.updateProfile(any()) } returns true
 
         val input = UpdateProfileInput(firstName = "John")
@@ -92,6 +92,7 @@ class AuthRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         assertTrue(result.getOrDefault(false))
+        verify { preferencesManager.setProfileSetupCompleted(true) }
     }
 
     @Test
@@ -102,6 +103,26 @@ class AuthRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         verify { preferencesManager.setProfileSetupCompleted(true) }
+    }
+
+    @Test
+    fun `getMe does not clear session on network failure`() = runBlocking {
+        coEvery { remoteDataSource.getMe() } throws Exception("Network error")
+
+        val result = repository.getMe()
+
+        assertTrue(result.isFailure)
+        verify(exactly = 0) { preferencesManager.clearSession() }
+    }
+
+    @Test
+    fun `getMe clears session if remote user is null`() = runBlocking {
+        coEvery { remoteDataSource.getMe() } returns null
+
+        val result = repository.getMe()
+
+        assertTrue(result.isSuccess)
+        verify(exactly = 1) { preferencesManager.clearSession() }
     }
 
     @Test

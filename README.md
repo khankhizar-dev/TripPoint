@@ -44,9 +44,9 @@ The project follows a multi-module architecture to promote scalability and maint
 ### User Lifecycle & Auth
 - [x] **Branded Splash Screen**: Smooth transitions with intelligent persistent routing.
 - [x] **Premium Onboarding**: 3-page interactive pager with detailed illustrations.
-- [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback.
-- [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection.
-- [x] **Permissions Wizard**: Branded step-by-step requests for system access.
+- [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback. Features **persistent sessions** and intelligent cross-device profile syncing.
+- [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection. Automatically skips once completed.
+- [x] **Permissions Wizard**: Branded **dialog-based** requests for system access, providing context before asking.
 
 ### Trip Workspace
 - [x] **Trip Dashboard**: live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).

@@ -124,7 +124,8 @@ fun RegisterScreen(
             FullscreenStatusView(
                 title = stringResource(R.string.auth_register_success_title),
                 subtitle = stringResource(R.string.auth_register_success_subtitle),
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_everything
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_everything,
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.offlineError -> {
@@ -133,7 +134,8 @@ fun RegisterScreen(
                 subtitle = stringResource(R.string.auth_error_offline_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_no_network,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(RegisterContract.Intent.RegisterClicked) }
+                onActionClick = { onIntent(RegisterContract.Intent.RegisterClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         uiState.serverError -> {
@@ -142,7 +144,8 @@ fun RegisterScreen(
                 subtitle = stringResource(R.string.auth_error_server_subtitle),
                 imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_error,
                 actionText = stringResource(R.string.auth_retry),
-                onActionClick = { onIntent(RegisterContract.Intent.RegisterClicked) }
+                onActionClick = { onIntent(RegisterContract.Intent.RegisterClicked) },
+                modifier = Modifier.fillMaxSize()
             )
         }
         else -> {

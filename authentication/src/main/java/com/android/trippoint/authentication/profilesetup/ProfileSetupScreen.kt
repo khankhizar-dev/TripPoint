@@ -117,7 +117,8 @@ fun ProfileSetupScreen(
             subtitle = stringResource(R.string.auth_profile_setup_success_subtitle),
             imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_welcome,
             actionText = stringResource(R.string.auth_profile_setup_go_home),
-            onActionClick = { onIntent(ProfileSetupContract.Intent.NextClicked) }
+            onActionClick = { onIntent(ProfileSetupContract.Intent.NextClicked) },
+            modifier = Modifier.fillMaxSize()
         )
         return
     }

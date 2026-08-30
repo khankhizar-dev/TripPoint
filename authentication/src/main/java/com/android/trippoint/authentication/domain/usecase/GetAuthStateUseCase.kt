@@ -10,8 +10,13 @@ class GetAuthStateUseCase(private val repository: AuthRepository) {
         if (token == null) return AuthState.LOGIN_REQUIRED
         
         val userResult = repository.getMe()
-        if (userResult.isFailure || userResult.getOrNull() == null) {
-            return AuthState.LOGIN_REQUIRED
+        if (userResult.isSuccess) {
+            if (userResult.getOrNull() == null) return AuthState.LOGIN_REQUIRED
+        } else {
+            // If getMe failed (e.g. network error), we check if we have a token.
+            // If we do, we can proceed to home/permissions/profile depending on local state.
+            // This prevents kick-outs on poor connection during splash.
+            if (repository.getAuthToken() == null) return AuthState.LOGIN_REQUIRED
         }
         
         if (!repository.isProfileSetupCompleted()) return AuthState.PROFILE_SETUP_REQUIRED
