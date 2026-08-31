@@ -29,6 +29,7 @@ fun TripPointTextField(
     trailingIcon: @Composable (() -> Unit)? = null,
     isError: Boolean = false,
     errorMessage: String? = null,
+    helperText: String? = null,
     visualTransformation: VisualTransformation = VisualTransformation.None,
     keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
     enabled: Boolean = true,
@@ -36,19 +37,29 @@ fun TripPointTextField(
     readOnly: Boolean = false
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        
-        Spacer(modifier = Modifier.height(8.dp))
+        if (label.isNotEmpty()) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelMedium,
+                color = if (isError) MaterialTheme.colorScheme.error 
+                        else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+        }
         
         OutlinedTextField(
             value = value,
             onValueChange = onValueChange,
             modifier = Modifier.fillMaxWidth(),
-            placeholder = placeholder?.let { { Text(text = it) } },
+            placeholder = placeholder?.let { 
+                { 
+                    Text(
+                        text = it,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    ) 
+                } 
+            },
             leadingIcon = leadingIcon,
             trailingIcon = trailingIcon,
             isError = isError,
@@ -58,12 +69,15 @@ fun TripPointTextField(
             singleLine = singleLine,
             readOnly = readOnly,
             shape = RoundedCornerShape(12.dp),
+            textStyle = MaterialTheme.typography.bodyLarge,
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline,
                 errorBorderColor = MaterialTheme.colorScheme.error,
                 focusedContainerColor = Color.Transparent,
                 unfocusedContainerColor = Color.Transparent,
+                disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f),
+                disabledBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.5f),
                 errorContainerColor = Color.Transparent
             )
         )
@@ -72,6 +86,13 @@ fun TripPointTextField(
             Text(
                 text = errorMessage,
                 color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(top = 4.dp, start = 4.dp)
+            )
+        } else if (helperText != null) {
+            Text(
+                text = helperText,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
                 style = MaterialTheme.typography.labelSmall,
                 modifier = Modifier.padding(top = 4.dp, start = 4.dp)
             )

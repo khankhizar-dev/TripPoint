@@ -13,34 +13,57 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 
 private val DarkColorScheme = darkColorScheme(
-    primary = PrimaryBlue,
-    secondary = PurpleGrey80,
-    tertiary = Pink80,
-    background = Color(0xFF000000),
-    surface = Color(0xFF121212),
+    primary = Primary500,
     onPrimary = Color.White,
-    onBackground = Color.White,
-    onSurface = Color.White
+    primaryContainer = Primary600,
+    onPrimaryContainer = Color.White,
+    secondary = DarkNeutral700,
+    onSecondary = Color.White,
+    tertiary = SemanticPurple,
+    onTertiary = Color.White,
+    background = DarkBackground,
+    onBackground = Neutral50,
+    surface = DarkSurface,
+    onSurface = Neutral50,
+    surfaceVariant = DarkSurfaceElevated,
+    onSurfaceVariant = DarkNeutral300,
+    error = ErrorRed,
+    onError = Color.White,
+    outline = DarkBorder
 )
 
 private val LightColorScheme = lightColorScheme(
-    primary = PrimaryBlue,
-    secondary = PurpleGrey40,
-    tertiary = Pink40,
-    background = Surface, // Use Surface color as default background to match screenshot
-    surface = Surface,
-    error = ErrorRed,
+    primary = Primary500,
     onPrimary = Color.White,
-    onBackground = TextPrimary,
-    onSurface = TextPrimary,
-    onSurfaceVariant = TextSecondary
+    primaryContainer = Primary200,
+    onPrimaryContainer = Primary600,
+    secondary = Neutral500,
+    onSecondary = Color.White,
+    tertiary = SemanticPurple,
+    onTertiary = Color.White,
+    background = Neutral50,
+    onBackground = Neutral900,
+    surface = Color.White,
+    onSurface = Neutral900,
+    surfaceVariant = Neutral100,
+    onSurfaceVariant = Neutral500,
+    error = ErrorRed,
+    onError = Color.White,
+    outline = Neutral300
 )
 
+@Suppress("LongParameterList")
 @Composable
 fun TripPointTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = false, // Disabled dynamic colors to maintain branded design consistency
+    dynamicColor: Boolean = false,
     dimensions: TripPointDimensions = TripPointDimensions(),
+    motion: TripPointMotion = TripPointMotion(),
+    brand: TripPointBrand = TripPointBrand(),
+    dataViz: TripPointDataViz = TripPointDataViz(),
+    illustrations: TripPointIllustrations = TripPointIllustrations(),
+    patterns: TripPointPatterns = TripPointPatterns(),
+    tone: TripPointTone = TripPointTone(),
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
@@ -53,7 +76,15 @@ fun TripPointTheme(
         else -> LightColorScheme
     }
 
-    CompositionLocalProvider(LocalDimensions provides dimensions) {
+    CompositionLocalProvider(
+        LocalDimensions provides dimensions,
+        LocalMotion provides motion,
+        LocalBrand provides brand,
+        LocalDataViz provides dataViz,
+        LocalIllustrations provides illustrations,
+        LocalPatterns provides patterns,
+        LocalTone provides tone
+    ) {
         MaterialTheme(
             colorScheme = colorScheme,
             typography = Typography,
@@ -66,4 +97,36 @@ object TripPointTheme {
     val dimensions: TripPointDimensions
         @Composable
         get() = LocalDimensions.current
+        
+    val motion: TripPointMotion
+        @Composable
+        get() = LocalMotion.current
+        
+    val brand: TripPointBrand
+        @Composable
+        get() = LocalBrand.current
+        
+    val dataViz: TripPointDataViz
+        @Composable
+        get() = LocalDataViz.current
+
+    val illustrations: TripPointIllustrations
+        @Composable
+        get() = LocalIllustrations.current
+
+    val patterns: TripPointPatterns
+        @Composable
+        get() = LocalPatterns.current
+
+    val tone: TripPointTone
+        @Composable
+        get() = LocalTone.current
+        
+    val typography: androidx.compose.material3.Typography
+        @Composable
+        get() = MaterialTheme.typography
+        
+    val colorScheme: androidx.compose.material3.ColorScheme
+        @Composable
+        get() = MaterialTheme.colorScheme
 }

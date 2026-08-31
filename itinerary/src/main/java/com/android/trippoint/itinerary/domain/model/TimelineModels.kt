@@ -1,5 +1,7 @@
 package com.android.trippoint.itinerary.domain.model
 
+import com.android.trippoint.core.common.model.Priority
+
 data class TimelineEvent(
     val id: String,
     val itineraryDayId: String,
@@ -65,12 +67,6 @@ data class TripNote(
     val date: String,
     val priority: Priority = Priority.MEDIUM
 )
-
-enum class Priority {
-    LOW,
-    MEDIUM,
-    HIGH
-}
 
 data class CreateActivityInput(
     val title: String,

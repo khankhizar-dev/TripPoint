@@ -53,7 +53,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.android.trippoint.core.designsystem.components.TripPointButton
 import com.android.trippoint.core.designsystem.components.TripPointTextField
-import com.android.trippoint.itinerary.domain.model.Priority
+import com.android.trippoint.core.common.model.Priority
 import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
@@ -228,7 +228,7 @@ private fun PrioritySelector(
     onPrioritySelected: (Priority) -> Unit
 ) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-        Priority.values().forEach { priority ->
+        Priority.entries.forEach { priority ->
             PriorityButton(
                 priority = priority,
                 isSelected = selectedPriority == priority,

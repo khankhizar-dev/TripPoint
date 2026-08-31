@@ -42,7 +42,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointTextField
-import com.android.trippoint.itinerary.domain.model.Priority
+import com.android.trippoint.core.common.model.Priority
 import com.android.trippoint.itinerary.domain.model.TripNote
 import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
