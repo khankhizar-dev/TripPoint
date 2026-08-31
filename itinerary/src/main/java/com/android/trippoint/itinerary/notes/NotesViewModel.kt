@@ -2,6 +2,7 @@ package com.android.trippoint.itinerary.notes
 
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.common.model.Priority
 import com.android.trippoint.itinerary.domain.repository.ItineraryRepository
 import kotlinx.coroutines.launch
 
@@ -47,7 +48,7 @@ class NotesViewModel(
                             title = it.title,
                             content = it.description ?: "",
                             date = it.createdAt,
-                            priority = com.android.trippoint.itinerary.domain.model.Priority.MEDIUM
+                            priority = Priority.MEDIUM
                         )
                     }
                     setState { copy(isLoading = false, notes = notes, error = null) }

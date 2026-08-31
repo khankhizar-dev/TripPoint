@@ -3,7 +3,7 @@ package com.android.trippoint.itinerary.task
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState
-import com.android.trippoint.itinerary.domain.model.Priority
+import com.android.trippoint.core.common.model.Priority
 
 class AddTaskContract {
     sealed class Intent : UiIntent {

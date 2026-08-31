@@ -8,9 +8,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.core.common.model.TripStatus
+import com.android.trippoint.core.designsystem.theme.InfoBlue
+import com.android.trippoint.core.designsystem.theme.Neutral500
 import com.android.trippoint.core.designsystem.theme.SuccessGreen
 import com.android.trippoint.core.designsystem.theme.WarningYellow
 
@@ -20,17 +21,17 @@ fun TripStatusChip(
     modifier: Modifier = Modifier
 ) {
     val (backgroundColor, textColor, label) = when (status) {
-        TripStatus.UPCOMING -> Triple(Color(0xFFDBEAFE), Color(0xFF2563EB), "Upcoming")
-        TripStatus.IN_PROGRESS -> Triple(Color(0xFFFEF3C7), WarningYellow, "In Progress")
-        TripStatus.COMPLETED -> Triple(Color(0xFFD1FAE5), SuccessGreen, "Completed")
-        TripStatus.DRAFT -> Triple(Color(0xFFF1F5F9), Color(0xFF64748B), "Draft")
-        TripStatus.ARCHIVED -> Triple(Color(0xFFF1F5F9), Color(0xFF64748B), "Archived")
+        TripStatus.UPCOMING -> Triple(InfoBlue.copy(alpha = 0.1f), InfoBlue, "Upcoming")
+        TripStatus.IN_PROGRESS -> Triple(WarningYellow.copy(alpha = 0.1f), WarningYellow, "In Progress")
+        TripStatus.COMPLETED -> Triple(SuccessGreen.copy(alpha = 0.1f), SuccessGreen, "Completed")
+        TripStatus.DRAFT -> Triple(Neutral500.copy(alpha = 0.1f), Neutral500, "Draft")
+        TripStatus.ARCHIVED -> Triple(Neutral500.copy(alpha = 0.1f), Neutral500, "Archived")
     }
 
     Box(
         modifier = modifier
-            .background(backgroundColor, RoundedCornerShape(4.dp))
-            .padding(horizontal = 8.dp, vertical = 2.dp)
+            .background(backgroundColor, RoundedCornerShape(100.dp))
+            .padding(horizontal = 12.dp, vertical = 4.dp)
     ) {
         Text(
             text = label,
