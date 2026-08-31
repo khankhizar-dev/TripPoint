@@ -52,6 +52,7 @@ data class TripPointDimensions(
     val logoSize: Dp = 96.dp,
     val illustrationHeight: Dp = 320.dp,
     val loaderSize: Dp = 32.dp,
+    val iconSizeLarge: Dp = 100.dp,
     val buttonHeightLarge: Dp = 56.dp,
     val buttonHeightMedium: Dp = 48.dp,
     val buttonHeightSmall: Dp = 36.dp,
