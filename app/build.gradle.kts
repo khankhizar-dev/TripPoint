@@ -43,6 +43,7 @@ dependencies {
     implementation(project(":trip"))
     implementation(project(":itinerary"))
     implementation(project(":booking"))
+    implementation(project(":budget"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

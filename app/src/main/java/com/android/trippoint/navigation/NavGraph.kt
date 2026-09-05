@@ -32,6 +32,11 @@ import com.android.trippoint.booking.filter.BookingFilterRoute
 import com.android.trippoint.booking.filter.BookingFilterViewModel
 import com.android.trippoint.booking.list.BookingListRoute
 import com.android.trippoint.booking.list.BookingListViewModel
+import com.android.trippoint.budget.list.*
+import com.android.trippoint.budget.overview.*
+import com.android.trippoint.budget.expense.add.*
+import com.android.trippoint.budget.expense.list.*
+import com.android.trippoint.budget.domain.repository.BudgetRepository
 import com.android.trippoint.core.navigation.Screen
 import com.android.trippoint.itinerary.add.AddEventRoute
 import com.android.trippoint.itinerary.add.AddEventViewModel
@@ -68,6 +73,7 @@ fun AppNavGraph(
     tripRepository: TripRepository,
     itineraryRepository: ItineraryRepository,
     bookingRepository: BookingRepository,
+    budgetRepository: BudgetRepository,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -79,6 +85,120 @@ fun AppNavGraph(
         tripNavGraph(navController, tripRepository)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
+        budgetNavGraph(navController, budgetRepository)
+    }
+}
+
+@Suppress("LongMethod")
+private fun NavGraphBuilder.budgetNavGraph(
+    navController: NavHostController,
+    budgetRepository: BudgetRepository
+) {
+    composable(
+        route = Screen.Budgets.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId")
+        val viewModel: BudgetListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return BudgetListViewModel(budgetRepository) as T
+                }
+            }
+        )
+        BudgetListRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetails = { tId, bId -> 
+                navController.navigate(Screen.BudgetOverview.createRoute(tId, bId)) 
+            },
+            onNavigateToCreate = { 
+                navController.navigate(Screen.CreateBudget.createRoute(tripId)) 
+            }
+        )
+    }
+    composable(
+        route = Screen.BudgetOverview.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: BudgetOverviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return BudgetOverviewViewModel(budgetRepository) as T
+                }
+            }
+        )
+        BudgetOverviewRoute(
+            tripId = tripId,
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToAddExpense = { bId -> 
+                navController.navigate(Screen.AddExpense.createRoute(bId)) 
+            },
+            onNavigateToExpenses = { bId ->
+                navController.navigate(Screen.ExpenseList.createRoute(bId))
+            }
+        )
+    }
+    composable(
+        route = Screen.AddExpense.route,
+        arguments = listOf(androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType })
+    ) { backStackEntry ->
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: AddExpenseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AddExpenseViewModel(budgetRepository) as T
+                }
+            }
+        )
+        AddExpenseRoute(
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(
+        route = Screen.ExpenseList.route,
+        arguments = listOf(androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType })
+    ) { backStackEntry ->
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: ExpenseListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ExpenseListViewModel(budgetRepository) as T
+                }
+            }
+        )
+        ExpenseListRoute(
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToAddExpense = { bId ->
+                navController.navigate(Screen.AddExpense.createRoute(bId))
+            }
+        )
     }
 }
 
@@ -312,6 +432,9 @@ private fun NavGraphBuilder.addHomeDestination(navController: NavHostController)
             onNavigateToCreateTrip = { navController.navigate(Screen.CreateTrip.route) },
             onNavigateToBookings = { tripId -> 
                 navController.navigate(Screen.Bookings.createRoute(tripId))
+            },
+            onNavigateToBudgets = { tripId ->
+                navController.navigate(Screen.Budgets.createRoute(tripId))
             }
         )
     }
@@ -344,7 +467,8 @@ private fun NavGraphBuilder.addTripOverviewDestination(
             onNavigateToBookings = { id -> navController.navigate(Screen.Bookings.createRoute(id)) },
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
-            onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) }
+            onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
+            onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) }
         )
     }
 }

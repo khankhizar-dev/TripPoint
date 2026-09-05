@@ -34,6 +34,7 @@ class TripOverviewContract {
         data class NavigateToAddTask(val tripId: String) : Effect()
         data class NavigateToAddNote(val tripId: String) : Effect()
         data class NavigateToAddBooking(val tripId: String) : Effect()
+        data class NavigateToBudgets(val tripId: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }

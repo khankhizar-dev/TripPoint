@@ -39,6 +39,7 @@ The project follows a multi-module architecture to promote scalability and maint
 - **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
 - **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
 - **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
+- **`:budget`**: **The Finance Center**. Tracks trip expenses, manages budgets, and provides category-wise breakdown of spending.
 
 ## 🛠 Features
 
@@ -75,6 +76,12 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Booking Details**: Comprehensive view with itinerary segments, airline/provider info, and total costs.
 - [x] **Traveller Management**: Dynamic passenger list with support for adding/removing travellers and seat assignments.
 - [x] **Management Actions**: Quick access to edit, share, delete, or manage baggage and seating.
+
+### Budget & Expense Tracking
+- [x] **Budget Overview**: High-fidelity summary card with total/spent amounts and real-time progress tracking.
+- [x] **Category Breakdown**: Detailed spending analysis for Food, Transport, Activities, etc.
+- [x] **Global Budget List**: Manage financial plans across all active and upcoming trips.
+- [ ] **Smart Expense Entry**: AI-powered receipt scanning and multi-currency support (Upcoming).
 
 ## 📖 Development Guidelines
 

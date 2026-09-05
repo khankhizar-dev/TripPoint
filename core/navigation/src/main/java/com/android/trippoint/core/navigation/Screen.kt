@@ -120,4 +120,27 @@ sealed class Screen(val route: String) {
     object ManageBooking : Screen("manage_booking/{tripId}/{bookingId}") {
         fun createRoute(tripId: String, bookingId: String) = "manage_booking/$tripId/$bookingId"
     }
+    object Budgets : Screen("budgets?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "budgets?tripId=$tripId"
+        } else {
+            "budgets"
+        }
+    }
+    object BudgetOverview : Screen("budget_overview/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "budget_overview/$budgetId?tripId=$tripId"
+    }
+    object CreateBudget : Screen("create_budget?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "create_budget?tripId=$tripId"
+        } else {
+            "create_budget"
+        }
+    }
+    object AddExpense : Screen("add_expense/{budgetId}") {
+        fun createRoute(budgetId: String) = "add_expense/$budgetId"
+    }
+    object ExpenseList : Screen("expense_list/{budgetId}") {
+        fun createRoute(budgetId: String) = "expense_list/$budgetId"
+    }
 }

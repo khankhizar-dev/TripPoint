@@ -188,6 +188,23 @@
     <string name="bookings_add_select_trip">Select Trip</string>
     <string name="bookings_add_placeholder_trip">Choose a trip</string>
 
+    <!-- Budget & Expenses -->
+    <string name="budget_list_title">My Budgets</string>
+    <string name="budget_overview_title">Budget Overview</string>
+    <string name="budget_add_expense_title">Add Expense</string>
+    <string name="budget_expense_list_title">Expenses</string>
+    <string name="budget_amount_label">Amount</string>
+    <string name="budget_category_label">Category</string>
+    <string name="budget_date_label">Date</string>
+    <string name="budget_description_label">Description</string>
+    <string name="budget_save_expense">Save Expense</string>
+    <string name="budget_empty_expenses">No expenses tracked yet.</string>
+    <string name="budget_category_food">Food</string>
+    <string name="budget_category_transport">Transport</string>
+    <string name="budget_category_activities">Activities</string>
+    <string name="budget_category_accommodation">Accommodation</string>
+    <string name="budget_category_other">Other</string>
+
     <!-- Add Traveller -->
     <string name="bookings_traveller_add_title">Add Traveller</string>
     <string name="bookings_traveller_first_name">First Name</string>

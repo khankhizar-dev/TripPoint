@@ -38,7 +38,8 @@ fun HomeRoute(
     onNavigateToProfile: () -> Unit,
     onNavigateToTripDetails: (String) -> Unit,
     onNavigateToCreateTrip: (String) -> Unit,
-    onNavigateToBookings: (String?) -> Unit
+    onNavigateToBookings: (String?) -> Unit,
+    onNavigateToBudgets: (String?) -> Unit
 ) {
     val context = LocalContext.current
     val preferencesManager = PreferencesManager(context)
