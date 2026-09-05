@@ -18,7 +18,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -67,8 +67,10 @@ fun TripOverviewRoute(
     viewModel: TripOverviewViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToTimeline: (String) -> Unit,
+    onNavigateToBookings: (String) -> Unit,
     onNavigateToAddTask: (String) -> Unit,
-    onNavigateToAddNote: (String) -> Unit
+    onNavigateToAddNote: (String) -> Unit,
+    onNavigateToAddBooking: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -81,8 +83,10 @@ fun TripOverviewRoute(
             when (effect) {
                 TripOverviewContract.Effect.NavigateBack -> onNavigateBack()
                 is TripOverviewContract.Effect.NavigateToTimeline -> onNavigateToTimeline(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToBookings -> onNavigateToBookings(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
@@ -108,7 +112,7 @@ fun TripOverviewScreen(
                 title = { Text(text = stringResource(id = designR.string.trip_overview_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onIntent(TripOverviewContract.Intent.BackClicked) }) {
-                        Icon(imageVector = Icons.Default.ArrowBack, contentDescription = null)
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 actions = {
@@ -149,35 +153,35 @@ private fun TripOverviewMenu(
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
         DropdownMenuItem(
-            text = { Text("Move to Upcoming") },
+            text = { Text(stringResource(id = designR.string.trip_overview_menu_upcoming)) },
             onClick = {
                 onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.UPCOMING))
                 onDismiss()
             }
         )
         DropdownMenuItem(
-            text = { Text("Move to In Progress") },
+            text = { Text(stringResource(id = designR.string.trip_overview_menu_in_progress)) },
             onClick = {
                 onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.IN_PROGRESS))
                 onDismiss()
             }
         )
         DropdownMenuItem(
-            text = { Text("Move to Completed") },
+            text = { Text(stringResource(id = designR.string.trip_overview_menu_completed)) },
             onClick = {
                 onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.COMPLETED))
                 onDismiss()
             }
         )
         DropdownMenuItem(
-            text = { Text("Archive") },
+            text = { Text(stringResource(id = designR.string.trip_overview_menu_archive)) },
             onClick = {
                 onIntent(TripOverviewContract.Intent.ArchiveTrip)
                 onDismiss()
             }
         )
         DropdownMenuItem(
-            text = { Text("Delete") },
+            text = { Text(stringResource(id = designR.string.trip_overview_menu_delete)) },
             onClick = {
                 onIntent(TripOverviewContract.Intent.DeleteTrip)
                 onDismiss()

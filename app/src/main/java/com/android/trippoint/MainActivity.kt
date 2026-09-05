@@ -15,9 +15,11 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.core.network.TripRemoteDataSource
 import com.android.trippoint.core.network.ItineraryRemoteDataSource
+import com.android.trippoint.core.network.BookingRemoteDataSource
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
+import com.android.trippoint.booking.data.repository.BookingRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
@@ -56,11 +58,27 @@ class MainActivity : ComponentActivity() {
                     ItineraryRepositoryImpl(ItineraryRemoteDataSource(api))
                 }
 
+                val bookingRepository = remember {
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    BookingRepositoryImpl(
+                        BookingRemoteDataSource(api),
+                        TripRemoteDataSource(api)
+                    )
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavGraph(
                         navController = navController,
                         tripRepository = tripRepository,
                         itineraryRepository = itineraryRepository,
+                        bookingRepository = bookingRepository,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

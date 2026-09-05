@@ -25,4 +25,6 @@ dependencies {
     implementation(libs.moshi.kotlin)
     testImplementation(libs.junit)
     testImplementation(libs.mockwebserver)
+    testImplementation(libs.mockk)
+    testImplementation(libs.kotlinx.coroutines.test)
 }

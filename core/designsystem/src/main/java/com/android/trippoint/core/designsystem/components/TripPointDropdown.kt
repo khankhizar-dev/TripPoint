@@ -31,10 +31,16 @@ fun TripPointDropdown(
     label: String,
     options: List<String>,
     modifier: Modifier = Modifier,
+    optionLabels: List<String>? = null,
     enabled: Boolean = true,
     placeholder: String? = null
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val displayValue = if (optionLabels != null && options.contains(value)) {
+        optionLabels[options.indexOf(value)]
+    } else {
+        value
+    }
 
     Column(modifier = modifier.fillMaxWidth()) {
         if (label.isNotEmpty()) {
@@ -52,7 +58,7 @@ fun TripPointDropdown(
             modifier = Modifier.fillMaxWidth()
         ) {
             OutlinedTextField(
-                value = value,
+                value = displayValue,
                 onValueChange = {},
                 readOnly = true,
                 enabled = enabled,
@@ -77,11 +83,11 @@ fun TripPointDropdown(
                 containerColor = MaterialTheme.colorScheme.surface,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                options.forEach { selectionOption ->
+                options.forEachIndexed { index, selectionOption ->
                     DropdownMenuItem(
                         text = { 
                             Text(
-                                text = selectionOption,
+                                text = optionLabels?.getOrNull(index) ?: selectionOption,
                                 style = MaterialTheme.typography.bodyLarge
                             ) 
                         },

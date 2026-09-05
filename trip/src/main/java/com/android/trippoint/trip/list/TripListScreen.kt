@@ -44,6 +44,7 @@ import com.android.trippoint.core.common.model.TripStatus
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.TripCard
 import com.android.trippoint.core.designsystem.components.TripCardSkeleton
+import com.android.trippoint.core.designsystem.components.TripPointBottomNavigation
 import com.android.trippoint.core.designsystem.components.TripPointTextField
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.designsystem.R as designR
@@ -53,7 +54,8 @@ import kotlinx.coroutines.flow.collectLatest
 fun TripListRoute(
     viewModel: TripListViewModel,
     onNavigateToDetails: (String) -> Unit,
-    onNavigateToCreate: () -> Unit,
+    onNavigateToCreate: (String) -> Unit,
+    onNavigateToBookings: (String?) -> Unit,
     onNavigateToProfile: () -> Unit,
     userName: String? = null
 ) {
@@ -63,7 +65,7 @@ fun TripListRoute(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 is TripListContract.Effect.NavigateToTripDetails -> onNavigateToDetails(effect.tripId)
-                TripListContract.Effect.NavigateToCreateTrip -> onNavigateToCreate()
+                TripListContract.Effect.NavigateToCreateTrip -> onNavigateToCreate("") // Placeholder tripId
                 is TripListContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
@@ -72,6 +74,7 @@ fun TripListRoute(
     TripListScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
+        onNavigateToBookings = { onNavigateToBookings(null) },
         onNavigateToProfile = onNavigateToProfile,
         userName = userName
     )
@@ -81,6 +84,7 @@ fun TripListRoute(
 fun TripListScreen(
     uiState: TripListContract.State,
     onIntent: (TripListContract.Intent) -> Unit,
+    onNavigateToBookings: () -> Unit,
     onNavigateToProfile: () -> Unit,
     userName: String? = null
 ) {
@@ -93,8 +97,17 @@ fun TripListScreen(
                 onNavigateToProfile = onNavigateToProfile
             )
         },
-        floatingActionButton = {
-            TripListFab(uiState = uiState, onIntent = onIntent)
+        bottomBar = {
+            TripPointBottomNavigation(
+                selectedRoute = "workspace",
+                onRouteSelected = { route ->
+                    when (route) {
+                        "bookings" -> onNavigateToBookings()
+                        "profile" -> onNavigateToProfile()
+                    }
+                },
+                onAddClick = { onIntent(TripListContract.Intent.CreateTripClicked) }
+            )
         }
     ) { innerPadding ->
         Column(modifier = Modifier.padding(innerPadding)) {
@@ -295,6 +308,7 @@ fun TripListScreenPreview() {
                 )
             ),
             onIntent = {},
+            onNavigateToBookings = {},
             onNavigateToProfile = {}
         )
     }
@@ -307,6 +321,7 @@ fun TripListLoadingPreview() {
         TripListScreen(
             uiState = TripListContract.State(isLoading = true),
             onIntent = {},
+            onNavigateToBookings = {},
             onNavigateToProfile = {}
         )
     }
@@ -319,6 +334,7 @@ fun TripListOfflinePreview() {
         TripListScreen(
             uiState = TripListContract.State(isOffline = true),
             onIntent = {},
+            onNavigateToBookings = {},
             onNavigateToProfile = {}
         )
     }

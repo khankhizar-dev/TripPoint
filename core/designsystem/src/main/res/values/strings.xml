@@ -34,6 +34,13 @@
     <string name="trip_overview_tasks_label">Tasks</string>
     <string name="trip_overview_days_left">%1$d days left</string>
     <string name="trip_overview_view_timeline">View Full Timeline</string>
+    <string name="trip_overview_hello">Hello, %1$s!</string>
+    <string name="trip_overview_menu_upcoming">Move to Upcoming</string>
+    <string name="trip_overview_menu_in_progress">Move to In Progress</string>
+    <string name="trip_overview_menu_completed">Move to Completed</string>
+    <string name="trip_overview_menu_archive">Archive</string>
+    <string name="trip_overview_menu_delete">Delete</string>
+    <string name="trip_overview_profile_desc">Profile</string>
 
     <!-- Create Trip -->
     <string name="create_trip_title">Create Trip</string>
@@ -109,4 +116,115 @@
     <string name="add_note_title">Add Note</string>
     <string name="add_note_content_label">Content</string>
     <string name="add_note_save_button">Save Note</string>
+
+    <!-- Bookings -->
+    <string name="bookings_title">My Bookings</string>
+    <string name="bookings_tab_upcoming">Upcoming</string>
+    <string name="bookings_tab_past">Past</string>
+    <string name="bookings_tab_cancelled">Cancelled</string>
+    <string name="bookings_search_placeholder">Search by city, airline, hotel...</string>
+    <string name="bookings_details_title">Booking Details</string>
+    <string name="bookings_details_view_ticket">View e-ticket</string>
+    <string name="bookings_details_share">Share</string>
+    <string name="bookings_details_booking_status">Booking Status</string>
+    <string name="bookings_details_provider">Provider</string>
+    <string name="bookings_details_total_amount">Total Amount</string>
+    <string name="bookings_details_view_price_details">View Price Details</string>
+    <string name="bookings_details_travellers">Traveller(s)</string>
+    <string name="bookings_details_summary">Summary</string>
+    <string name="bookings_details_notes">Notes</string>
+    <string name="bookings_details_reference">Reference</string>
+    <string name="bookings_details_date_time">Date &amp; Time</string>
+    <string name="bookings_details_location">Location</string>
+    <string name="bookings_details_view_eticket">View e-ticket</string>
+    <string name="bookings_details_status">Status</string>
+    <string name="bookings_details_unknown_provider">Unknown Provider</string>
+
+    <string name="bookings_manage_title">Manage Booking</string>
+    <string name="bookings_manage_change">Change Flight</string>
+    <string name="bookings_manage_cancel">Cancel Booking</string>
+    <string name="bookings_manage_upgrade">Upgrade</string>
+    <string name="bookings_manage_seats">Select Seats</string>
+    <string name="bookings_manage_baggage">Add Baggage</string>
+    <string name="bookings_manage_change_desc">Change date, time or route</string>
+    <string name="bookings_manage_cancel_desc">Cancel and view refund</string>
+    <string name="bookings_manage_upgrade_desc">Upgrade to better class</string>
+    <string name="bookings_manage_seats_desc">Choose or change seats</string>
+    <string name="bookings_manage_baggage_desc">Add more baggage</string>
+
+    <string name="bookings_add_title">Add Booking</string>
+    <string name="bookings_add_import_email">Import from Email</string>
+    <string name="bookings_add_import_email_desc">Automatically fetch bookings</string>
+    <string name="bookings_add_pnr">PNR / Reference No.</string>
+    <string name="bookings_add_pnr_desc">Enter PNR or Booking Reference</string>
+    <string name="bookings_add_scan">Scan Ticket</string>
+    <string name="bookings_add_scan_desc">Scan e-ticket or boarding pass</string>
+    <string name="bookings_add_manual">Manual Entry</string>
+    <string name="bookings_add_manual_desc">Enter booking details manually</string>
+    <string name="bookings_add_title_label">Booking Title</string>
+    <string name="bookings_add_placeholder_title">e.g. Hilton London</string>
+    <string name="bookings_add_placeholder_location">e.g. London, UK</string>
+    <string name="bookings_add_placeholder_provider">e.g. British Airways</string>
+    <string name="bookings_add_placeholder_reference">e.g. XYZ123</string>
+    <string name="bookings_add_placeholder_amount">0.00</string>
+    <string name="bookings_add_select_time">Select Time</string>
+    <string name="bookings_add_pnr_title">Enter PNR / Reference</string>
+    <string name="bookings_add_pnr_label">PNR or Booking Reference</string>
+    <string name="bookings_add_pnr_placeholder">e.g. ABC1235</string>
+    <string name="bookings_add_pnr_fetch_button">Fetch Details</string>
+    <string name="bookings_add_pnr_fetch_error">Could not find booking details for this reference.</string>
+    <string name="bookings_add_scan_title">Scan Ticket</string>
+    <string name="bookings_add_scan_instructions">Position your e-ticket or boarding pass within the frame to scan details automatically.</string>
+    <string name="bookings_add_scan_capture_button">Capture</string>
+    <string name="bookings_add_email_title">Import from Email</string>
+    <string name="bookings_add_email_instructions">Connect your email to automatically sync travel bookings from your inbox.</string>
+    <string name="bookings_add_email_connect_button">Connect Gmail</string>
+    <string name="bookings_add_email_outlook_button">Connect Outlook</string>
+    <string name="bookings_add_end_date_label">End Date</string>
+    <string name="bookings_add_end_time_label">End Time</string>
+    <string name="bookings_add_notes_placeholder">Add any extra details...</string>
+    <string name="bookings_add_ok">OK</string>
+    <string name="bookings_add_cancel">Cancel</string>
+    <string name="bookings_add_select_trip">Select Trip</string>
+    <string name="bookings_add_placeholder_trip">Choose a trip</string>
+
+    <!-- Add Traveller -->
+    <string name="bookings_traveller_add_title">Add Traveller</string>
+    <string name="bookings_traveller_first_name">First Name</string>
+    <string name="bookings_traveller_last_name">Last Name</string>
+    <string name="bookings_traveller_email">Email Address</string>
+    <string name="bookings_traveller_phone">Phone Number</string>
+    <string name="bookings_traveller_dob">Date of Birth</string>
+    <string name="bookings_traveller_ticket">Ticket Number</string>
+    <string name="bookings_traveller_seat">Seat Number</string>
+    <string name="bookings_traveller_save">Add Traveller</string>
+    <string name="bookings_traveller_placeholder_first">e.g. John</string>
+    <string name="bookings_traveller_placeholder_last">e.g. Doe</string>
+
+    <string name="bookings_empty_title">No bookings yet</string>
+    <string name="bookings_empty_desc">You don\'t have any bookings yet.</string>
+    <string name="bookings_empty_action">Explore Places</string>
+
+    <string name="bookings_filter_title">Filter</string>
+    <string name="bookings_filter_type_label">Type</string>
+    <string name="bookings_filter_date_label">Date</string>
+    <string name="bookings_filter_status_label">Status</string>
+    <string name="bookings_filter_provider_label">Provider</string>
+    <string name="bookings_filter_apply_button">Apply Filters</string>
+    <string name="bookings_filter_reset_button">Reset</string>
+    <string name="bookings_filter_all_dates">All Dates</string>
+    <string name="bookings_filter_all">All</string>
+    <string name="bookings_filter_type_flights">Flights</string>
+    <string name="bookings_filter_type_hotels">Hotels</string>
+    <string name="bookings_filter_type_activities">Activities</string>
+    <string name="bookings_filter_status_confirmed">Confirmed</string>
+    <string name="bookings_filter_status_pending">Pending</string>
+    <string name="bookings_filter_status_cancelled">Cancelled</string>
+
+    <string name="bookings_itinerary_baggage">Baggage Allowance</string>
+    <string name="bookings_itinerary_baggage_checkin">Check-in</string>
+    <string name="bookings_itinerary_baggage_cabin">Cabin</string>
+    <string name="bookings_itinerary_aircraft">Aircraft</string>
+    <string name="bookings_itinerary_details">Details</string>
+    <string name="bookings_itinerary_non_stop">Non-stop</string>
 </resources>

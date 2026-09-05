@@ -38,6 +38,7 @@ The project follows a multi-module architecture to promote scalability and maint
 - **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
 - **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
 - **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
+- **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
 
 ## 🛠 Features
 
@@ -64,11 +65,23 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Interactive Tasks**: Mark activities as completed directly from the timeline with live backend syncing.
 - [x] **Advanced Filtering**: Filter itinerary by category and sort by priority or time.
 
+### Booking Ecosystem
+- [x] **Unified Booking List**: Aggregated view of all travel reservations across multiple trips.
+- [x] **Multi-modal Intake**: Four ways to add bookings:
+    - **Manual Entry**: High-fidelity form with Date/Time pickers and PostgreSQL JSONB-compatible details.
+    - **PNR / Reference No**: Quick fetch directly from the backend via reference code.
+    - **Scan Ticket**: AI-ready scanner frame for e-tickets and boarding passes.
+    - **Import from Email**: Sync travel confirmations from Gmail and Outlook.
+- [x] **Booking Details**: Comprehensive view with itinerary segments, airline/provider info, and total costs.
+- [x] **Traveller Management**: Dynamic passenger list with support for adding/removing travellers and seat assignments.
+- [x] **Management Actions**: Quick access to edit, share, delete, or manage baggage and seating.
+
 ## 📖 Development Guidelines
 
 - **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
 - **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
-- **Testing**: Maintain high logic coverage (current `:trip` and `:itinerary` modules at 100%).
+- **Testing**: Maintain high logic coverage (current `:trip`, `:itinerary`, and `:booking` modules at 100%).
+- **Linting**: Ensure all code is **Detekt** and **Ktlint** compliant before committing.
 
 ---
 

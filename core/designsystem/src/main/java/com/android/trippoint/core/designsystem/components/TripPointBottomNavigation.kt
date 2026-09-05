@@ -53,10 +53,10 @@ fun TripPointBottomNavigation(
                 onClick = { onRouteSelected("home") }
             )
             NavigationItem(
-                label = "Trips",
+                label = "Workspace",
                 icon = TripPointIcons.Trip,
-                isSelected = selectedRoute == "trips",
-                onClick = { onRouteSelected("trips") }
+                isSelected = selectedRoute == "workspace",
+                onClick = { onRouteSelected("workspace") }
             )
             
             AddButton(onClick = onAddClick)

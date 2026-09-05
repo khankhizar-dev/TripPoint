@@ -176,7 +176,8 @@ class ItineraryRemoteDataSource(
     ): ItineraryActivityDto? {
         val query = """
             mutation MarkItineraryActivityCompleted(
-                ${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, ${'$'}activityId: ID!, ${'$'}completed: Boolean!
+                ${'$'}tripId: ID!, ${'$'}itineraryDayId: ID!, 
+                ${'$'}activityId: ID!, ${'$'}completed: Boolean!
             ) {
               markItineraryActivityCompleted(
                   tripId: ${'$'}tripId, itineraryDayId: ${'$'}itineraryDayId, 
