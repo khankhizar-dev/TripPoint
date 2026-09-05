@@ -7,37 +7,81 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 - **UI**: Jetpack Compose with Material 3
 - **Architecture**: MVI (Model-View-Intent) & Clean Architecture
 - **Dependency Injection**: Hilt (Planned)
-- **Networking**: Apollo GraphQL
-- **Local Storage**: Room & EncryptedSharedPreferences
+- **Networking**: Retrofit & GraphQL (Standardized via `GraphQlRequest`)
+- **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto`)
 - **Navigation**: Navigation Compose
-- **Design System**: Custom design system in `:core:designsystem`
+- **Design System**: Centralized design system in `:core:designsystem`
+
+## ⚙️ CI/CD & Quality
+
+The project uses a production-grade quality pipeline:
+- **Linting**: Android Lint, **Detekt** (code smells), and **Ktlint** (formatting) ensure high code quality.
+- **Testing**: JUnit 4, Robolectric, MockK, and Turbine for Flow testing.
+- **Commands**:
+    - Run all tests: `./gradlew testDebugUnitTest`
+    - Check formatting: `./gradlew ktlintCheck`
+    - Static analysis: `./gradlew detekt`
 
 ## 🏗 Architecture
 
 The project follows a multi-module architecture to promote scalability and maintainability:
 
-### Modules
+### Core Modules
+- **`:core:common`**: Contains base components like `BaseViewModel` for MVI and universal domain models (`Trip`, `Traveler`).
+- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripCard`, `TripStatusChip`), tokens, and premium illustrations.
+- **`:core:navigation`**: Centralized screen definitions and navigation routes.
+- **`:core:network`**: GraphQL configuration and centralized remote data sources.
+- **`:core:database`**: Local data persistence and secure preference management.
 
-- **`:app`**: The main entry point of the application. Handles top-level configuration and MainActivity.
-- **`:authentication`**: Manages the user lifecycle (Splash, Login, Registration).
-- **`:core:common`**: Contains base classes, utilities, and common interfaces used across modules.
-- **`:core:designsystem`**: The central repository for all UI components, tokens (colors, typography, spacing), and themes.
-- **`:core:navigation`**: Centralized navigation definitions and screen definitions.
-- **`:core:network`**: Apollo GraphQL configuration and networking logic.
-- **`:core:database`**: Local data persistence using Room.
+### Feature Modules
+- **`:app`**: The main entry point. Handles top-level navigation and app initialization.
+- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
+- **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
+- **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
+- **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
 
-## 🛠 Features (In Progress)
+## 🛠 Features
 
-- [x] Branded Splash Screen with custom illustration and smooth transitions.
-- [ ] Authentication System (Email/Password, Social Login).
-- [ ] Trip Dashboard.
-- [ ] Destination Exploration.
+### User Lifecycle & Auth
+- [x] **Branded Splash Screen**: Smooth transitions with intelligent persistent routing.
+- [x] **Premium Onboarding**: 3-page interactive pager with detailed illustrations.
+- [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback. Features **persistent sessions** and intelligent cross-device profile syncing.
+- [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection. Automatically skips once completed.
+- [x] **Permissions Wizard**: Branded **dialog-based** requests for system access, providing context before asking.
+
+### Trip Workspace
+- [x] **Trip Dashboard**: live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).
+- [x] **Search & Filter**: Real-time searching and tab-based status filtering.
+- [x] **Guided Creation**: Multi-step flow (`Create Trip` -> `Add Details` -> `Invite People` -> `Trip Summary`).
+- [x] **Rich Invitations**: Search from contacts or manual entry (Email/Phone) with immediate feedback.
+- [x] **Lifecycle Management**: Move trips between statuses, archive, or delete via a centralized action menu.
+- [x] **Dynamic Progress**: Real-time progress calculation based on task completion.
+
+### Itinerary & Timeline
+- [x] **Chronological Timeline**: Vertical high-fidelity view with status tracking.
+- [x] **Day Management**: Monthly calendar view with day-by-day organization.
+- [x] **Activity Deep Dive**: Specialized views for Flights, Tasks, and Notes.
+- [x] **Universal Creation**: Speed Dial FAB for quick access to Events, Tasks, and Notes.
+- [x] **Interactive Tasks**: Mark activities as completed directly from the timeline with live backend syncing.
+- [x] **Advanced Filtering**: Filter itinerary by category and sort by priority or time.
+
+### Booking Ecosystem
+- [x] **Unified Booking List**: Aggregated view of all travel reservations across multiple trips.
+- [x] **Multi-modal Intake**: Four ways to add bookings:
+    - **Manual Entry**: High-fidelity form with Date/Time pickers and PostgreSQL JSONB-compatible details.
+    - **PNR / Reference No**: Quick fetch directly from the backend via reference code.
+    - **Scan Ticket**: AI-ready scanner frame for e-tickets and boarding passes.
+    - **Import from Email**: Sync travel confirmations from Gmail and Outlook.
+- [x] **Booking Details**: Comprehensive view with itinerary segments, airline/provider info, and total costs.
+- [x] **Traveller Management**: Dynamic passenger list with support for adding/removing travellers and seat assignments.
+- [x] **Management Actions**: Quick access to edit, share, delete, or manage baggage and seating.
 
 ## 📖 Development Guidelines
 
-- **MVI Pattern**: Every screen should follow the `UiState`, `UiIntent`, and `UiEffect` pattern using `BaseViewModel`.
-- **Theming**: Always use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions` instead of hardcoded values.
-- **Localization**: All strings must be kept in module-specific `strings.xml` files.
+- **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
+- **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
+- **Testing**: Maintain high logic coverage (current `:trip`, `:itinerary`, and `:booking` modules at 100%).
+- **Linting**: Ensure all code is **Detekt** and **Ktlint** compliant before committing.
 
 ---
 

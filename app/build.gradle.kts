@@ -35,13 +35,20 @@ android {
 
 dependencies {
     implementation(project(":core:common"))
+    implementation(project(":core:database"))
+    implementation(project(":core:network"))
     implementation(project(":core:designsystem"))
     implementation(project(":core:navigation"))
     implementation(project(":authentication"))
+    implementation(project(":trip"))
+    implementation(project(":itinerary"))
+    implementation(project(":booking"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
+    implementation(libs.androidx.compose.material.icons.extended)
+    implementation(libs.coil.compose)
     implementation(libs.androidx.compose.ui)
     implementation(libs.androidx.compose.ui.graphics)
     implementation(libs.androidx.compose.ui.tooling.preview)
@@ -56,4 +63,10 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    testImplementation(libs.kotlinx.coroutines.test)
+    testImplementation(libs.turbine)
+    testImplementation(libs.mockk)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.compose.ui.test.junit4)
 }

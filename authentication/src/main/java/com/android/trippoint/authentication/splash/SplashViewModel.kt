@@ -5,7 +5,9 @@ import com.android.trippoint.core.common.BaseViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Intent, SplashContract.Effect>(
+class SplashViewModel(
+    private val getAuthStateUseCase: com.android.trippoint.authentication.domain.usecase.GetAuthStateUseCase
+) : BaseViewModel<SplashContract.State, SplashContract.Intent, SplashContract.Effect>(
     initialState = SplashContract.State()
 ) {
     init {
@@ -20,7 +22,6 @@ class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Inten
 
     private fun checkAuth() {
         viewModelScope.launch {
-            // Simulation of sequential loading steps
             setState { copy(splashStep = SplashContract.SplashStep.Initializing) }
             delay(1000)
             
@@ -28,10 +29,19 @@ class SplashViewModel : BaseViewModel<SplashContract.State, SplashContract.Inten
             delay(1000)
             
             setState { copy(splashStep = SplashContract.SplashStep.SyncingData) }
-            delay(1000)
 
-            // For now, always navigate to Login
-            sendEffect(SplashContract.Effect.NavigateToLogin)
+            when (getAuthStateUseCase()) {
+                com.android.trippoint.authentication.domain.usecase.AuthState.ONBOARDING_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToWelcome)
+                com.android.trippoint.authentication.domain.usecase.AuthState.LOGIN_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToLogin)
+                com.android.trippoint.authentication.domain.usecase.AuthState.PROFILE_SETUP_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToProfileSetup)
+                com.android.trippoint.authentication.domain.usecase.AuthState.PERMISSIONS_REQUIRED -> 
+                    sendEffect(SplashContract.Effect.NavigateToPermissions)
+                com.android.trippoint.authentication.domain.usecase.AuthState.AUTHENTICATED -> 
+                    sendEffect(SplashContract.Effect.NavigateToHome)
+            }
         }
     }
 }

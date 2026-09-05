@@ -8,10 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Landscape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -20,29 +16,60 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.android.trippoint.authentication.R
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.designsystem.components.AppLogo
-import com.android.trippoint.core.designsystem.components.ErrorView
+import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
-import com.android.trippoint.core.designsystem.components.LoadingView
 import com.android.trippoint.core.designsystem.components.SplashIllustration
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
 
 @Composable
 fun SplashRoute(
+    onNavigateToWelcome: () -> Unit,
     onNavigateToLogin: () -> Unit,
+    onNavigateToProfileSetup: () -> Unit,
+    onNavigateToPermissions: () -> Unit,
     onNavigateToHome: () -> Unit,
-    viewModel: SplashViewModel = viewModel()
 ) {
+    val context = LocalContext.current
+    val preferencesManager = PreferencesManager(context)
+    val api = com.android.trippoint.core.network.NetworkModule.provideTripPointApi(
+        authTokenProvider = { preferencesManager.getAuthToken() },
+        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+        onTokenRefreshed = { token, refresh ->
+            preferencesManager.setAuthToken(token)
+            preferencesManager.setRefreshToken(refresh)
+        }
+    )
+    val authRemoteDataSource = com.android.trippoint.core.network.AuthRemoteDataSource(api)
+    val authRepository = com.android.trippoint.authentication.data.repository.AuthRepositoryImpl(
+        authRemoteDataSource, preferencesManager
+    )
+    val getAuthStateUseCase = com.android.trippoint.authentication.domain.usecase.GetAuthStateUseCase(authRepository)
+
+    val viewModel: SplashViewModel = viewModel(
+        factory = object : ViewModelProvider.Factory {
+            override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                return SplashViewModel(getAuthStateUseCase) as T
+            }
+        }
+    )
     val uiState by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
+                is SplashContract.Effect.NavigateToWelcome -> onNavigateToWelcome()
                 is SplashContract.Effect.NavigateToLogin -> onNavigateToLogin()
+                is SplashContract.Effect.NavigateToProfileSetup -> onNavigateToProfileSetup()
+                is SplashContract.Effect.NavigateToPermissions -> onNavigateToPermissions()
                 is SplashContract.Effect.NavigateToHome -> onNavigateToHome()
             }
         }
@@ -53,6 +80,29 @@ fun SplashRoute(
 
 @Composable
 fun SplashScreen(uiState: SplashContract.State) {
+    if (uiState.error != null) {
+        val illustration = when (uiState.error) {
+            SplashContract.SplashError.NoInternet -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_no_network
+            SplashContract.SplashError.ServerError -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_error
+            SplashContract.SplashError.Maintenance -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_plan
+            SplashContract.SplashError.ForceUpdate -> 
+                com.android.trippoint.core.designsystem.R.drawable.illustration_trip
+        }
+
+        FullscreenStatusView(
+            title = stringResource(uiState.error.titleResId),
+            subtitle = stringResource(uiState.error.descriptionResId),
+            imageResId = illustration,
+            actionText = stringResource(com.android.trippoint.core.designsystem.R.string.core_designsystem_retry),
+            onActionClick = { /* Handle retry */ },
+            modifier = Modifier.fillMaxSize()
+        )
+        return
+    }
+
     val dimen = TripPointTheme.dimensions
     Box(
         modifier = Modifier
@@ -98,24 +148,14 @@ fun SplashScreen(uiState: SplashContract.State) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier.padding(horizontal = 24.dp)
             ) {
-                if (uiState.error != null) {
-                    ErrorView(
-                        title = stringResource(uiState.error.titleResId),
-                        description = stringResource(uiState.error.descriptionResId),
-                        icon = uiState.error.icon,
-                        actionText = stringResource(com.android.trippoint.core.designsystem.R.string.core_designsystem_retry),
-                        onActionClick = { /* Handle retry */ }
-                    )
-                } else {
-                    LoadingIndicator()
+                LoadingIndicator()
 
-                    Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(16.dp))
 
-                    Text(
-                        text = stringResource(uiState.splashStep.messageResId),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+                Text(
+                    text = stringResource(uiState.splashStep.messageResId),
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
 
             Spacer(modifier = Modifier.weight(1f))

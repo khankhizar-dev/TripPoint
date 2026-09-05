@@ -1,0 +1,52 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Soft Shadows -->
+    <path
+        android:fillColor="#1A2563EB"
+        android:pathData="M20,165 Q100,175 180,165 Q100,155 20,165 Z" />
+
+    <!-- Table -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M60,140 h80 v4 q0,2 -2,2 h-76 q-2,0 -2,-2 z M95,146 v20 h10 v-20 z" />
+
+    <!-- Travelers -->
+    <!-- Person 1 -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M35,100a10,10 0,1,0 20,0a10,10 0,1,0 -20,0" /> <!-- Head -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M25,160 v-30 q0,-15 25,-15 h5 v45 z" /> <!-- Body -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M20,135 h12 v25 h-12 z" /> <!-- Backpack -->
+
+    <!-- Person 2 -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M145,100a10,10 0,1,0 20,0a10,10 0,1,0 -20,0" /> <!-- Head -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M140,115 h5 q25,0 25,15 v30 h-30 z" /> <!-- Body -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M168,135 h12 v25 h-12 z" /> <!-- Backpack -->
+
+    <!-- Coffee Cups -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M75,130 h12 v10 h-12 z M113,130 h12 v10 h-12 z" />
+
+    <!-- Map on table -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M80,135 h40 v10 h-40 z" />
+    <path
+        android:strokeColor="#2563EB"
+        android:strokeWidth="1"
+        android:pathData="M85,140 h30" />
+</vector>

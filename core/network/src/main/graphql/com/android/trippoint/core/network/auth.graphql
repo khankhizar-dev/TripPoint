@@ -1,0 +1,84 @@
+mutation Register($input: RegisterInput!) {
+  register(input: $input) {
+    user {
+      id
+      email
+      firstName
+      lastName
+    }
+    token
+    refreshToken
+  }
+}
+
+mutation Login($email: String!, $password: String!) {
+  login(email: $email, password: $password) {
+    user {
+      id
+      email
+      firstName
+      lastName
+    }
+    token
+    refreshToken
+  }
+}
+
+mutation VerifyEmail($input: VerifyEmailOtpInput!) {
+  verifyEmailOtp(input: $input)
+}
+
+mutation ResendEmailOtp {
+  resendEmailOtp
+}
+
+mutation RequestReset($email: String!) {
+  requestPasswordReset(email: $email)
+}
+
+mutation VerifyReset($input: VerifyPasswordResetOtpInput!) {
+  verifyPasswordResetOtp(input: $input)
+}
+
+mutation ResetPassword($input: ResetPasswordInput!) {
+  resetPassword(input: $input)
+}
+
+query GetMe {
+  me {
+    id
+    email
+    firstName
+    lastName
+  }
+}
+
+mutation Refresh($input: RefreshTokenInput!) {
+  refreshToken(input: $input) {
+    token
+    refreshToken
+  }
+}
+
+mutation Logout {
+  logout
+}
+
+mutation LogoutAllDevices {
+  logoutAllDevices
+}
+
+mutation ChangePassword($current: String!, $new: String!) {
+  changePassword(currentPassword: $current, newPassword: $new)
+}
+
+query GetUserDevices {
+  userDevices {
+    id
+    deviceName
+    platform
+    appVersion
+    lastLoginAt
+    createdAt
+  }
+}

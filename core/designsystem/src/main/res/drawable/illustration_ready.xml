@@ -1,0 +1,38 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="200dp"
+    android:height="200dp"
+    android:viewportWidth="200"
+    android:viewportHeight="200">
+    <!-- Traveler Looking at Path (Ready Adventure) -->
+    <!-- Distant Mountains -->
+    <path
+        android:fillColor="#E2E8F0"
+        android:pathData="M0,120 L40,60 L80,120 L120,40 L160,120 L200,120 V200 H0 Z" />
+
+    <!-- Path -->
+    <path
+        android:strokeColor="#2563EB"
+        android:strokeWidth="4"
+        android:strokeLineCap="round"
+        android:pathData="M100,180 Q120,150 90,130 T110,90" />
+
+    <!-- Character on Cliff -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M30,180 h40 v20 h-40 z" /> <!-- Rock -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M45,150 v-20 q0,-5 5,-5 h5 v30 z" /> <!-- Body -->
+    <path
+        android:fillColor="#1E293B"
+        android:pathData="M50,115 a6,6 0,1,0 12,0 a6,6 0,1,0 -12,0" /> <!-- Head -->
+    <path
+        android:fillColor="#2563EB"
+        android:pathData="M55,130 h8 v15 h-8 z" /> <!-- Backpack -->
+
+    <!-- Birds -->
+    <path
+        android:strokeColor="#64748B"
+        android:strokeWidth="1.5"
+        android:pathData="M140,50 l5,5 l5,-5 M160,40 l4,4 l4,-4" />
+</vector>

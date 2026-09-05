@@ -1,0 +1,38 @@
+package com.android.trippoint.authentication.permissions
+
+import com.android.trippoint.core.common.BaseViewModel
+
+class PermissionsViewModel(
+    private val authRepository: com.android.trippoint.authentication.domain.repository.AuthRepository
+) : 
+    BaseViewModel<PermissionsContract.State, PermissionsContract.Intent, PermissionsContract.Effect>(
+        initialState = PermissionsContract.State()
+    ) {
+
+    override fun onIntent(intent: PermissionsContract.Intent) {
+        when (intent) {
+            PermissionsContract.Intent.AllowClicked -> {
+                sendEffect(PermissionsContract.Effect.RequestPermission(uiState.value.currentStep))
+                handleNext()
+            }
+            PermissionsContract.Intent.DenyClicked -> handleNext()
+            PermissionsContract.Intent.ExploreClicked -> {
+                authRepository.setPermissionsRequested(true)
+                sendEffect(PermissionsContract.Effect.NavigateToHome)
+            }
+        }
+    }
+
+    private fun handleNext() {
+        val currentState = uiState.value
+        when (currentState.currentStep) {
+            PermissionsContract.Step.NOTIFICATIONS -> setState { 
+                copy(currentStep = PermissionsContract.Step.LOCATION) 
+            }
+            PermissionsContract.Step.LOCATION -> setState { 
+                copy(currentStep = PermissionsContract.Step.CALENDAR) 
+            }
+            PermissionsContract.Step.CALENDAR -> setState { copy(isAllSet = true) }
+        }
+    }
+}
