@@ -18,17 +18,19 @@ class TripOverviewViewModel(
             is TripOverviewContract.Intent.LoadTripDetails -> loadTripDetails(intent.tripId)
             is TripOverviewContract.Intent.TabSelected -> {
                 setState { copy(selectedTab = intent.tabIndex) }
-                if (intent.tabIndex == 1) { // Timeline tab
-                    uiState.value.trip?.id?.let {
-                        sendEffect(TripOverviewContract.Effect.NavigateToTimeline(it))
-                    }
+                val tripId = uiState.value.trip?.id ?: return
+                when (intent.tabIndex) {
+                    1 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
+                    2 -> sendEffect(TripOverviewContract.Effect.NavigateToBookings(tripId))
                 }
             }
             TripOverviewContract.Intent.BackClicked -> {
                 sendEffect(TripOverviewContract.Effect.NavigateBack)
             }
             TripOverviewContract.Intent.AddBookingClicked -> {
-                // Handle action
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddBooking(it))
+                }
             }
             TripOverviewContract.Intent.AddTaskClicked -> {
                 uiState.value.trip?.id?.let {

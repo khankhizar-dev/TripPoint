@@ -67,4 +67,57 @@ sealed class Screen(val route: String) {
     object FilterSort : Screen("filter_sort/{tripId}") {
         fun createRoute(tripId: String) = "filter_sort/$tripId"
     }
+    object Bookings : Screen("bookings?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "bookings?tripId=$tripId" else "bookings"
+    }
+    object BookingDetails : Screen("booking_details/{bookingId}?tripId={tripId}") {
+        fun createRoute(tripId: String, bookingId: String) = "booking_details/$bookingId?tripId=$tripId"
+    }
+    object AddTraveller : Screen("add_traveller/{bookingId}?tripId={tripId}") {
+        fun createRoute(tripId: String, bookingId: String) = "add_traveller/$bookingId?tripId=$tripId"
+    }
+    object AddBookingOptions : Screen("add_booking_options?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "add_booking_options?tripId=$tripId"
+        } else {
+            "add_booking_options"
+        }
+    }
+    object CreateBooking : Screen("create_booking?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "create_booking?tripId=$tripId"
+        } else {
+            "create_booking"
+        }
+    }
+    object PnrIntake : Screen("pnr_intake?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "pnr_intake?tripId=$tripId"
+        } else {
+            "pnr_intake"
+        }
+    }
+    object ScanTicket : Screen("scan_ticket?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "scan_ticket?tripId=$tripId"
+        } else {
+            "scan_ticket"
+        }
+    }
+    object ImportEmail : Screen("import_email?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "import_email?tripId=$tripId"
+        } else {
+            "import_email"
+        }
+    }
+    object BookingFilter : Screen("booking_filter/{tripId}") {
+        fun createRoute(tripId: String) = "booking_filter/$tripId"
+    }
+    object BookingItinerary : Screen("booking_itinerary/{tripId}/{bookingId}") {
+        fun createRoute(tripId: String, bookingId: String) = "booking_itinerary/$tripId/$bookingId"
+    }
+    object ManageBooking : Screen("manage_booking/{tripId}/{bookingId}") {
+        fun createRoute(tripId: String, bookingId: String) = "manage_booking/$tripId/$bookingId"
+    }
 }
