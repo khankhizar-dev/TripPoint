@@ -29,6 +29,8 @@ import com.android.trippoint.documents.list.*
 import com.android.trippoint.documents.add.*
 import com.android.trippoint.documents.details.*
 import com.android.trippoint.documents.categories.*
+import com.android.trippoint.documents.scan.*
+import com.android.trippoint.documents.search.*
 import com.android.trippoint.documents.domain.repository.DocumentRepository
 import com.android.trippoint.budget.domain.repository.BudgetRepository
 import com.android.trippoint.core.navigation.Screen
@@ -105,7 +107,24 @@ private fun NavGraphBuilder.documentsNavGraph(
                 navController.navigate(Screen.DocumentDetails.createRoute(id)) 
             },
             onNavigateToCategories = { navController.navigate(Screen.DocumentCategories.route) },
-            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) }
+            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) },
+            onNavigateToSearch = { navController.navigate(Screen.DocumentSearch.route) }
+        )
+    }
+    composable(Screen.DocumentScan.route) {
+        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ScanDocumentRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onDocumentCaptured = { /* TODO */ }
+        )
+    }
+    composable(Screen.DocumentSearch.route) {
+        val viewModel: SearchFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        SearchFilterRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onFiltersApplied = { /* TODO */ }
         )
     }
     composable(
@@ -130,7 +149,7 @@ private fun NavGraphBuilder.documentsNavGraph(
     composable(Screen.DocumentUploadOptions.route) {
         UploadOptionsRoute(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToScan = { /* TODO */ },
+            onNavigateToScan = { navController.navigate(Screen.DocumentScan.route) },
             onNavigateToManual = { navController.navigate(Screen.AddDocument.route) }
         )
     }

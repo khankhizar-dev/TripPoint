@@ -159,4 +159,6 @@ sealed class Screen(val route: String) {
     }
     object DocumentUploadOptions : Screen("document_upload_options")
     object AddDocument : Screen("add_document")
+    object DocumentScan : Screen("document_scan")
+    object DocumentSearch : Screen("document_search")
 }

@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -49,7 +50,8 @@ fun DocumentListRoute(
     onNavigateBack: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
     onNavigateToCategories: () -> Unit,
-    onNavigateToAdd: () -> Unit
+    onNavigateToAdd: () -> Unit,
+    onNavigateToSearch: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -71,7 +73,8 @@ fun DocumentListRoute(
     DocumentListScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
-        onNavigateToCategories = onNavigateToCategories
+        onNavigateToCategories = onNavigateToCategories,
+        onSearchClick = onNavigateToSearch
     )
 }
 
@@ -79,13 +82,19 @@ fun DocumentListRoute(
 fun DocumentListScreen(
     uiState: DocumentListContract.State,
     onIntent: (DocumentListContract.Intent) -> Unit,
-    onNavigateToCategories: () -> Unit
+    onNavigateToCategories: () -> Unit,
+    onSearchClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
             TripPointTopAppBar(
                 title = stringResource(id = designR.string.documents_title),
-                onNavClick = { onIntent(DocumentListContract.Intent.BackClicked) }
+                onNavClick = { onIntent(DocumentListContract.Intent.BackClicked) },
+                actions = {
+                    IconButton(onClick = onSearchClick) {
+                        Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    }
+                }
             )
         },
         floatingActionButton = {

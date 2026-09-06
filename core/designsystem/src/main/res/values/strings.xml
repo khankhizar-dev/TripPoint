@@ -239,6 +239,22 @@
     <string name="documents_ref_label">Reference Number</string>
     <string name="documents_save_button">Store Document</string>
 
+    <!-- Scan Document -->
+    <string name="documents_scan_title">Scan Document</string>
+    <string name="documents_scan_auto_capture">Auto capture</string>
+    <string name="documents_scan_instructions">Align document within the frame</string>
+
+    <!-- Search & Filter -->
+    <string name="documents_search_filter_title">Search &amp; Filter</string>
+    <string name="documents_filter_category">Category</string>
+    <string name="documents_filter_expiry">Expiry Date</string>
+    <string name="documents_filter_issued_by">Issued By</string>
+    <string name="documents_apply_filters">Apply Filters</string>
+    <string name="documents_reset_filters">Reset</string>
+    <string name="documents_filter_all">All</string>
+    <string name="documents_filter_this_month">This Month</string>
+    <string name="documents_filter_this_year">This Year</string>
+
     <!-- Add Traveller -->
     <string name="bookings_traveller_add_title">Add Traveller</string>
     <string name="bookings_traveller_first_name">First Name</string>
