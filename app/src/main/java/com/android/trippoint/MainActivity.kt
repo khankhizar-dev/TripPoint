@@ -21,6 +21,7 @@ import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
 import com.android.trippoint.booking.data.repository.BookingRepositoryImpl
 import com.android.trippoint.budget.data.repository.BudgetRepositoryImpl
+import com.android.trippoint.documents.data.repository.DocumentRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
@@ -78,6 +79,10 @@ class MainActivity : ComponentActivity() {
                     BudgetRepositoryImpl()
                 }
 
+                val documentRepository = remember {
+                    DocumentRepositoryImpl()
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavGraph(
                         navController = navController,
@@ -85,6 +90,7 @@ class MainActivity : ComponentActivity() {
                         itineraryRepository = itineraryRepository,
                         bookingRepository = bookingRepository,
                         budgetRepository = budgetRepository,
+                        documentRepository = documentRepository,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }

@@ -204,6 +204,40 @@
     <string name="budget_category_activities">Activities</string>
     <string name="budget_category_accommodation">Accommodation</string>
     <string name="budget_category_other">Other</string>
+    <string name="budget_scanner_title">AI Receipt Scanner</string>
+    <string name="budget_scanner_instructions">Place your receipt inside the frame. Our AI will automatically extract the amount, date, and category.</string>
+    <string name="budget_scanner_processing">AI is processing receipt...</string>
+    <string name="budget_scanner_success">Receipt scanned successfully!</string>
+    <string name="budget_scanner_error">Could not read receipt. Please try again or enter manually.</string>
+    <string name="budget_scanner_capture">Capture Receipt</string>
+
+    <!-- Travel Documents -->
+    <string name="documents_title">My Documents</string>
+    <string name="documents_categories_title">Categories</string>
+    <string name="documents_tab_all">All</string>
+    <string name="documents_tab_recent">Recent</string>
+    <string name="documents_tab_favorites">Favorites</string>
+    <string name="documents_tab_shared">Shared</string>
+    <string name="documents_section_recent">Recent Documents</string>
+    <string name="documents_section_view_all">View All</string>
+    <string name="documents_search_placeholder">Search documents</string>
+
+    <string name="documents_type_passport_visa">Passport &amp; Visa</string>
+    <string name="documents_type_tickets_boarding">Tickets &amp; Boarding</string>
+    <string name="documents_type_id_proofs">ID Proofs</string>
+    <string name="documents_type_hotel_vouchers">Hotel Vouchers</string>
+    <string name="documents_type_insurance">Insurance</string>
+    <string name="documents_type_other">Other Documents</string>
+
+    <string name="documents_count_suffix">%1$d Documents</string>
+
+    <string name="documents_empty_title">No documents stored</string>
+    <string name="documents_empty_desc">Keep your important travel documents safe and accessible offline.</string>
+    <string name="documents_add_title">Add Document</string>
+    <string name="documents_upload_label">Click to upload file</string>
+    <string name="documents_expiry_label">Expiry Date</string>
+    <string name="documents_ref_label">Reference Number</string>
+    <string name="documents_save_button">Store Document</string>
 
     <!-- Add Traveller -->
     <string name="bookings_traveller_add_title">Add Traveller</string>

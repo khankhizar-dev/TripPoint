@@ -143,4 +143,20 @@ sealed class Screen(val route: String) {
     object ExpenseList : Screen("expense_list/{budgetId}") {
         fun createRoute(budgetId: String) = "expense_list/$budgetId"
     }
+    object SpendingTrends : Screen("spending_trends/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "spending_trends/$budgetId?tripId=$tripId"
+    }
+    object BudgetReports : Screen("budget_reports/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "budget_reports/$budgetId?tripId=$tripId"
+    }
+    object ReceiptScanner : Screen("receipt_scanner/{budgetId}") {
+        fun createRoute(budgetId: String) = "receipt_scanner/$budgetId"
+    }
+    object Documents : Screen("documents")
+    object DocumentCategories : Screen("document_categories")
+    object DocumentDetails : Screen("document_details/{documentId}") {
+        fun createRoute(id: String) = "document_details/$id"
+    }
+    object DocumentUploadOptions : Screen("document_upload_options")
+    object AddDocument : Screen("add_document")
 }

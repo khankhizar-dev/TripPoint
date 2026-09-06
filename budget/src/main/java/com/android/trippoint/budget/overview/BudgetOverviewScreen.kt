@@ -13,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Camera
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,17 +22,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.core.designsystem.components.AlertVariant
+import com.android.trippoint.core.designsystem.components.ButtonVariant
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointAlert
 import com.android.trippoint.core.designsystem.components.TripPointBudgetCard
+import com.android.trippoint.core.designsystem.components.TripPointButton
 import com.android.trippoint.core.designsystem.components.TripPointInfoCard
+import com.android.trippoint.core.designsystem.components.TripPointInteractiveCard
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import kotlinx.coroutines.flow.collectLatest
@@ -43,7 +47,10 @@ fun BudgetOverviewRoute(
     viewModel: BudgetOverviewViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToAddExpense: (String) -> Unit,
-    onNavigateToExpenses: (String) -> Unit
+    onNavigateToExpenses: (String) -> Unit,
+    onNavigateToTrends: (String, String) -> Unit,
+    onNavigateToReports: (String, String) -> Unit,
+    onNavigateToScanner: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -63,7 +70,10 @@ fun BudgetOverviewRoute(
     BudgetOverviewScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
-        onViewAllExpenses = { onNavigateToExpenses(budgetId) }
+        onViewAllExpenses = { onNavigateToExpenses(budgetId) },
+        onTrendsClick = { onNavigateToTrends(tripId, budgetId) },
+        onReportsClick = { onNavigateToReports(tripId, budgetId) },
+        onScannerClick = { onNavigateToScanner(budgetId) }
     )
 }
 
@@ -71,7 +81,10 @@ fun BudgetOverviewRoute(
 fun BudgetOverviewScreen(
     uiState: BudgetOverviewContract.State,
     onIntent: (BudgetOverviewContract.Intent) -> Unit,
-    onViewAllExpenses: () -> Unit
+    onViewAllExpenses: () -> Unit,
+    onTrendsClick: () -> Unit,
+    onReportsClick: () -> Unit,
+    onScannerClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -93,6 +106,9 @@ fun BudgetOverviewScreen(
         BudgetOverviewContent(
             uiState = uiState,
             onViewAllExpenses = onViewAllExpenses,
+            onTrendsClick = onTrendsClick,
+            onReportsClick = onReportsClick,
+            onScannerClick = onScannerClick,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -102,6 +118,9 @@ fun BudgetOverviewScreen(
 private fun BudgetOverviewContent(
     uiState: BudgetOverviewContract.State,
     onViewAllExpenses: () -> Unit,
+    onTrendsClick: () -> Unit,
+    onReportsClick: () -> Unit,
+    onScannerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (uiState.isLoading) {
@@ -130,6 +149,36 @@ private fun BudgetOverviewContent(
                     modifier = Modifier.fillMaxWidth()
                 )
                 
+                Spacer(modifier = Modifier.height(32.dp))
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    TripPointInteractiveCard(
+                        title = "Spending Trends",
+                        subtitle = "View analytics",
+                        onClick = onTrendsClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TripPointInteractiveCard(
+                        title = "Reports",
+                        subtitle = "Export data",
+                        onClick = onReportsClick,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TripPointButton(
+                    text = "AI Receipt Scan",
+                    onClick = onScannerClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    variant = ButtonVariant.Secondary,
+                    leadingIcon = Icons.Default.Camera
+                )
+
                 Spacer(modifier = Modifier.height(32.dp))
                 
                 Row(
