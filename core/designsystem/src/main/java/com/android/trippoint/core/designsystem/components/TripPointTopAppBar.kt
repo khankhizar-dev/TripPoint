@@ -33,14 +33,16 @@ fun TripPointTopAppBar(
     navIcon: TopAppBarNavIcon = TopAppBarNavIcon.Back,
     onNavClick: (() -> Unit)? = null,
     isDark: Boolean = false,
+    containerColor: Color? = null,
+    contentColor: Color? = null,
     actions: @Composable RowScope.() -> Unit = {}
 ) {
-    val containerColor = if (isDark) {
+    val finalContainerColor = containerColor ?: if (isDark) {
         MaterialTheme.colorScheme.onSurface 
     } else {
         Color.Transparent
     }
-    val contentColor = if (isDark) {
+    val finalContentColor = contentColor ?: if (isDark) {
         MaterialTheme.colorScheme.surface 
     } else {
         MaterialTheme.colorScheme.onSurface
@@ -57,7 +59,7 @@ fun TripPointTopAppBar(
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = contentColor
+                    tint = finalContentColor
                 )
             }
         }
@@ -68,17 +70,17 @@ fun TripPointTopAppBar(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                color = contentColor
+                color = finalContentColor
             )
         },
         modifier = modifier,
         navigationIcon = navigationIcon,
         actions = actions,
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = containerColor,
-            titleContentColor = contentColor,
-            navigationIconContentColor = contentColor,
-            actionIconContentColor = contentColor
+            containerColor = finalContainerColor,
+            titleContentColor = finalContentColor,
+            navigationIconContentColor = finalContentColor,
+            actionIconContentColor = finalContentColor
         )
     )
 }

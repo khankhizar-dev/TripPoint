@@ -1,0 +1,26 @@
+package com.android.trippoint.documents.scan
+
+import com.android.trippoint.core.common.UiEffect
+import com.android.trippoint.core.common.UiIntent
+import com.android.trippoint.core.common.UiState
+
+class ScanDocumentContract {
+    sealed class Intent : UiIntent {
+        object CaptureClicked : Intent()
+        data class AutoCaptureToggled(val enabled: Boolean) : Intent()
+        object BackClicked : Intent()
+        object FlashToggled : Intent()
+    }
+
+    data class State(
+        val isAutoCaptureEnabled: Boolean = true,
+        val isFlashEnabled: Boolean = false,
+        val isProcessing: Boolean = false,
+        val error: String? = null
+    ) : UiState
+
+    sealed class Effect : UiEffect {
+        object NavigateBack : Effect()
+        data class DocumentCaptured(val uri: String) : Effect()
+    }
+}

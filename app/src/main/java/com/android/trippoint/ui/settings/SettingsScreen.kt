@@ -52,6 +52,7 @@ fun SettingsRoute(
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
@@ -75,6 +76,7 @@ fun SettingsRoute(
         onNavigateToPreferences = onNavigateToPreferences,
         onNavigateToNotifications = onNavigateToNotifications,
         onNavigateToSecurity = onNavigateToSecurity,
+        onNavigateToDocuments = onNavigateToDocuments,
         onNavigateToSupport = onNavigateToSupport,
         onNavigateToAbout = onNavigateToAbout
     )
@@ -137,6 +139,7 @@ fun SettingsScreen(
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
@@ -158,6 +161,7 @@ fun SettingsScreen(
                 onNavigateToPreferences = onNavigateToPreferences,
                 onNavigateToNotifications = onNavigateToNotifications,
                 onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToDocuments = onNavigateToDocuments,
                 onNavigateToSupport = onNavigateToSupport,
                 onNavigateToAbout = onNavigateToAbout
             )
@@ -193,6 +197,7 @@ private fun SettingsContent(
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
@@ -231,6 +236,7 @@ private fun SettingsContent(
                 onNavigateToPreferences = onNavigateToPreferences,
                 onNavigateToNotifications = onNavigateToNotifications,
                 onNavigateToSecurity = onNavigateToSecurity,
+                onNavigateToDocuments = onNavigateToDocuments,
                 onNavigateToSupport = onNavigateToSupport,
                 onNavigateToAbout = onNavigateToAbout
             )
@@ -249,6 +255,7 @@ private fun SettingsOptionsList(
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
     onNavigateToSecurity: () -> Unit,
+    onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
     onNavigateToAbout: () -> Unit
 ) {
@@ -267,6 +274,11 @@ private fun SettingsOptionsList(
             title = "Account & Security",
             icon = Icons.Outlined.Lock,
             onClick = onNavigateToSecurity
+        )
+        SettingsListItem(
+            title = "Document Locker",
+            icon = Icons.Default.Info, // Should be a locker icon
+            onClick = onNavigateToDocuments
         )
         SettingsListItem(
             title = "Support & Help",

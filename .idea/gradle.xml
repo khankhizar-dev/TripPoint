@@ -12,12 +12,14 @@
             <option value="$PROJECT_DIR$/app" />
             <option value="$PROJECT_DIR$/authentication" />
             <option value="$PROJECT_DIR$/booking" />
+            <option value="$PROJECT_DIR$/budget" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/database" />
             <option value="$PROJECT_DIR$/core/designsystem" />
             <option value="$PROJECT_DIR$/core/navigation" />
             <option value="$PROJECT_DIR$/core/network" />
+            <option value="$PROJECT_DIR$/documents" />
             <option value="$PROJECT_DIR$/itinerary" />
             <option value="$PROJECT_DIR$/trip" />
           </set>

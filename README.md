@@ -39,6 +39,7 @@ The project follows a multi-module architecture to promote scalability and maint
 - **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
 - **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
 - **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
+- **`:budget`**: **The Finance Center**. Tracks trip expenses, manages budgets, and provides category-wise breakdown of spending.
 
 ## 🛠 Features
 
@@ -75,6 +76,22 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Booking Details**: Comprehensive view with itinerary segments, airline/provider info, and total costs.
 - [x] **Traveller Management**: Dynamic passenger list with support for adding/removing travellers and seat assignments.
 - [x] **Management Actions**: Quick access to edit, share, delete, or manage baggage and seating.
+
+### Budget & Expense Tracking
+- [x] **Budget Overview**: High-fidelity summary card with total/spent amounts and real-time progress tracking.
+- [x] **Category Breakdown**: Detailed spending analysis for Food, Transport, Activities, etc.
+- [x] **Global Budget List**: Manage financial plans across all active and upcoming trips.
+- [x] **Spending Trends**: Dynamic bar charts and AI-powered spending insights.
+- [x] **Financial Reports**: Export trip expenses to PDF and CSV formats.
+- [x] **AI Receipt Scanner**: High-fidelity animated camera interface for automatic expense entry.
+
+### Travel Document Locker
+- [x] **Secure Storage**: Encrypted locker for Passports, Visas, Tickets, and Insurance.
+- [x] **High-Fidelity UI**: Interactive cards with favoriting, sharing, and expiry tracking.
+- [x] **AI Document Scan**: Dark-themed scanner with alignment guides and auto-capture.
+- [x] **Categories Grid**: Visual organization with real-time document counts per type.
+- [x] **Batch Management**: Long-press selection mode for bulk actions.
+- [x] **Granular Discovery**: Search and filter by category, expiry date, or issuer.
 
 ## 📖 Development Guidelines
 

@@ -8,6 +8,16 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute
+import com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute
+import com.android.trippoint.authentication.login.LoginRoute
+import com.android.trippoint.authentication.onboarding.OnboardingRoute
+import com.android.trippoint.authentication.onboarding.WelcomeScreen
+import com.android.trippoint.authentication.otp.OtpRoute
+import com.android.trippoint.authentication.permissions.PermissionsRoute
+import com.android.trippoint.authentication.profilesetup.ProfileSetupRoute
+import com.android.trippoint.authentication.register.RegisterRoute
+import com.android.trippoint.authentication.session.SessionExpiredScreen
 import com.android.trippoint.authentication.splash.SplashRoute
 import com.android.trippoint.booking.add.AddBookingOptionsRoute
 import com.android.trippoint.booking.add.AddBookingOptionsViewModel
@@ -32,7 +42,36 @@ import com.android.trippoint.booking.filter.BookingFilterRoute
 import com.android.trippoint.booking.filter.BookingFilterViewModel
 import com.android.trippoint.booking.list.BookingListRoute
 import com.android.trippoint.booking.list.BookingListViewModel
+import com.android.trippoint.budget.domain.repository.BudgetRepository
+import com.android.trippoint.budget.expense.add.AddExpenseRoute
+import com.android.trippoint.budget.expense.add.AddExpenseViewModel
+import com.android.trippoint.budget.expense.list.ExpenseListRoute
+import com.android.trippoint.budget.expense.list.ExpenseListViewModel
+import com.android.trippoint.budget.expense.scanner.ReceiptScannerRoute
+import com.android.trippoint.budget.expense.scanner.ReceiptScannerViewModel
+import com.android.trippoint.budget.list.BudgetListRoute
+import com.android.trippoint.budget.list.BudgetListViewModel
+import com.android.trippoint.budget.overview.BudgetOverviewRoute
+import com.android.trippoint.budget.overview.BudgetOverviewViewModel
+import com.android.trippoint.budget.reports.BudgetReportsRoute
+import com.android.trippoint.budget.reports.BudgetReportsViewModel
+import com.android.trippoint.budget.trends.SpendingTrendsRoute
+import com.android.trippoint.budget.trends.SpendingTrendsViewModel
 import com.android.trippoint.core.navigation.Screen
+import com.android.trippoint.documents.add.AddDocumentRoute
+import com.android.trippoint.documents.add.AddDocumentViewModel
+import com.android.trippoint.documents.add.UploadOptionsRoute
+import com.android.trippoint.documents.categories.DocumentCategoriesRoute
+import com.android.trippoint.documents.categories.DocumentCategoriesViewModel
+import com.android.trippoint.documents.details.DocumentDetailsRoute
+import com.android.trippoint.documents.details.DocumentDetailsViewModel
+import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.documents.list.DocumentListRoute
+import com.android.trippoint.documents.list.DocumentListViewModel
+import com.android.trippoint.documents.scan.ScanDocumentRoute
+import com.android.trippoint.documents.scan.ScanDocumentViewModel
+import com.android.trippoint.documents.search.SearchFilterRoute
+import com.android.trippoint.documents.search.SearchFilterViewModel
 import com.android.trippoint.itinerary.add.AddEventRoute
 import com.android.trippoint.itinerary.add.AddEventViewModel
 import com.android.trippoint.itinerary.day.TimelineRoute
@@ -61,6 +100,17 @@ import com.android.trippoint.trip.overview.TripOverviewRoute
 import com.android.trippoint.trip.overview.TripOverviewViewModel
 import com.android.trippoint.trip.summary.TripSummaryRoute
 import com.android.trippoint.trip.summary.TripSummaryViewModel
+import com.android.trippoint.ui.home.HomeRoute
+import com.android.trippoint.ui.settings.AboutScreen
+import com.android.trippoint.ui.settings.ChangePasswordRoute
+import com.android.trippoint.ui.settings.ConnectedAccountsScreen
+import com.android.trippoint.ui.settings.DevicesRoute
+import com.android.trippoint.ui.settings.EditProfileRoute
+import com.android.trippoint.ui.settings.NotificationsRoute
+import com.android.trippoint.ui.settings.PreferencesRoute
+import com.android.trippoint.ui.settings.SecurityRoute
+import com.android.trippoint.ui.settings.SettingsRoute
+import com.android.trippoint.ui.settings.SupportRoute
 
 @Composable
 fun AppNavGraph(
@@ -68,6 +118,8 @@ fun AppNavGraph(
     tripRepository: TripRepository,
     itineraryRepository: ItineraryRepository,
     bookingRepository: BookingRepository,
+    budgetRepository: BudgetRepository,
+    documentRepository: DocumentRepository,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -79,6 +131,8 @@ fun AppNavGraph(
         tripNavGraph(navController, tripRepository)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
+        budgetNavGraph(navController, budgetRepository)
+        documentsNavGraph(navController, documentRepository)
     }
 }
 
@@ -130,7 +184,7 @@ private fun NavGraphBuilder.addSplashDestination(navController: NavHostControlle
 
 private fun NavGraphBuilder.addWelcomeDestination(navController: NavHostController) {
     composable(Screen.Welcome.route) {
-        com.android.trippoint.authentication.onboarding.WelcomeScreen(
+        WelcomeScreen(
             onGetStarted = { navController.navigate(Screen.Onboarding.route) },
             onSignIn = { navController.navigate(Screen.Login.route) }
         )
@@ -139,7 +193,7 @@ private fun NavGraphBuilder.addWelcomeDestination(navController: NavHostControll
 
 private fun NavGraphBuilder.addOnboardingDestination(navController: NavHostController) {
     composable(Screen.Onboarding.route) {
-        com.android.trippoint.authentication.onboarding.OnboardingRoute(
+        OnboardingRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(Screen.Welcome.route) { inclusive = true }
@@ -151,7 +205,7 @@ private fun NavGraphBuilder.addOnboardingDestination(navController: NavHostContr
 
 private fun NavGraphBuilder.addLoginDestination(navController: NavHostController) {
     composable(Screen.Login.route) {
-        com.android.trippoint.authentication.login.LoginRoute(
+        LoginRoute(
             onNavigateToHome = { isProfileComplete ->
                 val destination = if (isProfileComplete) Screen.Home.route else Screen.ProfileSetup.route
                 navController.navigate(destination) {
@@ -166,9 +220,11 @@ private fun NavGraphBuilder.addLoginDestination(navController: NavHostController
 
 private fun NavGraphBuilder.addForgotPasswordDestination(navController: NavHostController) {
     composable(Screen.ForgotPassword.route) {
-        com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute(
+        ForgotPasswordRoute(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToOtp = { email -> navController.navigate(Screen.Otp.createRoute(email, true)) }
+            onNavigateToOtp = { email ->
+                navController.navigate(Screen.Otp.createRoute(email, true))
+            }
         )
     }
 }
@@ -183,9 +239,8 @@ private fun NavGraphBuilder.addResetPasswordDestination(navController: NavHostCo
     ) { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email") ?: ""
         val otp = backStackEntry.arguments?.getString("otp") ?: ""
-        com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute(
-            email = email,
-            otp = otp,
+        ResetPasswordRoute(
+            email = email, otp = otp,
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -197,7 +252,7 @@ private fun NavGraphBuilder.addResetPasswordDestination(navController: NavHostCo
 
 private fun NavGraphBuilder.addRegisterDestination(navController: NavHostController) {
     composable(Screen.Register.route) {
-        com.android.trippoint.authentication.register.RegisterRoute(
+        RegisterRoute(
             onNavigateToOtp = { email ->
                 navController.navigate(Screen.Otp.createRoute(email)) {
                     popUpTo(Screen.Register.route) { inclusive = true }
@@ -225,9 +280,8 @@ private fun NavGraphBuilder.addOtpDestination(navController: NavHostController) 
     ) { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email") ?: ""
         val isForgotPassword = backStackEntry.arguments?.getBoolean("isForgotPassword") ?: false
-        com.android.trippoint.authentication.otp.OtpRoute(
-            email = email,
-            isForgotPasswordFlow = isForgotPassword,
+        OtpRoute(
+            email = email, isForgotPasswordFlow = isForgotPassword,
             onNavigateToHome = {
                 navController.navigate(Screen.ProfileSetup.route) {
                     popUpTo(0) { inclusive = true }
@@ -244,7 +298,7 @@ private fun NavGraphBuilder.addOtpDestination(navController: NavHostController) 
 
 private fun NavGraphBuilder.addProfileSetupDestination(navController: NavHostController) {
     composable(Screen.ProfileSetup.route) {
-        com.android.trippoint.authentication.profilesetup.ProfileSetupRoute(
+        ProfileSetupRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Permissions.route) {
                     popUpTo(0) { inclusive = true }
@@ -256,7 +310,7 @@ private fun NavGraphBuilder.addProfileSetupDestination(navController: NavHostCon
 
 private fun NavGraphBuilder.addPermissionsDestination(navController: NavHostController) {
     composable(Screen.Permissions.route) {
-        com.android.trippoint.authentication.permissions.PermissionsRoute(
+        PermissionsRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
@@ -268,7 +322,7 @@ private fun NavGraphBuilder.addPermissionsDestination(navController: NavHostCont
 
 private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostController) {
     composable(Screen.SessionExpired.route) {
-        com.android.trippoint.authentication.session.SessionExpiredScreen(
+        SessionExpiredScreen(
             onLoginAgain = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -278,54 +332,31 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
     }
 }
 
+@Suppress("LongMethod")
 private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripRepository: TripRepository) {
-    addHomeDestination(navController)
-    addTripOverviewDestination(navController, tripRepository)
-    addCreateTripDestination(navController, tripRepository)
-    addAddDetailsDestination(navController)
-    addInvitePeopleDestination(navController, tripRepository)
-    addTripSummaryDestination(navController, tripRepository)
-    addProfileDestination(navController)
-    addEditProfileDestination(navController)
-    addPreferencesDestination(navController)
-    addNotificationsDestination(navController)
-    addSecurityDestination(navController)
-    addChangePasswordDestination(navController)
-    addDevicesDestination(navController)
-    addConnectedAccountsDestination(navController)
-    addSupportDestination(navController)
-    addAboutDestination()
-}
-
-private fun NavGraphBuilder.addHomeDestination(navController: NavHostController) {
     composable(Screen.Home.route) {
-        com.android.trippoint.ui.home.HomeRoute(
+        HomeRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
                 }
             },
             onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-            onNavigateToTripDetails = { tripId -> 
-                navController.navigate(Screen.TripOverview.createRoute(tripId)) 
+            onNavigateToTripDetails = { tripId ->
+                navController.navigate(Screen.TripOverview.createRoute(tripId))
             },
             onNavigateToCreateTrip = { navController.navigate(Screen.CreateTrip.route) },
             onNavigateToBookings = { tripId -> 
                 navController.navigate(Screen.Bookings.createRoute(tripId))
+            },
+            onNavigateToBudgets = { tripId ->
+                navController.navigate(Screen.Budgets.createRoute(tripId))
             }
         )
     }
-}
-
-private fun NavGraphBuilder.addTripOverviewDestination(
-    navController: NavHostController, 
-    tripRepository: TripRepository
-) {
     composable(
         route = Screen.TripOverview.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: TripOverviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -337,22 +368,16 @@ private fun NavGraphBuilder.addTripOverviewDestination(
             }
         )
         TripOverviewRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToTimeline = { id -> navController.navigate(Screen.TripDays.createRoute(id)) },
             onNavigateToBookings = { id -> navController.navigate(Screen.Bookings.createRoute(id)) },
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
-            onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) }
+            onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
+            onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addCreateTripDestination(
-    navController: NavHostController, 
-    tripRepository: TripRepository
-) {
     composable(Screen.CreateTrip.route) {
         val viewModel: CreateTripViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = object : ViewModelProvider.Factory {
@@ -368,20 +393,14 @@ private fun NavGraphBuilder.addCreateTripDestination(
             onNavigateToAddDetails = { id -> navController.navigate(Screen.AddDetails.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddDetailsDestination(navController: NavHostController) {
     composable(
         route = Screen.AddDetails.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: AddDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         AddDetailsRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onSaveAndContinue = { navController.navigate(Screen.InvitePeople.createRoute(tripId)) },
             onNavigateToItinerary = { id -> navController.navigate(Screen.TripDays.createRoute(id)) },
@@ -389,17 +408,9 @@ private fun NavGraphBuilder.addAddDetailsDestination(navController: NavHostContr
             onNavigateToNotes = { id -> navController.navigate(Screen.Notes.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addInvitePeopleDestination(
-    navController: NavHostController, 
-    tripRepository: TripRepository
-) {
     composable(
         route = Screen.InvitePeople.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: InvitePeopleViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -411,23 +422,14 @@ private fun NavGraphBuilder.addInvitePeopleDestination(
             }
         )
         InvitePeopleRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToSummary = { id -> navController.navigate(Screen.TripSummary.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addTripSummaryDestination(
-    navController: NavHostController, 
-    tripRepository: TripRepository
-) {
     composable(
         route = Screen.TripSummary.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: TripSummaryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -439,8 +441,7 @@ private fun NavGraphBuilder.addTripSummaryDestination(
             }
         )
         TripSummaryRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
@@ -449,11 +450,8 @@ private fun NavGraphBuilder.addTripSummaryDestination(
             }
         )
     }
-}
-
-private fun NavGraphBuilder.addProfileDestination(navController: NavHostController) {
     composable(Screen.Profile.route) {
-        com.android.trippoint.ui.settings.SettingsRoute(
+        SettingsRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -463,92 +461,51 @@ private fun NavGraphBuilder.addProfileDestination(navController: NavHostControll
             onNavigateToPreferences = { navController.navigate(Screen.Preferences.route) },
             onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
             onNavigateToSecurity = { navController.navigate(Screen.Security.route) },
+            onNavigateToDocuments = { navController.navigate(Screen.Documents.route) },
             onNavigateToSupport = { navController.navigate(Screen.Support.route) },
             onNavigateToAbout = { navController.navigate(Screen.About.route) }
         )
     }
-}
-
-private fun NavGraphBuilder.addEditProfileDestination(navController: NavHostController) {
     composable(Screen.EditProfile.route) {
-        com.android.trippoint.ui.settings.EditProfileRoute(onNavigateBack = { navController.popBackStack() })
+        EditProfileRoute(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addPreferencesDestination(navController: NavHostController) {
     composable(Screen.Preferences.route) {
-        com.android.trippoint.ui.settings.PreferencesRoute(onNavigateBack = { navController.popBackStack() })
+        PreferencesRoute(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addNotificationsDestination(navController: NavHostController) {
     composable(Screen.Notifications.route) {
-        com.android.trippoint.ui.settings.NotificationsRoute(onNavigateBack = { navController.popBackStack() })
+        NotificationsRoute(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addSecurityDestination(navController: NavHostController) {
     composable(Screen.Security.route) {
-        com.android.trippoint.ui.settings.SecurityRoute(
+        SecurityRoute(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToChangePassword = { navController.navigate(Screen.ChangePassword.route) },
             onNavigateToDevices = { navController.navigate(Screen.Devices.route) },
             onNavigateToConnectedAccounts = { navController.navigate(Screen.ConnectedAccounts.route) }
         )
     }
-}
-
-private fun NavGraphBuilder.addChangePasswordDestination(navController: NavHostController) {
     composable(Screen.ChangePassword.route) {
-        com.android.trippoint.ui.settings.ChangePasswordRoute(onNavigateBack = { navController.popBackStack() })
+        ChangePasswordRoute(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addDevicesDestination(navController: NavHostController) {
     composable(Screen.Devices.route) {
-        com.android.trippoint.ui.settings.DevicesRoute(onNavigateBack = { navController.popBackStack() })
+        DevicesRoute(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addConnectedAccountsDestination(navController: NavHostController) {
     composable(Screen.ConnectedAccounts.route) {
-        com.android.trippoint.ui.settings.ConnectedAccountsScreen(onNavigateBack = { navController.popBackStack() })
+        ConnectedAccountsScreen(onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addSupportDestination(navController: NavHostController) {
     composable(Screen.Support.route) {
-        com.android.trippoint.ui.settings.SupportRoute(onNavigateBack = { navController.popBackStack() })
+        SupportRoute(onNavigateBack = { navController.popBackStack() })
     }
+    composable(Screen.About.route) { AboutScreen() }
 }
 
-private fun NavGraphBuilder.addAboutDestination() {
-    composable(Screen.About.route) { com.android.trippoint.ui.settings.AboutScreen() }
-}
-
+@Suppress("LongMethod")
 private fun NavGraphBuilder.itineraryNavGraph(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
-    addTripDaysDestination(navController, itineraryRepository)
-    addTimelineDestination(navController, itineraryRepository)
-    addEventDetailsDestination(navController, itineraryRepository)
-    addAddTaskDestination(navController, itineraryRepository)
-    addNotesDestination(navController, itineraryRepository)
-    addAddNoteDestination(navController, itineraryRepository)
-    addAddEventDestination(navController, itineraryRepository)
-    addFilterSortDestination(navController, itineraryRepository)
-}
-
-private fun NavGraphBuilder.addTripDaysDestination(
     navController: NavHostController, 
     itineraryRepository: ItineraryRepository
 ) {
     composable(
         route = Screen.TripDays.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: TripDaysViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -560,20 +517,11 @@ private fun NavGraphBuilder.addTripDaysDestination(
             }
         )
         TripDaysRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToDayTimeline = { id, date -> 
-                navController.navigate(Screen.Timeline.createRoute(id, date)) 
-            }
+            onNavigateToDayTimeline = { id, date -> navController.navigate(Screen.Timeline.createRoute(id, date)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addTimelineDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.Timeline.route,
         arguments = listOf(
@@ -592,9 +540,7 @@ private fun NavGraphBuilder.addTimelineDestination(
             }
         )
         TimelineRoute(
-            tripId = tripId,
-            date = date,
-            viewModel = viewModel,
+            tripId = tripId, date = date, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToEventDetails = { tId, dId, eId ->
                 navController.navigate(Screen.EventDetails.createRoute(tId, dId, eId))
@@ -605,12 +551,6 @@ private fun NavGraphBuilder.addTimelineDestination(
             onNavigateToFilter = { id -> navController.navigate(Screen.FilterSort.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addEventDetailsDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.EventDetails.route,
         arguments = listOf(
@@ -631,19 +571,10 @@ private fun NavGraphBuilder.addEventDetailsDestination(
             }
         )
         EventDetailsRoute(
-            tripId = tripId,
-            dayId = dayId,
-            activityId = activityId,
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
+            tripId = tripId, dayId = dayId, activityId = activityId,
+            viewModel = viewModel, onNavigateBack = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddTaskDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.AddTask.route,
         arguments = listOf(
@@ -662,24 +593,14 @@ private fun NavGraphBuilder.addAddTaskDestination(
             }
         )
         AddTaskRoute(
-            tripId = tripId,
-            date = date,
-            viewModel = viewModel,
+            tripId = tripId, date = date, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onTaskAdded = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addNotesDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.Notes.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: NotesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -691,23 +612,14 @@ private fun NavGraphBuilder.addNotesDestination(
             }
         )
         NotesRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddNoteDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.AddNote.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: AddNoteViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -719,18 +631,11 @@ private fun NavGraphBuilder.addAddNoteDestination(
             }
         )
         AddNoteRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNoteAdded = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddEventDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.AddEvent.route,
         arguments = listOf(
@@ -749,24 +654,14 @@ private fun NavGraphBuilder.addAddEventDestination(
             }
         )
         AddEventRoute(
-            tripId = tripId,
-            date = date,
-            viewModel = viewModel,
+            tripId = tripId, date = date, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onEventAdded = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addFilterSortDestination(
-    navController: NavHostController, 
-    itineraryRepository: ItineraryRepository
-) {
     composable(
         route = Screen.FilterSort.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: FilterSortViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -777,35 +672,15 @@ private fun NavGraphBuilder.addFilterSortDestination(
                 }
             }
         )
-        FilterSortRoute(
-            tripId = tripId,
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
-        )
+        FilterSortRoute(tripId = tripId, viewModel = viewModel, onNavigateBack = { navController.popBackStack() })
     }
 }
 
+@Suppress("LongMethod")
 private fun NavGraphBuilder.bookingNavGraph(
     navController: NavHostController, 
     bookingRepository: BookingRepository,
     tripRepository: TripRepository
-) {
-    addBookingListDestination(navController, bookingRepository)
-    addBookingDetailsDestination(navController, bookingRepository)
-    addAddTravellerDestination(navController, bookingRepository)
-    addBookingItineraryDestination(navController, bookingRepository)
-    addManageBookingDestination(navController, bookingRepository)
-    addAddBookingOptionsDestination(navController)
-    addPnrIntakeDestination(navController, bookingRepository)
-    addScanTicketDestination(navController, bookingRepository)
-    addImportEmailDestination(navController, bookingRepository)
-    addCreateBookingDestination(navController, bookingRepository, tripRepository)
-    addBookingFilterDestination(navController)
-}
-
-private fun NavGraphBuilder.addBookingListDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
 ) {
     composable(
         route = Screen.Bookings.route,
@@ -843,12 +718,6 @@ private fun NavGraphBuilder.addBookingListDestination(
             onNavigateToProfile = { navController.navigate(Screen.Profile.route) }
         )
     }
-}
-
-private fun NavGraphBuilder.addBookingDetailsDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.BookingDetails.route,
         arguments = listOf(
@@ -871,9 +740,7 @@ private fun NavGraphBuilder.addBookingDetailsDestination(
             }
         )
         BookingDetailsRoute(
-            tripId = tripId,
-            bookingId = bookingId,
-            viewModel = viewModel,
+            tripId = tripId, bookingId = bookingId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToItinerary = { tId, bId -> 
                 navController.navigate(Screen.BookingItinerary.createRoute(tId, bId)) 
@@ -886,42 +753,6 @@ private fun NavGraphBuilder.addBookingDetailsDestination(
             }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddTravellerDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
-    composable(
-        route = Screen.AddTraveller.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("bookingId") { type = androidx.navigation.NavType.StringType },
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
-    ) { backStackEntry ->
-        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
-        val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
-        val viewModel: AddTravellerViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return AddTravellerViewModel(bookingRepository) as T
-                }
-            }
-        )
-        AddTravellerRoute(
-            tripId = tripId,
-            bookingId = bookingId,
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-}
-
-private fun NavGraphBuilder.addBookingItineraryDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.BookingItinerary.route,
         arguments = listOf(
@@ -940,18 +771,10 @@ private fun NavGraphBuilder.addBookingItineraryDestination(
             }
         )
         BookingItineraryRoute(
-            tripId = tripId,
-            bookingId = bookingId,
-            viewModel = viewModel,
+            tripId = tripId, bookingId = bookingId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addManageBookingDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.ManageBooking.route,
         arguments = listOf(
@@ -970,15 +793,10 @@ private fun NavGraphBuilder.addManageBookingDestination(
             }
         )
         ManageBookingRoute(
-            tripId = tripId,
-            bookingId = bookingId,
-            viewModel = viewModel,
+            tripId = tripId, bookingId = bookingId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addAddBookingOptionsDestination(navController: NavHostController) {
     composable(
         route = Screen.AddBookingOptions.route,
         arguments = listOf(
@@ -992,8 +810,7 @@ private fun NavGraphBuilder.addAddBookingOptionsDestination(navController: NavHo
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: AddBookingOptionsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         AddBookingOptionsRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToManualEntry = { id -> navController.navigate(Screen.CreateBooking.createRoute(id)) },
             onNavigateToPnrEntry = { id -> navController.navigate(Screen.PnrIntake.createRoute(id)) },
@@ -1001,12 +818,6 @@ private fun NavGraphBuilder.addAddBookingOptionsDestination(navController: NavHo
             onNavigateToImportEmail = { id -> navController.navigate(Screen.ImportEmail.createRoute(id)) }
         )
     }
-}
-
-private fun NavGraphBuilder.addPnrIntakeDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.PnrIntake.route,
         arguments = listOf(
@@ -1027,18 +838,11 @@ private fun NavGraphBuilder.addPnrIntakeDestination(
             }
         )
         PnrIntakeRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onBookingAdded = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addScanTicketDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.ScanTicket.route,
         arguments = listOf(
@@ -1059,18 +863,11 @@ private fun NavGraphBuilder.addScanTicketDestination(
             }
         )
         ScanTicketRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onBookingAdded = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addImportEmailDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository
-) {
     composable(
         route = Screen.ImportEmail.route,
         arguments = listOf(
@@ -1091,19 +888,11 @@ private fun NavGraphBuilder.addImportEmailDestination(
             }
         )
         ImportEmailRoute(
-            tripId = tripId,
-            viewModel = viewModel,
+            tripId = tripId, viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onSuccess = { navController.popBackStack() }
         )
     }
-}
-
-private fun NavGraphBuilder.addCreateBookingDestination(
-    navController: NavHostController, 
-    bookingRepository: BookingRepository,
-    tripRepository: TripRepository
-) {
     composable(
         route = Screen.CreateBooking.route,
         arguments = listOf(
@@ -1123,26 +912,338 @@ private fun NavGraphBuilder.addCreateBookingDestination(
                 }
             }
         )
-        CreateBookingRoute(
-            tripId = tripId,
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
-        )
+        CreateBookingRoute(tripId = tripId, viewModel = viewModel, onNavigateBack = { navController.popBackStack() })
     }
-}
-
-private fun NavGraphBuilder.addBookingFilterDestination(navController: NavHostController) {
     composable(
         route = Screen.BookingFilter.route,
-        arguments = listOf(
-            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
-        )
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
     ) {
         val viewModel: BookingFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         BookingFilterRoute(
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onFiltersApplied = { navController.popBackStack() }
+        )
+    }
+    composable(
+        route = Screen.AddTraveller.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("bookingId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val bookingId = backStackEntry.arguments?.getString("bookingId") ?: ""
+        val viewModel: AddTravellerViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AddTravellerViewModel(bookingRepository) as T
+                }
+            }
+        )
+        AddTravellerRoute(
+            tripId = tripId, bookingId = bookingId,
+            viewModel = viewModel, onNavigateBack = { navController.popBackStack() }
+        )
+    }
+}
+
+@Suppress("LongMethod")
+private fun NavGraphBuilder.budgetNavGraph(
+    navController: NavHostController,
+    budgetRepository: BudgetRepository
+) {
+    composable(
+        route = Screen.Budgets.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId")
+        val viewModel: BudgetListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return BudgetListViewModel(budgetRepository) as T
+                }
+            }
+        )
+        BudgetListRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetails = { tId, bId -> 
+                navController.navigate(Screen.BudgetOverview.createRoute(tId, bId)) 
+            },
+            onNavigateToCreate = { 
+                navController.navigate(Screen.CreateBudget.createRoute(tripId)) 
+            }
+        )
+    }
+    composable(
+        route = Screen.BudgetOverview.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: BudgetOverviewViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return BudgetOverviewViewModel(budgetRepository) as T
+                }
+            }
+        )
+        BudgetOverviewRoute(
+            tripId = tripId,
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToAddExpense = { bId -> 
+                navController.navigate(Screen.AddExpense.createRoute(bId)) 
+            },
+            onNavigateToExpenses = { bId ->
+                navController.navigate(Screen.ExpenseList.createRoute(bId))
+            },
+            onNavigateToTrends = { tId, bId ->
+                navController.navigate(Screen.SpendingTrends.createRoute(tId, bId))
+            },
+            onNavigateToReports = { tId, bId ->
+                navController.navigate(Screen.BudgetReports.createRoute(tId, bId))
+            },
+            onNavigateToScanner = { bId ->
+                navController.navigate(Screen.ReceiptScanner.createRoute(bId))
+            }
+        )
+    }
+    composable(
+        route = Screen.SpendingTrends.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: SpendingTrendsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return SpendingTrendsViewModel(budgetRepository) as T
+                }
+            }
+        )
+        SpendingTrendsRoute(
+            tripId = tripId,
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(
+        route = Screen.BudgetReports.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: BudgetReportsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return BudgetReportsViewModel(budgetRepository) as T
+                }
+            }
+        )
+        BudgetReportsRoute(
+            tripId = tripId,
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(
+        route = Screen.AddExpense.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: AddExpenseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AddExpenseViewModel(budgetRepository) as T
+                }
+            }
+        )
+        AddExpenseRoute(
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(
+        route = Screen.ExpenseList.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: ExpenseListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ExpenseListViewModel(budgetRepository) as T
+                }
+            }
+        )
+        ExpenseListRoute(
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToAddExpense = { bId ->
+                navController.navigate(Screen.AddExpense.createRoute(bId))
+            }
+        )
+    }
+    composable(
+        route = Screen.ReceiptScanner.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
+        val viewModel: ReceiptScannerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ReceiptScannerRoute(
+            budgetId = budgetId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToConfirm = {
+                // TODO: Navigate to confirmation screen or pre-fill Add Expense
+                navController.popBackStack()
+            }
+        )
+    }
+}
+
+private fun NavGraphBuilder.documentsNavGraph(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
+    composable(Screen.Documents.route) {
+        val viewModel: DocumentListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentListViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentListRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetails = { id -> 
+                navController.navigate(Screen.DocumentDetails.createRoute(id)) 
+            },
+            onNavigateToCategories = { navController.navigate(Screen.DocumentCategories.route) },
+            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) },
+            onNavigateToSearch = { navController.navigate(Screen.DocumentSearch.route) }
+        )
+    }
+    composable(Screen.DocumentScan.route) {
+        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ScanDocumentRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onDocumentCaptured = { /* TODO */ }
+        )
+    }
+    composable(Screen.DocumentSearch.route) {
+        val viewModel: SearchFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        SearchFilterRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onFiltersApplied = { /* TODO */ }
+        )
+    }
+    composable(
+        route = Screen.DocumentDetails.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("documentId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
+        val viewModel: DocumentDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentDetailsViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentDetailsRoute(
+            documentId = documentId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(Screen.DocumentUploadOptions.route) {
+        UploadOptionsRoute(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToScan = { navController.navigate(Screen.DocumentScan.route) },
+            onNavigateToManual = { navController.navigate(Screen.AddDocument.route) }
+        )
+    }
+    composable(Screen.DocumentCategories.route) {
+        val viewModel: DocumentCategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentCategoriesViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentCategoriesRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDocumentsByType = { /* TODO: Pass type to list */ }
+        )
+    }
+    composable(Screen.AddDocument.route) {
+        val viewModel: AddDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AddDocumentViewModel(documentRepository) as T
+                }
+            }
+        )
+        AddDocumentRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
         )
     }
 }

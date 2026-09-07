@@ -22,6 +22,7 @@ class TripOverviewViewModel(
                 when (intent.tabIndex) {
                     1 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
                     2 -> sendEffect(TripOverviewContract.Effect.NavigateToBookings(tripId))
+                    4 -> sendEffect(TripOverviewContract.Effect.NavigateToBudgets(tripId))
                 }
             }
             TripOverviewContract.Intent.BackClicked -> {

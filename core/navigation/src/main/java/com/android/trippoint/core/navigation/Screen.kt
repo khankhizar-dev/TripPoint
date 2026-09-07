@@ -120,4 +120,45 @@ sealed class Screen(val route: String) {
     object ManageBooking : Screen("manage_booking/{tripId}/{bookingId}") {
         fun createRoute(tripId: String, bookingId: String) = "manage_booking/$tripId/$bookingId"
     }
+    object Budgets : Screen("budgets?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "budgets?tripId=$tripId"
+        } else {
+            "budgets"
+        }
+    }
+    object BudgetOverview : Screen("budget_overview/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "budget_overview/$budgetId?tripId=$tripId"
+    }
+    object CreateBudget : Screen("create_budget?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "create_budget?tripId=$tripId"
+        } else {
+            "create_budget"
+        }
+    }
+    object AddExpense : Screen("add_expense/{budgetId}") {
+        fun createRoute(budgetId: String) = "add_expense/$budgetId"
+    }
+    object ExpenseList : Screen("expense_list/{budgetId}") {
+        fun createRoute(budgetId: String) = "expense_list/$budgetId"
+    }
+    object SpendingTrends : Screen("spending_trends/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "spending_trends/$budgetId?tripId=$tripId"
+    }
+    object BudgetReports : Screen("budget_reports/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "budget_reports/$budgetId?tripId=$tripId"
+    }
+    object ReceiptScanner : Screen("receipt_scanner/{budgetId}") {
+        fun createRoute(budgetId: String) = "receipt_scanner/$budgetId"
+    }
+    object Documents : Screen("documents")
+    object DocumentCategories : Screen("document_categories")
+    object DocumentDetails : Screen("document_details/{documentId}") {
+        fun createRoute(id: String) = "document_details/$id"
+    }
+    object DocumentUploadOptions : Screen("document_upload_options")
+    object AddDocument : Screen("add_document")
+    object DocumentScan : Screen("document_scan")
+    object DocumentSearch : Screen("document_search")
 }
