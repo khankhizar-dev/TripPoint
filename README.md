@@ -81,7 +81,17 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Budget Overview**: High-fidelity summary card with total/spent amounts and real-time progress tracking.
 - [x] **Category Breakdown**: Detailed spending analysis for Food, Transport, Activities, etc.
 - [x] **Global Budget List**: Manage financial plans across all active and upcoming trips.
-- [ ] **Smart Expense Entry**: AI-powered receipt scanning and multi-currency support (Upcoming).
+- [x] **Spending Trends**: Dynamic bar charts and AI-powered spending insights.
+- [x] **Financial Reports**: Export trip expenses to PDF and CSV formats.
+- [x] **AI Receipt Scanner**: High-fidelity animated camera interface for automatic expense entry.
+
+### Travel Document Locker
+- [x] **Secure Storage**: Encrypted locker for Passports, Visas, Tickets, and Insurance.
+- [x] **High-Fidelity UI**: Interactive cards with favoriting, sharing, and expiry tracking.
+- [x] **AI Document Scan**: Dark-themed scanner with alignment guides and auto-capture.
+- [x] **Categories Grid**: Visual organization with real-time document counts per type.
+- [x] **Batch Management**: Long-press selection mode for bulk actions.
+- [x] **Granular Discovery**: Search and filter by category, expiry date, or issuer.
 
 ## 📖 Development Guidelines
 
