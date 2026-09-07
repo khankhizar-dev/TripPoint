@@ -16,6 +16,8 @@ class DocumentListContract {
         object ViewAllRecentClicked : Intent()
         data class CategoryClicked(val type: DocumentType) : Intent()
         object AddDocumentClicked : Intent()
+        data class DocumentLongClicked(val id: String) : Intent()
+        object ClearSelection : Intent()
         object BackClicked : Intent()
     }
 
@@ -24,6 +26,9 @@ class DocumentListContract {
         val recentDocuments: List<Document> = emptyList(),
         val selectedTab: Int = 0,
         val searchQuery: String = "",
+        val selectedDocumentIds: Set<String> = emptySet(),
+        val isSelectionMode: Boolean = false,
+        val isOffline: Boolean = false,
         val isLoading: Boolean = false,
         val error: String? = null
     ) : UiState
@@ -33,5 +38,6 @@ class DocumentListContract {
         data class NavigateToDetails(val id: String) : Effect()
         object NavigateToCategories : Effect()
         object NavigateToAddDocument : Effect()
+        data class ShowMessage(val message: String) : Effect()
     }
 }

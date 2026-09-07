@@ -54,7 +54,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun DocumentDetailsRoute(
     documentId: String,
     viewModel: DocumentDetailsViewModel,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
@@ -95,9 +95,9 @@ fun DocumentDetailsScreen(
             )
         },
         bottomBar = {
-            if (uiState.document != null) {
+            uiState.document?.let { document ->
                 DocumentDetailsBottomBar(
-                    isFavorite = uiState.document.isFavorite,
+                    isFavorite = document.isFavorite,
                     onIntent = onIntent
                 )
             }
@@ -109,8 +109,13 @@ fun DocumentDetailsScreen(
                 LoadingIndicator()
             }
         } else if (uiState.error != null) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
             }
         } else {
             uiState.document?.let { document ->

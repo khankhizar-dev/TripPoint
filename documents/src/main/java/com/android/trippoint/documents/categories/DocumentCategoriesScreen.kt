@@ -30,7 +30,7 @@ import kotlinx.coroutines.flow.collectLatest
 fun DocumentCategoriesRoute(
     viewModel: DocumentCategoriesViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToDocumentsByType: (DocumentType) -> Unit
+    onNavigateToDocumentsByType: (DocumentType) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -73,8 +73,13 @@ fun DocumentCategoriesScreen(
                 LoadingIndicator()
             }
         } else if (uiState.error != null) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(24.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
             }
         } else {
             LazyVerticalGrid(

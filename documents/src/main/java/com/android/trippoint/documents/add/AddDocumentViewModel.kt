@@ -6,7 +6,7 @@ import com.android.trippoint.documents.domain.repository.DocumentRepository
 import kotlinx.coroutines.launch
 
 class AddDocumentViewModel(
-    private val repository: DocumentRepository
+    private val repository: DocumentRepository,
 ) : BaseViewModel<
     AddDocumentContract.State,
     AddDocumentContract.Intent,
@@ -28,7 +28,7 @@ class AddDocumentViewModel(
 
     private fun saveDocument() {
         val state = uiState.value
-        if (state.title.isBlank() || state.fileUrl == null) {
+        if ((state.title.isBlank() || state.fileUrl == null)) {
             setState { copy(error = "Title and file are required") }
             return
         }

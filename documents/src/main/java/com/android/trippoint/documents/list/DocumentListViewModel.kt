@@ -41,7 +41,32 @@ class DocumentListViewModel(
             DocumentListContract.Intent.AddDocumentClicked -> {
                 sendEffect(DocumentListContract.Effect.NavigateToAddDocument)
             }
-            DocumentListContract.Intent.BackClicked -> sendEffect(DocumentListContract.Effect.NavigateBack)
+            is DocumentListContract.Intent.DocumentLongClicked -> toggleSelection(intent.id)
+            DocumentListContract.Intent.ClearSelection -> setState {
+                copy(selectedDocumentIds = emptySet(), isSelectionMode = false)
+            }
+            DocumentListContract.Intent.BackClicked -> {
+                if (uiState.value.isSelectionMode) {
+                    onIntent(DocumentListContract.Intent.ClearSelection)
+                } else {
+                    sendEffect(DocumentListContract.Effect.NavigateBack)
+                }
+            }
+        }
+    }
+
+    private fun toggleSelection(id: String) {
+        val currentSelected = uiState.value.selectedDocumentIds
+        val newSelected = if (currentSelected.contains(id)) {
+            currentSelected - id
+        } else {
+            currentSelected + id
+        }
+        setState {
+            copy(
+                selectedDocumentIds = newSelected,
+                isSelectionMode = newSelected.isNotEmpty()
+            )
         }
     }
 

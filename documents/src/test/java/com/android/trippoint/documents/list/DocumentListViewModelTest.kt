@@ -52,7 +52,7 @@ class DocumentListViewModelTest {
             notes = null,
             isFavorite = false,
             createdAt = "now",
-            updatedAt = "now"
+            updatedAt = "now",
         )
     )
 
@@ -179,7 +179,7 @@ class DocumentListViewModelTest {
 
     @Test
     fun `ToggleFavorite success reloads documents`() = runTest {
-        coEvery { repository.toggleFavorite("d1") } returns Result.success(true)
+        coEvery { repository.toggleFavorite("d1") } returns Result.success(value = true)
         coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
         
         viewModel.onIntent(DocumentListContract.Intent.ToggleFavorite("d1"))
@@ -220,6 +220,62 @@ class DocumentListViewModelTest {
             viewModel.onIntent(DocumentListContract.Intent.AddDocumentClicked)
             assertEquals(DocumentListContract.Effect.NavigateToAddDocument, awaitItem())
         }
+    }
+
+    @Test
+    fun `DocumentLongClicked toggles selection and enables selection mode`() = runTest {
+        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        runCurrent()
+
+        // Toggle on
+        viewModel.onIntent(DocumentListContract.Intent.DocumentLongClicked("d1"))
+        
+        var state = viewModel.uiState.value
+        assertTrue(state.isSelectionMode)
+        assertTrue(state.selectedDocumentIds.contains("d1"))
+        assertEquals(1, state.selectedDocumentIds.size)
+
+        // Toggle off
+        viewModel.onIntent(DocumentListContract.Intent.DocumentLongClicked("d1"))
+        
+        state = viewModel.uiState.value
+        assertEquals(false, state.isSelectionMode)
+        assertTrue(state.selectedDocumentIds.isEmpty())
+    }
+
+    @Test
+    fun `ClearSelection clears selection and disables selection mode`() = runTest {
+        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        runCurrent()
+
+        // Select two
+        viewModel.onIntent(DocumentListContract.Intent.DocumentLongClicked("d1"))
+        viewModel.onIntent(DocumentListContract.Intent.DocumentLongClicked("d2"))
+        
+        assertTrue(viewModel.uiState.value.isSelectionMode)
+        assertEquals(2, viewModel.uiState.value.selectedDocumentIds.size)
+
+        // Clear
+        viewModel.onIntent(DocumentListContract.Intent.ClearSelection)
+        
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isSelectionMode)
+        assertTrue(state.selectedDocumentIds.isEmpty())
+    }
+    
+    @Test
+    fun `BackClicked in selection mode clears selection`() = runTest {
+        viewModel.onIntent(DocumentListContract.Intent.DocumentLongClicked("d1"))
+        assertTrue(viewModel.uiState.value.isSelectionMode)
+
+        viewModel.onIntent(DocumentListContract.Intent.BackClicked)
+        
+        assertEquals(false, viewModel.uiState.value.isSelectionMode)
+        assertTrue(viewModel.uiState.value.selectedDocumentIds.isEmpty())
     }
 
     @Test
