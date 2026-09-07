@@ -8,32 +8,70 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute
+import com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute
+import com.android.trippoint.authentication.login.LoginRoute
+import com.android.trippoint.authentication.onboarding.OnboardingRoute
+import com.android.trippoint.authentication.onboarding.WelcomeScreen
+import com.android.trippoint.authentication.otp.OtpRoute
+import com.android.trippoint.authentication.permissions.PermissionsRoute
+import com.android.trippoint.authentication.profilesetup.ProfileSetupRoute
+import com.android.trippoint.authentication.register.RegisterRoute
+import com.android.trippoint.authentication.session.SessionExpiredScreen
 import com.android.trippoint.authentication.splash.SplashRoute
-import com.android.trippoint.booking.add.*
+import com.android.trippoint.booking.add.AddBookingOptionsRoute
+import com.android.trippoint.booking.add.AddBookingOptionsViewModel
+import com.android.trippoint.booking.add.ImportEmailRoute
+import com.android.trippoint.booking.add.ImportEmailViewModel
+import com.android.trippoint.booking.add.PnrIntakeRoute
+import com.android.trippoint.booking.add.PnrIntakeViewModel
+import com.android.trippoint.booking.add.ScanTicketRoute
+import com.android.trippoint.booking.add.ScanTicketViewModel
 import com.android.trippoint.booking.create.CreateBookingRoute
 import com.android.trippoint.booking.create.CreateBookingViewModel
-import com.android.trippoint.booking.details.*
+import com.android.trippoint.booking.details.AddTravellerRoute
+import com.android.trippoint.booking.details.AddTravellerViewModel
+import com.android.trippoint.booking.details.BookingDetailsRoute
+import com.android.trippoint.booking.details.BookingDetailsViewModel
+import com.android.trippoint.booking.details.BookingItineraryRoute
+import com.android.trippoint.booking.details.BookingItineraryViewModel
+import com.android.trippoint.booking.details.ManageBookingRoute
+import com.android.trippoint.booking.details.ManageBookingViewModel
 import com.android.trippoint.booking.domain.repository.BookingRepository
 import com.android.trippoint.booking.filter.BookingFilterRoute
 import com.android.trippoint.booking.filter.BookingFilterViewModel
 import com.android.trippoint.booking.list.BookingListRoute
 import com.android.trippoint.booking.list.BookingListViewModel
-import com.android.trippoint.budget.list.*
-import com.android.trippoint.budget.overview.*
-import com.android.trippoint.budget.trends.*
-import com.android.trippoint.budget.reports.*
-import com.android.trippoint.budget.expense.add.*
-import com.android.trippoint.budget.expense.list.*
-import com.android.trippoint.budget.expense.scanner.*
-import com.android.trippoint.documents.list.*
-import com.android.trippoint.documents.add.*
-import com.android.trippoint.documents.details.*
-import com.android.trippoint.documents.categories.*
-import com.android.trippoint.documents.scan.*
-import com.android.trippoint.documents.search.*
-import com.android.trippoint.documents.domain.repository.DocumentRepository
 import com.android.trippoint.budget.domain.repository.BudgetRepository
+import com.android.trippoint.budget.expense.add.AddExpenseRoute
+import com.android.trippoint.budget.expense.add.AddExpenseViewModel
+import com.android.trippoint.budget.expense.list.ExpenseListRoute
+import com.android.trippoint.budget.expense.list.ExpenseListViewModel
+import com.android.trippoint.budget.expense.scanner.ReceiptScannerRoute
+import com.android.trippoint.budget.expense.scanner.ReceiptScannerViewModel
+import com.android.trippoint.budget.list.BudgetListRoute
+import com.android.trippoint.budget.list.BudgetListViewModel
+import com.android.trippoint.budget.overview.BudgetOverviewRoute
+import com.android.trippoint.budget.overview.BudgetOverviewViewModel
+import com.android.trippoint.budget.reports.BudgetReportsRoute
+import com.android.trippoint.budget.reports.BudgetReportsViewModel
+import com.android.trippoint.budget.trends.SpendingTrendsRoute
+import com.android.trippoint.budget.trends.SpendingTrendsViewModel
 import com.android.trippoint.core.navigation.Screen
+import com.android.trippoint.documents.add.AddDocumentRoute
+import com.android.trippoint.documents.add.AddDocumentViewModel
+import com.android.trippoint.documents.add.UploadOptionsRoute
+import com.android.trippoint.documents.categories.DocumentCategoriesRoute
+import com.android.trippoint.documents.categories.DocumentCategoriesViewModel
+import com.android.trippoint.documents.details.DocumentDetailsRoute
+import com.android.trippoint.documents.details.DocumentDetailsViewModel
+import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.documents.list.DocumentListRoute
+import com.android.trippoint.documents.list.DocumentListViewModel
+import com.android.trippoint.documents.scan.ScanDocumentRoute
+import com.android.trippoint.documents.scan.ScanDocumentViewModel
+import com.android.trippoint.documents.search.SearchFilterRoute
+import com.android.trippoint.documents.search.SearchFilterViewModel
 import com.android.trippoint.itinerary.add.AddEventRoute
 import com.android.trippoint.itinerary.add.AddEventViewModel
 import com.android.trippoint.itinerary.day.TimelineRoute
@@ -62,6 +100,17 @@ import com.android.trippoint.trip.overview.TripOverviewRoute
 import com.android.trippoint.trip.overview.TripOverviewViewModel
 import com.android.trippoint.trip.summary.TripSummaryRoute
 import com.android.trippoint.trip.summary.TripSummaryViewModel
+import com.android.trippoint.ui.home.HomeRoute
+import com.android.trippoint.ui.settings.AboutScreen
+import com.android.trippoint.ui.settings.ChangePasswordRoute
+import com.android.trippoint.ui.settings.ConnectedAccountsScreen
+import com.android.trippoint.ui.settings.DevicesRoute
+import com.android.trippoint.ui.settings.EditProfileRoute
+import com.android.trippoint.ui.settings.NotificationsRoute
+import com.android.trippoint.ui.settings.PreferencesRoute
+import com.android.trippoint.ui.settings.SecurityRoute
+import com.android.trippoint.ui.settings.SettingsRoute
+import com.android.trippoint.ui.settings.SupportRoute
 
 @Composable
 fun AppNavGraph(
@@ -87,104 +136,21 @@ fun AppNavGraph(
     }
 }
 
-private fun NavGraphBuilder.documentsNavGraph(
-    navController: NavHostController,
-    documentRepository: DocumentRepository
-) {
-    composable(Screen.Documents.route) {
-        val viewModel: DocumentListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return DocumentListViewModel(documentRepository) as T
-                }
-            }
-        )
-        DocumentListRoute(
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToDetails = { id -> 
-                navController.navigate(Screen.DocumentDetails.createRoute(id)) 
-            },
-            onNavigateToCategories = { navController.navigate(Screen.DocumentCategories.route) },
-            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) },
-            onNavigateToSearch = { navController.navigate(Screen.DocumentSearch.route) }
-        )
-    }
-    composable(Screen.DocumentScan.route) {
-        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-        ScanDocumentRoute(
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() },
-            onDocumentCaptured = { /* TODO */ }
-        )
-    }
-    composable(Screen.DocumentSearch.route) {
-        val viewModel: SearchFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-        SearchFilterRoute(
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() },
-            onFiltersApplied = { /* TODO */ }
-        )
-    }
-    composable(
-        route = Screen.DocumentDetails.route,
-        arguments = listOf(androidx.navigation.navArgument("documentId") { type = androidx.navigation.NavType.StringType })
-    ) { backStackEntry ->
-        val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
-        val viewModel: DocumentDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return DocumentDetailsViewModel(documentRepository) as T
-                }
-            }
-        )
-        DocumentDetailsRoute(
-            documentId = documentId,
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
-    composable(Screen.DocumentUploadOptions.route) {
-        UploadOptionsRoute(
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToScan = { navController.navigate(Screen.DocumentScan.route) },
-            onNavigateToManual = { navController.navigate(Screen.AddDocument.route) }
-        )
-    }
-    composable(Screen.DocumentCategories.route) {
-        val viewModel: DocumentCategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return DocumentCategoriesViewModel(documentRepository) as T
-                }
-            }
-        )
-        DocumentCategoriesRoute(
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() },
-            onNavigateToDocumentsByType = { /* TODO: Pass type to list */ }
-        )
-    }
-    composable(Screen.AddDocument.route) {
-        val viewModel: AddDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
-            factory = object : ViewModelProvider.Factory {
-                @Suppress("UNCHECKED_CAST")
-                override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return AddDocumentViewModel(documentRepository) as T
-                }
-            }
-        )
-        AddDocumentRoute(
-            viewModel = viewModel,
-            onNavigateBack = { navController.popBackStack() }
-        )
-    }
+private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
+    addSplashDestination(navController)
+    addWelcomeDestination(navController)
+    addOnboardingDestination(navController)
+    addLoginDestination(navController)
+    addForgotPasswordDestination(navController)
+    addResetPasswordDestination(navController)
+    addRegisterDestination(navController)
+    addOtpDestination(navController)
+    addProfileSetupDestination(navController)
+    addPermissionsDestination(navController)
+    addSessionExpiredDestination(navController)
 }
 
-private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
+private fun NavGraphBuilder.addSplashDestination(navController: NavHostController) {
     composable(Screen.Splash.route) {
         SplashRoute(
             onNavigateToWelcome = {
@@ -214,14 +180,20 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addWelcomeDestination(navController: NavHostController) {
     composable(Screen.Welcome.route) {
-        com.android.trippoint.authentication.onboarding.WelcomeScreen(
+        WelcomeScreen(
             onGetStarted = { navController.navigate(Screen.Onboarding.route) },
             onSignIn = { navController.navigate(Screen.Login.route) }
         )
     }
+}
+
+private fun NavGraphBuilder.addOnboardingDestination(navController: NavHostController) {
     composable(Screen.Onboarding.route) {
-        com.android.trippoint.authentication.onboarding.OnboardingRoute(
+        OnboardingRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(Screen.Welcome.route) { inclusive = true }
@@ -229,8 +201,11 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addLoginDestination(navController: NavHostController) {
     composable(Screen.Login.route) {
-        com.android.trippoint.authentication.login.LoginRoute(
+        LoginRoute(
             onNavigateToHome = { isProfileComplete ->
                 val destination = if (isProfileComplete) Screen.Home.route else Screen.ProfileSetup.route
                 navController.navigate(destination) {
@@ -241,12 +216,20 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             onForgotPassword = { navController.navigate(Screen.ForgotPassword.route) }
         )
     }
+}
+
+private fun NavGraphBuilder.addForgotPasswordDestination(navController: NavHostController) {
     composable(Screen.ForgotPassword.route) {
-        com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute(
+        ForgotPasswordRoute(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToOtp = { email -> navController.navigate(Screen.Otp.createRoute(email, true)) }
+            onNavigateToOtp = { email ->
+                navController.navigate(Screen.Otp.createRoute(email, true))
+            }
         )
     }
+}
+
+private fun NavGraphBuilder.addResetPasswordDestination(navController: NavHostController) {
     composable(
         route = Screen.ResetPassword.route,
         arguments = listOf(
@@ -256,7 +239,7 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     ) { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email") ?: ""
         val otp = backStackEntry.arguments?.getString("otp") ?: ""
-        com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute(
+        ResetPasswordRoute(
             email = email, otp = otp,
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
@@ -265,8 +248,11 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addRegisterDestination(navController: NavHostController) {
     composable(Screen.Register.route) {
-        com.android.trippoint.authentication.register.RegisterRoute(
+        RegisterRoute(
             onNavigateToOtp = { email ->
                 navController.navigate(Screen.Otp.createRoute(email)) {
                     popUpTo(Screen.Register.route) { inclusive = true }
@@ -279,6 +265,9 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addOtpDestination(navController: NavHostController) {
     composable(
         route = Screen.Otp.route,
         arguments = listOf(
@@ -291,7 +280,7 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
     ) { backStackEntry ->
         val email = backStackEntry.arguments?.getString("email") ?: ""
         val isForgotPassword = backStackEntry.arguments?.getBoolean("isForgotPassword") ?: false
-        com.android.trippoint.authentication.otp.OtpRoute(
+        OtpRoute(
             email = email, isForgotPasswordFlow = isForgotPassword,
             onNavigateToHome = {
                 navController.navigate(Screen.ProfileSetup.route) {
@@ -305,8 +294,11 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addProfileSetupDestination(navController: NavHostController) {
     composable(Screen.ProfileSetup.route) {
-        com.android.trippoint.authentication.profilesetup.ProfileSetupRoute(
+        ProfileSetupRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Permissions.route) {
                     popUpTo(0) { inclusive = true }
@@ -314,8 +306,11 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addPermissionsDestination(navController: NavHostController) {
     composable(Screen.Permissions.route) {
-        com.android.trippoint.authentication.permissions.PermissionsRoute(
+        PermissionsRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
@@ -323,8 +318,11 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostController) {
     composable(Screen.SessionExpired.route) {
-        com.android.trippoint.authentication.session.SessionExpiredScreen(
+        SessionExpiredScreen(
             onLoginAgain = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -337,14 +335,16 @@ private fun NavGraphBuilder.authNavGraph(navController: NavHostController) {
 @Suppress("LongMethod")
 private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripRepository: TripRepository) {
     composable(Screen.Home.route) {
-        com.android.trippoint.ui.home.HomeRoute(
+        HomeRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
                 }
             },
             onNavigateToProfile = { navController.navigate(Screen.Profile.route) },
-            onNavigateToTripDetails = { tripId -> navController.navigate(Screen.TripOverview.createRoute(tripId)) },
+            onNavigateToTripDetails = { tripId ->
+                navController.navigate(Screen.TripOverview.createRoute(tripId))
+            },
             onNavigateToCreateTrip = { navController.navigate(Screen.CreateTrip.route) },
             onNavigateToBookings = { tripId -> 
                 navController.navigate(Screen.Bookings.createRoute(tripId))
@@ -451,7 +451,7 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
         )
     }
     composable(Screen.Profile.route) {
-        com.android.trippoint.ui.settings.SettingsRoute(
+        SettingsRoute(
             onNavigateToLogin = {
                 navController.navigate(Screen.Login.route) {
                     popUpTo(0) { inclusive = true }
@@ -467,16 +467,16 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
         )
     }
     composable(Screen.EditProfile.route) {
-        com.android.trippoint.ui.settings.EditProfileRoute(onNavigateBack = { navController.popBackStack() })
+        EditProfileRoute(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.Preferences.route) {
-        com.android.trippoint.ui.settings.PreferencesRoute(onNavigateBack = { navController.popBackStack() })
+        PreferencesRoute(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.Notifications.route) {
-        com.android.trippoint.ui.settings.NotificationsRoute(onNavigateBack = { navController.popBackStack() })
+        NotificationsRoute(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.Security.route) {
-        com.android.trippoint.ui.settings.SecurityRoute(
+        SecurityRoute(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToChangePassword = { navController.navigate(Screen.ChangePassword.route) },
             onNavigateToDevices = { navController.navigate(Screen.Devices.route) },
@@ -484,18 +484,18 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
         )
     }
     composable(Screen.ChangePassword.route) {
-        com.android.trippoint.ui.settings.ChangePasswordRoute(onNavigateBack = { navController.popBackStack() })
+        ChangePasswordRoute(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.Devices.route) {
-        com.android.trippoint.ui.settings.DevicesRoute(onNavigateBack = { navController.popBackStack() })
+        DevicesRoute(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.ConnectedAccounts.route) {
-        com.android.trippoint.ui.settings.ConnectedAccountsScreen(onNavigateBack = { navController.popBackStack() })
+        ConnectedAccountsScreen(onNavigateBack = { navController.popBackStack() })
     }
     composable(Screen.Support.route) {
-        com.android.trippoint.ui.settings.SupportRoute(onNavigateBack = { navController.popBackStack() })
+        SupportRoute(onNavigateBack = { navController.popBackStack() })
     }
-    composable(Screen.About.route) { com.android.trippoint.ui.settings.AboutScreen() }
+    composable(Screen.About.route) { AboutScreen() }
 }
 
 @Suppress("LongMethod")
@@ -710,7 +710,9 @@ private fun NavGraphBuilder.bookingNavGraph(
                     popUpTo(0) { inclusive = true }
                 }
             },
-            onNavigateToDetails = { tId, bId -> navController.navigate(Screen.BookingDetails.createRoute(tId, bId)) },
+            onNavigateToDetails = { tId, bId -> 
+                navController.navigate(Screen.BookingDetails.createRoute(tId, bId)) 
+            },
             onNavigateToCreate = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
             onNavigateToFilter = { id -> navController.navigate(Screen.BookingFilter.createRoute(id)) },
             onNavigateToProfile = { navController.navigate(Screen.Profile.route) }
@@ -1084,7 +1086,9 @@ private fun NavGraphBuilder.budgetNavGraph(
     }
     composable(
         route = Screen.AddExpense.route,
-        arguments = listOf(androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType })
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
     ) { backStackEntry ->
         val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
         val viewModel: AddExpenseViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -1103,7 +1107,9 @@ private fun NavGraphBuilder.budgetNavGraph(
     }
     composable(
         route = Screen.ExpenseList.route,
-        arguments = listOf(androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType })
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
     ) { backStackEntry ->
         val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
         val viewModel: ExpenseListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
@@ -1125,7 +1131,9 @@ private fun NavGraphBuilder.budgetNavGraph(
     }
     composable(
         route = Screen.ReceiptScanner.route,
-        arguments = listOf(androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType })
+        arguments = listOf(
+            androidx.navigation.navArgument("budgetId") { type = androidx.navigation.NavType.StringType }
+        )
     ) { backStackEntry ->
         val budgetId = backStackEntry.arguments?.getString("budgetId") ?: ""
         val viewModel: ReceiptScannerViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
@@ -1133,10 +1141,109 @@ private fun NavGraphBuilder.budgetNavGraph(
             budgetId = budgetId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToConfirm = { receipt ->
+            onNavigateToConfirm = {
                 // TODO: Navigate to confirmation screen or pre-fill Add Expense
                 navController.popBackStack()
             }
+        )
+    }
+}
+
+private fun NavGraphBuilder.documentsNavGraph(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
+    composable(Screen.Documents.route) {
+        val viewModel: DocumentListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentListViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentListRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetails = { id -> 
+                navController.navigate(Screen.DocumentDetails.createRoute(id)) 
+            },
+            onNavigateToCategories = { navController.navigate(Screen.DocumentCategories.route) },
+            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) },
+            onNavigateToSearch = { navController.navigate(Screen.DocumentSearch.route) }
+        )
+    }
+    composable(Screen.DocumentScan.route) {
+        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ScanDocumentRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onDocumentCaptured = { /* TODO */ }
+        )
+    }
+    composable(Screen.DocumentSearch.route) {
+        val viewModel: SearchFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        SearchFilterRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onFiltersApplied = { /* TODO */ }
+        )
+    }
+    composable(
+        route = Screen.DocumentDetails.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("documentId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
+        val viewModel: DocumentDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentDetailsViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentDetailsRoute(
+            documentId = documentId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+    composable(Screen.DocumentUploadOptions.route) {
+        UploadOptionsRoute(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToScan = { navController.navigate(Screen.DocumentScan.route) },
+            onNavigateToManual = { navController.navigate(Screen.AddDocument.route) }
+        )
+    }
+    composable(Screen.DocumentCategories.route) {
+        val viewModel: DocumentCategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DocumentCategoriesViewModel(documentRepository) as T
+                }
+            }
+        )
+        DocumentCategoriesRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDocumentsByType = { /* TODO: Pass type to list */ }
+        )
+    }
+    composable(Screen.AddDocument.route) {
+        val viewModel: AddDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return AddDocumentViewModel(documentRepository) as T
+                }
+            }
+        )
+        AddDocumentRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
         )
     }
 }
