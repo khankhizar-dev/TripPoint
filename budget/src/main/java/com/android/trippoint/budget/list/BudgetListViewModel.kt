@@ -26,9 +26,19 @@ class BudgetListViewModel(
     private fun loadBudgets(tripId: String?) {
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            val result = repository.getBudgets(tripId)
+            val result = if (tripId != null) {
+                repository.getBudget(tripId).map { listOf(it) }
+            } else {
+                repository.getBudgets()
+            }
             if (result.isSuccess) {
-                setState { copy(isLoading = false, budgets = result.getOrDefault(emptyList()), error = null) }
+                setState {
+                    copy(
+                        isLoading = false,
+                        budgets = result.getOrDefault(emptyList()),
+                        error = null
+                    )
+                }
             } else {
                 setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
             }

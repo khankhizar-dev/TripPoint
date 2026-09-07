@@ -210,6 +210,16 @@
     <string name="budget_scanner_success">Receipt scanned successfully!</string>
     <string name="budget_scanner_error">Could not read receipt. Please try again or enter manually.</string>
     <string name="budget_scanner_capture">Capture Receipt</string>
+    <string name="budget_settlements_title">Settlements</string>
+    <string name="budget_total_expense">Total Expense</string>
+    <string name="budget_equal_share">Equal Share</string>
+    <string name="budget_owes">owes</string>
+    <string name="budget_to">to</string>
+    <string name="budget_balance">Balance</string>
+    <string name="budget_paid">Paid</string>
+    <string name="budget_share">Share</string>
+    <string name="budget_create_title">Setup Budget</string>
+    <string name="budget_limit_label">Budget Limit</string>
 
     <!-- Travel Documents -->
     <string name="documents_title">My Documents</string>

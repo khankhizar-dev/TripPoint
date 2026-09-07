@@ -3,6 +3,7 @@ package com.android.trippoint.budget.expense.add
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.budget.domain.repository.BudgetRepository
 import com.android.trippoint.core.common.BaseViewModel
+import com.android.trippoint.core.network.CreateExpenseInput
 import kotlinx.coroutines.launch
 
 class AddExpenseViewModel(
@@ -12,11 +13,14 @@ class AddExpenseViewModel(
 ) {
     override fun onIntent(intent: AddExpenseContract.Intent) {
         when (intent) {
-            is AddExpenseContract.Intent.LoadBudgetId -> setState { copy(budgetId = intent.budgetId) }
+            is AddExpenseContract.Intent.LoadIds -> setState { 
+                copy(tripId = intent.tripId, budgetId = intent.budgetId) 
+            }
             is AddExpenseContract.Intent.AmountChanged -> setState { copy(amount = intent.value) }
             is AddExpenseContract.Intent.CategoryChanged -> setState { copy(category = intent.value) }
             is AddExpenseContract.Intent.DateChanged -> setState { copy(date = intent.value) }
             is AddExpenseContract.Intent.DescriptionChanged -> setState { copy(description = intent.value) }
+            is AddExpenseContract.Intent.PaidByChanged -> setState { copy(paidBy = intent.value) }
             AddExpenseContract.Intent.SaveClicked -> saveExpense()
             AddExpenseContract.Intent.BackClicked -> sendEffect(AddExpenseContract.Effect.NavigateBack)
         }
@@ -31,15 +35,27 @@ class AddExpenseViewModel(
             return
         }
 
+        if (state.paidBy.isBlank()) {
+            setState { copy(error = "Please specify who paid") }
+            return
+        }
+
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            val result = repository.addExpense(
-                budgetId = state.budgetId,
+            val input = CreateExpenseInput(
+                category = state.category.uppercase(),
+                title = state.description.ifBlank { state.category },
+                description = state.description,
                 amount = amountValue,
-                category = state.category,
-                date = state.date,
-                description = state.description
+                currency = "USD", 
+                expenseDate = state.date,
+                paymentMethod = "CASH", 
+                paidBy = state.paidBy, 
+                recurring = false,
+                recurrenceRule = null
             )
+            
+            val result = repository.createExpense(state.tripId, input)
             if (result.isSuccess) {
                 setState { copy(isLoading = false) }
                 sendEffect(AddExpenseContract.Effect.ExpenseAdded)

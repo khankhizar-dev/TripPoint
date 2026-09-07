@@ -40,16 +40,18 @@ import com.android.trippoint.core.designsystem.components.TripPointLinearProgres
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import kotlinx.coroutines.flow.collectLatest
 
+@Suppress("LongParameterList")
 @Composable
 fun BudgetOverviewRoute(
     tripId: String,
     budgetId: String,
     viewModel: BudgetOverviewViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToAddExpense: (String) -> Unit,
-    onNavigateToExpenses: (String) -> Unit,
+    onNavigateToAddExpense: (String, String) -> Unit,
+    onNavigateToExpenses: (String, String) -> Unit,
     onNavigateToTrends: (String, String) -> Unit,
     onNavigateToReports: (String, String) -> Unit,
+    onNavigateToSettlements: (String) -> Unit,
     onNavigateToScanner: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -62,7 +64,9 @@ fun BudgetOverviewRoute(
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 BudgetOverviewContract.Effect.NavigateBack -> onNavigateBack()
-                is BudgetOverviewContract.Effect.NavigateToAddExpense -> onNavigateToAddExpense(effect.budgetId)
+                is BudgetOverviewContract.Effect.NavigateToAddExpense -> {
+                    onNavigateToAddExpense(tripId, effect.budgetId)
+                }
             }
         }
     }
@@ -70,9 +74,10 @@ fun BudgetOverviewRoute(
     BudgetOverviewScreen(
         uiState = uiState,
         onIntent = viewModel::onIntent,
-        onViewAllExpenses = { onNavigateToExpenses(budgetId) },
+        onViewAllExpenses = { onNavigateToExpenses(tripId, budgetId) },
         onTrendsClick = { onNavigateToTrends(tripId, budgetId) },
         onReportsClick = { onNavigateToReports(tripId, budgetId) },
+        onSettlementsClick = { onNavigateToSettlements(tripId) },
         onScannerClick = { onNavigateToScanner(budgetId) }
     )
 }
@@ -84,6 +89,7 @@ fun BudgetOverviewScreen(
     onViewAllExpenses: () -> Unit,
     onTrendsClick: () -> Unit,
     onReportsClick: () -> Unit,
+    onSettlementsClick: () -> Unit,
     onScannerClick: () -> Unit
 ) {
     Scaffold(
@@ -108,6 +114,7 @@ fun BudgetOverviewScreen(
             onViewAllExpenses = onViewAllExpenses,
             onTrendsClick = onTrendsClick,
             onReportsClick = onReportsClick,
+            onSettlementsClick = onSettlementsClick,
             onScannerClick = onScannerClick,
             modifier = Modifier.padding(innerPadding)
         )
@@ -120,6 +127,7 @@ private fun BudgetOverviewContent(
     onViewAllExpenses: () -> Unit,
     onTrendsClick: () -> Unit,
     onReportsClick: () -> Unit,
+    onSettlementsClick: () -> Unit,
     onScannerClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -168,6 +176,15 @@ private fun BudgetOverviewContent(
                         modifier = Modifier.weight(1f)
                     )
                 }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                TripPointInteractiveCard(
+                    title = "Settlements",
+                    subtitle = "Who owes whom?",
+                    onClick = onSettlementsClick,
+                    modifier = Modifier.fillMaxWidth()
+                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

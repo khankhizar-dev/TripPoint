@@ -19,8 +19,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -38,36 +38,42 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ExpenseListRoute(
+    tripId: String,
     budgetId: String,
     viewModel: ExpenseListViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToAddExpense: (String) -> Unit
+    onNavigateToAddExpense: (String, String) -> Unit,
+    onNavigateToDetails: (String, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(budgetId) {
-        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses(budgetId))
+    LaunchedEffect(tripId, budgetId) {
+        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses(tripId, budgetId))
     }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ExpenseListContract.Effect.NavigateBack -> onNavigateBack()
-                is ExpenseListContract.Effect.NavigateToAddExpense -> onNavigateToAddExpense(effect.budgetId)
+                is ExpenseListContract.Effect.NavigateToAddExpense -> {
+                    onNavigateToAddExpense(tripId, effect.budgetId)
+                }
             }
         }
     }
 
     ExpenseListScreen(
         uiState = uiState,
-        onIntent = viewModel::onIntent
+        onIntent = viewModel::onIntent,
+        onExpenseClick = { eId -> onNavigateToDetails(tripId, eId) }
     )
 }
 
 @Composable
 fun ExpenseListScreen(
     uiState: ExpenseListContract.State,
-    onIntent: (ExpenseListContract.Intent) -> Unit
+    onIntent: (ExpenseListContract.Intent) -> Unit,
+    onExpenseClick: (String) -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -86,41 +92,57 @@ fun ExpenseListScreen(
             }
         }
     ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingIndicator()
-            }
-        } else if (uiState.error != null) {
-            Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-                TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
-            }
-        } else if (uiState.expenses.isEmpty()) {
-            TripPointEmptyState(
-                title = "No expenses yet",
-                subtitle = "Start tracking your spending for this trip.",
-                imageResId = designR.drawable.illustration_empty_trip,
-                actionText = "Add Expense",
-                onActionClick = { onIntent(ExpenseListContract.Intent.AddExpenseClicked) }
-            )
-        } else {
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(24.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(uiState.expenses) { expense ->
-                    ExpenseItem(expense)
-                }
+        ExpenseListContent(
+            uiState = uiState, 
+            onIntent = onIntent,
+            onExpenseClick = onExpenseClick,
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
+
+@Composable
+private fun ExpenseListContent(
+    uiState: ExpenseListContract.State,
+    onIntent: (ExpenseListContract.Intent) -> Unit,
+    onExpenseClick: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (uiState.isLoading) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            LoadingIndicator()
+        }
+    } else if (uiState.error != null) {
+        Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+            TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
+        }
+    } else if (uiState.expenses.isEmpty()) {
+        TripPointEmptyState(
+            title = "No expenses yet",
+            subtitle = "Start tracking your spending for this trip.",
+            imageResId = designR.drawable.illustration_empty_trip,
+            actionText = "Add Expense",
+            onActionClick = { onIntent(ExpenseListContract.Intent.AddExpenseClicked) }
+        )
+    } else {
+        LazyColumn(
+            modifier = modifier.fillMaxSize(),
+            contentPadding = PaddingValues(24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            items(uiState.expenses) { expense ->
+                ExpenseItem(expense, onClick = { onExpenseClick(expense.id) })
             }
         }
     }
 }
 
 @Composable
-private fun ExpenseItem(expense: Expense) {
-    TripPointInfoCard(title = expense.category) {
+private fun ExpenseItem(expense: Expense, onClick: () -> Unit) {
+    TripPointInfoCard(
+        title = expense.category,
+        onClick = onClick
+    ) {
         Column {
             Row(
                 modifier = Modifier.fillMaxWidth(),

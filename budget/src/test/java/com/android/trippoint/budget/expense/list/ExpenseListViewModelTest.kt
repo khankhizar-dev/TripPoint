@@ -46,50 +46,46 @@ class ExpenseListViewModelTest {
     }
 
     @Test
-    fun `LoadExpenses success updates state with expenses`() = runTest {
-        val budgetId = "b1"
-        val expenses = listOf(
-            Expense("e1", budgetId, 10.0, "USD", "Food", "2024-01-01", "Lunch", createdAt = "2024-01-01")
-        )
-        coEvery { repository.getExpenses(budgetId) } returns Result.success(expenses)
+    fun `LoadExpenses success updates state`() = runTest {
+        val mockExpenses = listOf(mockk<Expense>())
+        coEvery { repository.getExpenses("t1", any()) } returns Result.success(mockExpenses)
 
-        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses(budgetId))
+        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses("t1", "b1"))
         
         runCurrent()
-        
-        assertEquals(false, viewModel.uiState.value.isLoading)
-        assertEquals(expenses, viewModel.uiState.value.expenses)
-        assertNull(viewModel.uiState.value.error)
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isLoading)
+        assertEquals(mockExpenses, state.expenses)
+        assertEquals("t1", state.tripId)
+        assertEquals("b1", state.budgetId)
+        assertNull(state.error)
     }
 
     @Test
-    fun `LoadExpenses failure updates state with error`() = runTest {
-        val budgetId = "b1"
-        val errorMessage = "Network Error"
-        coEvery { repository.getExpenses(budgetId) } returns Result.failure(Exception(errorMessage))
+    fun `LoadExpenses failure updates error state`() = runTest {
+        coEvery { repository.getExpenses("t1", any()) } returns Result.failure(Exception("Network error"))
 
-        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses(budgetId))
-        runCurrent()
+        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses("t1", "b1"))
         
+        runCurrent()
         assertEquals(false, viewModel.uiState.value.isLoading)
-        assertEquals(errorMessage, viewModel.uiState.value.error)
+        assertEquals("Network error", viewModel.uiState.value.error)
     }
 
     @Test
-    fun `AddExpenseClicked sends NavigateToAddExpense effect`() = runTest {
-        val budgetId = "b1"
-        coEvery { repository.getExpenses(budgetId) } returns Result.success(emptyList())
-        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses(budgetId))
+    fun `AddExpenseClicked intent sends NavigateToAddExpense effect`() = runTest {
+        coEvery { repository.getExpenses("t1", any()) } returns Result.success(emptyList())
+        viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses("t1", "b1"))
         runCurrent()
-
+        
         viewModel.effect.test {
             viewModel.onIntent(ExpenseListContract.Intent.AddExpenseClicked)
-            assertEquals(ExpenseListContract.Effect.NavigateToAddExpense(budgetId), awaitItem())
+            assertEquals(ExpenseListContract.Effect.NavigateToAddExpense("b1"), awaitItem())
         }
     }
 
     @Test
-    fun `BackClicked sends NavigateBack effect`() = runTest {
+    fun `BackClicked intent sends NavigateBack effect`() = runTest {
         viewModel.effect.test {
             viewModel.onIntent(ExpenseListContract.Intent.BackClicked)
             assertEquals(ExpenseListContract.Effect.NavigateBack, awaitItem())

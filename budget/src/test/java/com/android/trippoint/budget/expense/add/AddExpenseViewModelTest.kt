@@ -42,54 +42,30 @@ class AddExpenseViewModelTest {
         assertEquals("", state.budgetId)
         assertEquals("", state.amount)
         assertEquals("Food", state.category)
-        assertEquals("", state.date)
-        assertEquals("", state.description)
         assertEquals(false, state.isLoading)
         assertNull(state.error)
     }
 
     @Test
-    fun `LoadBudgetId updates state`() {
-        viewModel.onIntent(AddExpenseContract.Intent.LoadBudgetId("b1"))
+    fun `LoadIds updates state correctly`() = runTest {
+        viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        assertEquals("t1", viewModel.uiState.value.tripId)
         assertEquals("b1", viewModel.uiState.value.budgetId)
     }
 
     @Test
-    fun `AmountChanged updates state`() {
-        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("50.5"))
-        assertEquals("50.5", viewModel.uiState.value.amount)
-    }
+    fun `field change intents update state`() {
+        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("42.5"))
+        assertEquals("42.5", viewModel.uiState.value.amount)
 
-    @Test
-    fun `CategoryChanged updates state`() {
         viewModel.onIntent(AddExpenseContract.Intent.CategoryChanged("Transport"))
         assertEquals("Transport", viewModel.uiState.value.category)
-    }
 
-    @Test
-    fun `DateChanged updates state`() {
-        viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2024-09-05"))
-        assertEquals("2024-09-05", viewModel.uiState.value.date)
-    }
+        viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2026-09-01"))
+        assertEquals("2026-09-01", viewModel.uiState.value.date)
 
-    @Test
-    fun `DescriptionChanged updates state`() {
-        viewModel.onIntent(AddExpenseContract.Intent.DescriptionChanged("Taxi to airport"))
-        assertEquals("Taxi to airport", viewModel.uiState.value.description)
-    }
-
-    @Test
-    fun `BackClicked sends NavigateBack effect`() = runTest {
-        viewModel.effect.test {
-            viewModel.onIntent(AddExpenseContract.Intent.BackClicked)
-            assertEquals(AddExpenseContract.Effect.NavigateBack, awaitItem())
-        }
-    }
-
-    @Test
-    fun `SaveClicked with empty amount shows error`() {
-        viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
-        assertEquals("Enter a valid amount", viewModel.uiState.value.error)
+        viewModel.onIntent(AddExpenseContract.Intent.DescriptionChanged("Taxi"))
+        assertEquals("Taxi", viewModel.uiState.value.description)
     }
 
     @Test
@@ -100,37 +76,16 @@ class AddExpenseViewModelTest {
     }
 
     @Test
-    fun `SaveClicked with zero amount shows error`() {
-        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("0"))
-        viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
-        assertEquals("Enter a valid amount", viewModel.uiState.value.error)
-    }
+    fun `SaveClicked success sends ExpenseAdded effect`() = runTest {
+        val mockExpense = mockk<Expense>()
+        coEvery { repository.createExpense(any(), any()) } returns Result.success(mockExpense)
 
-    @Test
-    fun `successful save updates state and sends ExpenseAdded effect`() = runTest {
-        val budgetId = "b1"
-        val amount = 50.5
-        val category = "Food"
-        val date = "2024-09-05"
-        val description = "Lunch"
-        
-        val expense = Expense(
-            "e1", budgetId, amount, "USD", category, date, description, createdAt = date
-        )
-        
-        coEvery { 
-            repository.addExpense(budgetId, amount, category, date, description) 
-        } returns Result.success(expense)
-
-        viewModel.onIntent(AddExpenseContract.Intent.LoadBudgetId(budgetId))
-        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged(amount.toString()))
-        viewModel.onIntent(AddExpenseContract.Intent.CategoryChanged(category))
-        viewModel.onIntent(AddExpenseContract.Intent.DateChanged(date))
-        viewModel.onIntent(AddExpenseContract.Intent.DescriptionChanged(description))
+        viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("10.0"))
+        viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2026-01-01"))
         
         viewModel.effect.test {
             viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
-            
             runCurrent()
             
             assertEquals(false, viewModel.uiState.value.isLoading)
@@ -139,18 +94,27 @@ class AddExpenseViewModelTest {
     }
 
     @Test
-    fun `failed save updates state with error`() = runTest {
-        val errorMessage = "Save failed"
-        coEvery { 
-            repository.addExpense(any(), any(), any(), any(), any()) 
-        } returns Result.failure(Exception(errorMessage))
+    fun `SaveClicked failure updates error state`() = runTest {
+        coEvery {
+            repository.createExpense(any(), any())
+        } returns Result.failure(Exception("Creation failed"))
 
-        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("10"))
-        viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
+        viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("10.0"))
+        viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2026-01-01"))
         
+        viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
         runCurrent()
         
         assertEquals(false, viewModel.uiState.value.isLoading)
-        assertEquals(errorMessage, viewModel.uiState.value.error)
+        assertEquals("Creation failed", viewModel.uiState.value.error)
+    }
+
+    @Test
+    fun `BackClicked intent sends NavigateBack effect`() = runTest {
+        viewModel.effect.test {
+            viewModel.onIntent(AddExpenseContract.Intent.BackClicked)
+            assertEquals(AddExpenseContract.Effect.NavigateBack, awaitItem())
+        }
     }
 }

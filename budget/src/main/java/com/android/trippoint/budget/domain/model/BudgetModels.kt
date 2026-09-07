@@ -49,6 +49,8 @@ data class Expense(
     val location: String? = null,
     val attachments: List<String> = emptyList(),
     val paymentMethod: String? = null,
+    val paidBy: String? = null,
+    val createdBy: String? = null,
     val createdAt: String
 )
 
