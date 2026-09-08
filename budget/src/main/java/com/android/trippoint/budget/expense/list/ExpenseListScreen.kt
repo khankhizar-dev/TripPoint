@@ -131,14 +131,21 @@ private fun ExpenseListContent(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             items(uiState.expenses) { expense ->
-                ExpenseItem(expense, onClick = { onExpenseClick(expense.id) })
+                val paidByName = uiState.members.find { it.userId == expense.paidBy }?.userName 
+                    ?: expense.paidBy?.take(8) ?: "Unknown"
+                
+                ExpenseItem(
+                    expense = expense, 
+                    paidByName = paidByName,
+                    onClick = { onExpenseClick(expense.id) }
+                )
             }
         }
     }
 }
 
 @Composable
-private fun ExpenseItem(expense: Expense, onClick: () -> Unit) {
+private fun ExpenseItem(expense: Expense, paidByName: String, onClick: () -> Unit) {
     TripPointInfoCard(
         title = expense.category,
         onClick = onClick
@@ -156,7 +163,7 @@ private fun ExpenseItem(expense: Expense, onClick: () -> Unit) {
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = expense.date,
+                        text = "Paid by $paidByName • ${expense.date}",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

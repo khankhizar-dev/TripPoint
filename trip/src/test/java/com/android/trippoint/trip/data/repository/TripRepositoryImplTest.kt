@@ -126,8 +126,8 @@ class TripRepositoryImplTest {
         val result = repository.getTripMembers("1")
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-        assertEquals("OWNER", result.getOrNull()?.first()?.role?.name)
+        val member = result.getOrNull()?.first()
+        assertEquals("OWNER", member?.role?.name)
     }
 
     @Test

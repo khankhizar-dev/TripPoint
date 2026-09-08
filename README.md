@@ -48,15 +48,16 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Premium Onboarding**: 3-page interactive pager with detailed illustrations.
 - [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback. Features **persistent sessions** and intelligent cross-device profile syncing.
 - [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection. Automatically skips once completed.
-- [x] **Permissions Wizard**: Branded **dialog-based** requests for system access, providing context before asking.
+- [x] **Permissions Wizard**: Modern **modal dialog-based** requests over the Home dashboard, providing context before asking.
 
 ### Trip Workspace
-- [x] **Trip Dashboard**: live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).
+- [x] **Trip Dashboard**: Live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).
 - [x] **Search & Filter**: Real-time searching and tab-based status filtering.
+- [x] **Real-time Overview**: Command center featuring live **Budget vs. Spent** stats and chronological **Task Progress** synced from across the app.
 - [x] **Guided Creation**: Multi-step flow (`Create Trip` -> `Add Details` -> `Invite People` -> `Trip Summary`).
 - [x] **Rich Invitations**: Search from contacts or manual entry (Email/Phone) with immediate feedback.
 - [x] **Lifecycle Management**: Move trips between statuses, archive, or delete via a centralized action menu.
-- [x] **Dynamic Progress**: Real-time progress calculation based on task completion.
+- [x] **Dynamic Progress**: Reactive progress bars that update instantly as tasks are completed in the itinerary.
 
 ### Itinerary & Timeline
 - [x] **Chronological Timeline**: Vertical high-fidelity view with status tracking.
@@ -79,6 +80,7 @@ The project follows a multi-module architecture to promote scalability and maint
 
 ### Budget & Expense Tracking
 - [x] **Budget Overview**: High-fidelity summary card with total/spent amounts and real-time progress tracking.
+- [x] **Intelligent Aggregation**: Real-time spending calculation that cross-references individual transactions with category-wise analytics for 100% accuracy.
 - [x] **Category Breakdown**: Detailed spending analysis for Food, Transport, Activities, etc.
 - [x] **Global Budget List**: Manage financial plans across all active and upcoming trips.
 - [x] **Spending Trends**: Dynamic bar charts and AI-powered spending insights.

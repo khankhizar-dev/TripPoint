@@ -24,11 +24,14 @@ class ExpenseListViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true, tripId = tripId, budgetId = budgetId) }
             val result = repository.getExpenses(tripId)
+            val membersResult = repository.getTripMembers(tripId)
+            
             if (result.isSuccess) {
                 setState { 
                     copy(
                         isLoading = false, 
-                        expenses = result.getOrDefault(emptyList()), 
+                        expenses = result.getOrDefault(emptyList()),
+                        members = membersResult.getOrDefault(emptyList()),
                         error = null
                     ) 
                 }

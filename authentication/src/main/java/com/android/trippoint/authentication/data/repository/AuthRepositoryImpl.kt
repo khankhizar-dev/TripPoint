@@ -25,8 +25,9 @@ class AuthRepositoryImpl(
                 preferencesManager.setAuthToken(response.token)
                 preferencesManager.setRefreshToken(response.refreshToken)
                 preferencesManager.setUserId(response.user.id)
-                // If username is set, profile is complete
-                if (response.user.username != null) {
+                // If any significant profile field is set, consider it partially complete
+                // If username is set, it's definitely complete
+                if (response.user.username != null || response.user.firstName != null) {
                     preferencesManager.setProfileSetupCompleted(true)
                 }
                 Result.success(response.user.toDomain())
@@ -131,11 +132,14 @@ class AuthRepositoryImpl(
         return try {
             val user = remoteDataSource.getMe()
             if (user == null) {
+                // If we have a token but getMe returns null, it might be an auth error.
+                // We clear session ONLY if we are sure it's an auth failure.
+                // For now, we trust the remote source to return null on auth failure.
                 preferencesManager.clearSession()
             } else {
                 preferencesManager.setUserId(user.id)
-                // Consider profile complete if username is set
-                if (user.username != null) {
+                // Consider profile complete if username or fullName is set
+                if (user.username != null || user.fullName != null) {
                     preferencesManager.setProfileSetupCompleted(true)
                 }
             }

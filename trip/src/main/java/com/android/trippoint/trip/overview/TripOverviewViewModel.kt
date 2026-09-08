@@ -4,11 +4,15 @@ import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.core.common.model.Traveler
 import com.android.trippoint.core.common.model.TripStatus
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.trip.domain.repository.TripRepository
 import kotlinx.coroutines.launch
 
 class TripOverviewViewModel(
-    private val repository: TripRepository
+    private val repository: TripRepository,
+    private val budgetRemoteDataSource: BudgetRemoteDataSource,
+    private val itineraryRemoteDataSource: ItineraryRemoteDataSource
 ) : BaseViewModel<TripOverviewContract.State, TripOverviewContract.Intent, TripOverviewContract.Effect>(
     TripOverviewContract.State()
 ) {
@@ -22,6 +26,7 @@ class TripOverviewViewModel(
                 when (intent.tabIndex) {
                     1 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
                     2 -> sendEffect(TripOverviewContract.Effect.NavigateToBookings(tripId))
+                    3 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId)) // Or dedicated
                     4 -> sendEffect(TripOverviewContract.Effect.NavigateToBudgets(tripId))
                 }
             }
@@ -39,7 +44,9 @@ class TripOverviewViewModel(
                 }
             }
             TripOverviewContract.Intent.AddExpenseClicked -> {
-                // Handle action
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddExpense(it))
+                }
             }
             TripOverviewContract.Intent.AddNoteClicked -> {
                 uiState.value.trip?.id?.let {
@@ -97,25 +104,52 @@ class TripOverviewViewModel(
             
             val tripResult = repository.getTrip(tripId)
             val membersResult = repository.getTripMembers(tripId)
+            
+            // Fetch analytics data to provide high-fidelity stats
+            val budgetSummary = runCatching { budgetRemoteDataSource.getBudgetSummary(tripId) }.getOrNull()
+            val itineraryDays = runCatching { 
+                itineraryRemoteDataSource.getItineraryDays(tripId) 
+            }.getOrNull() ?: emptyList()
+            
+            var totalTasks = 0
+            var completedTasks = 0
+            
+            itineraryDays.forEach { day ->
+                val activities = runCatching { 
+                    itineraryRemoteDataSource.getItineraryActivities(tripId, day.id) 
+                }.getOrNull() ?: emptyList()
+                totalTasks += activities.size
+                completedTasks += activities.count { it.completed }
+            }
 
             if (tripResult.isSuccess) {
                 val trip = tripResult.getOrNull()
                 val members = membersResult.getOrDefault(emptyList())
                 
-                // Map members to travelers
                 val travelers = members.map { member ->
                     Traveler(
                         id = member.userId,
-                        name = "User ${member.userId}", // Need a way to get user names
+                        name = member.userName ?: "User ${member.userId.take(4)}",
                         photoUrl = "",
                         role = member.role,
                         status = member.status
                     )
                 }
 
+                val budgetText = if (budgetSummary != null) {
+                    "${budgetSummary.budget.currency} ${budgetSummary.budget.totalAmount}"
+                } else {
+                    "Not Set"
+                }
+
                 setState {
                     copy(
-                        trip = trip?.copy(travelers = travelers),
+                        trip = trip?.copy(
+                            travelers = travelers,
+                            budget = budgetText,
+                            tasksCount = totalTasks,
+                            completedTasksCount = completedTasks
+                        ),
                         isLoading = false,
                         error = null
                     )

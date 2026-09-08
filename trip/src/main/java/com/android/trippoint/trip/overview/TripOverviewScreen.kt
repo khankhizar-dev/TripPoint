@@ -37,6 +37,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.android.trippoint.core.common.model.Traveler
 import com.android.trippoint.core.common.model.Trip
@@ -61,6 +65,7 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 
+@Suppress("LongParameterList")
 @Composable
 fun TripOverviewRoute(
     tripId: String,
@@ -75,8 +80,15 @@ fun TripOverviewRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(tripId) {
-        viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails(tripId))
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails(tripId))
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -88,6 +100,10 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddExpense -> {
+                    // Navigate directly to budgets list for that trip
+                    onNavigateToBudgets(effect.tripId)
+                }
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }
@@ -292,7 +308,11 @@ private fun TripOverviewContent(
             Spacer(modifier = Modifier.height(24.dp))
             QuickActionsSection(onIntent)
             Spacer(modifier = Modifier.height(24.dp))
-            StatsSection(trip)
+            StatsSection(
+                trip = trip,
+                onBudgetClick = { onIntent(TripOverviewContract.Intent.AddExpenseClicked) },
+                onTasksClick = { onIntent(TripOverviewContract.Intent.AddTaskClicked) }
+            )
         }
     }
 }
@@ -380,7 +400,11 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun StatsSection(trip: Trip) {
+private fun StatsSection(
+    trip: Trip,
+    onBudgetClick: () -> Unit,
+    onTasksClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -388,19 +412,27 @@ private fun StatsSection(trip: Trip) {
         StatItem(
             label = stringResource(id = designR.string.trip_overview_budget_label),
             value = trip.budget,
+            onClick = onBudgetClick,
             modifier = Modifier.weight(1f)
         )
         StatItem(
             label = stringResource(id = designR.string.trip_overview_tasks_label),
             value = "${trip.completedTasksCount}/${trip.tasksCount}",
+            onClick = onTasksClick,
             modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
+private fun StatItem(
+    label: String, 
+    value: String, 
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
+        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))

@@ -12,7 +12,10 @@ class AuthRemoteDataSource(
         val query = """
             mutation Register(${'$'}input: RegisterInput!) {
               register(input: ${'$'}input) {
-                user { id email firstName lastName }
+                user { 
+                  id email firstName lastName fullName username 
+                  phoneNumber dateOfBirth nationality profilePhotoUrl country 
+                }
                 token
                 refreshToken
               }
@@ -33,7 +36,10 @@ class AuthRemoteDataSource(
         val query = """
             mutation Login(${'$'}email: String!, ${'$'}password: String!) {
               login(email: ${'$'}email, password: ${'$'}password) {
-                user { id email firstName lastName }
+                user { 
+                  id email firstName lastName fullName username 
+                  phoneNumber dateOfBirth nationality profilePhotoUrl country 
+                }
                 token
                 refreshToken
               }

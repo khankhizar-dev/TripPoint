@@ -159,22 +159,26 @@ class TripRepositoryImpl(
             location = destination,
             startDate = startDate,
             endDate = endDate,
-            status = try { TripStatus.valueOf(status) } catch (e: Exception) { TripStatus.DRAFT },
-            imageUrl = "", // Backend doesn't return this yet
+            status = try { TripStatus.valueOf(status) } catch (_: Exception) { TripStatus.DRAFT },
+            imageUrl = "", // Removed from API for now
             progress = progress,
             travelersCount = travelers,
+            tasksCount = 0, // Fallback since API field is undefined
+            completedTasksCount = 0, // Fallback since API field is undefined
             createdAt = createdAt,
             updatedAt = updatedAt
         )
     }
 
     private fun TripMemberDto.toDomain(): TripMember {
+        val name = user?.fullName ?: "${user?.firstName ?: ""} ${user?.lastName ?: ""}".trim()
         return TripMember(
             id = id,
             tripId = tripId,
             userId = userId,
-            role = try { TravelerRole.valueOf(role) } catch (e: Exception) { TravelerRole.MEMBER },
-            status = try { InvitationStatus.valueOf(status) } catch (e: Exception) { InvitationStatus.PENDING },
+            userName = name.ifBlank { null },
+            role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
+            status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,
             joinedAt = joinedAt
         )

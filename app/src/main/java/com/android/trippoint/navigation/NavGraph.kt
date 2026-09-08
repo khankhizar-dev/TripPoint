@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute
 import com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute
 import com.android.trippoint.authentication.login.LoginRoute
@@ -116,6 +117,10 @@ import com.android.trippoint.ui.settings.NotificationsRoute
 import com.android.trippoint.ui.settings.PreferencesRoute
 import com.android.trippoint.ui.settings.SecurityRoute
 import com.android.trippoint.ui.settings.SettingsRoute
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.ItineraryRemoteDataSource
+import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.ui.settings.SupportRoute
 
 @Composable
@@ -126,6 +131,7 @@ fun AppNavGraph(
     bookingRepository: BookingRepository,
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
+    preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -134,7 +140,7 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         authNavGraph(navController)
-        tripNavGraph(navController, tripRepository)
+        tripNavGraph(navController, tripRepository, preferencesManager)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
@@ -175,9 +181,10 @@ private fun NavGraphBuilder.addSplashDestination(navController: NavHostControlle
                 }
             },
             onNavigateToPermissions = {
-                navController.navigate(Screen.Permissions.route) {
+                navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
+                navController.navigate(Screen.Permissions.route)
             },
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
@@ -306,16 +313,17 @@ private fun NavGraphBuilder.addProfileSetupDestination(navController: NavHostCon
     composable(Screen.ProfileSetup.route) {
         ProfileSetupRoute(
             onNavigateToHome = {
-                navController.navigate(Screen.Permissions.route) {
+                navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
                 }
+                navController.navigate(Screen.Permissions.route)
             }
         )
     }
 }
 
 private fun NavGraphBuilder.addPermissionsDestination(navController: NavHostController) {
-    composable(Screen.Permissions.route) {
+    dialog(Screen.Permissions.route) {
         PermissionsRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
@@ -339,7 +347,11 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
 }
 
 @Suppress("LongMethod")
-private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripRepository: TripRepository) {
+private fun NavGraphBuilder.tripNavGraph(
+    navController: NavHostController, 
+    tripRepository: TripRepository,
+    preferencesManager: PreferencesManager
+) {
     composable(Screen.Home.route) {
         HomeRoute(
             onNavigateToLogin = {
@@ -369,7 +381,19 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return TripOverviewViewModel(tripRepository) as T
+                    val api = NetworkModule.provideTripPointApi(
+                        { preferencesManager.getAuthToken() },
+                        { preferencesManager.getRefreshToken() },
+                        { t, r -> 
+                            preferencesManager.setAuthToken(t)
+                            preferencesManager.setRefreshToken(r)
+                        }
+                    )
+                    return TripOverviewViewModel(
+                        tripRepository,
+                        BudgetRemoteDataSource(api),
+                        ItineraryRemoteDataSource(api)
+                    ) as T
                 }
             }
         )

@@ -53,6 +53,7 @@ data class TripMember(
     val id: String,
     val tripId: String,
     val userId: String,
+    val userName: String? = null,
     val role: TravelerRole,
     val status: InvitationStatus,
     val invitedAt: String,

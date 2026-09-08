@@ -3,7 +3,6 @@ package com.android.trippoint.budget.reports
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.budget.domain.repository.BudgetRepository
 import com.android.trippoint.core.common.BaseViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class BudgetReportsViewModel(
@@ -25,7 +24,7 @@ class BudgetReportsViewModel(
     private fun generateReport(format: String, action: String) {
         viewModelScope.launch {
             setState { copy(isLoading = true) }
-            delay(2000) // Simulate report generation
+            // Real logic for report generation could go here
             setState { copy(isLoading = false) }
             sendEffect(BudgetReportsContract.Effect.ShowSuccess("$action $format report successful"))
         }

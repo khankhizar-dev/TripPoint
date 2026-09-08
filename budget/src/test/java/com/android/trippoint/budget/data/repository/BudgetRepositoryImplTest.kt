@@ -5,6 +5,7 @@ import com.android.trippoint.core.network.BudgetDto
 import com.android.trippoint.core.network.BudgetRemoteDataSource
 import com.android.trippoint.core.network.CreateExpenseInput
 import com.android.trippoint.core.network.ExpenseDto
+import com.android.trippoint.core.network.TripMemberDto
 import com.android.trippoint.core.network.TripRemoteDataSource
 import io.mockk.coEvery
 import io.mockk.every
@@ -54,6 +55,16 @@ class BudgetRepositoryImplTest {
         archived = false,
         createdAt = "2024-09-05",
         updatedAt = "2024-09-05"
+    )
+
+    private val dummyMemberDto = TripMemberDto(
+        id = "m1",
+        tripId = "t1",
+        userId = "u1",
+        role = "MEMBER",
+        status = "ACCEPTED",
+        invitedAt = "2024-01-01",
+        joinedAt = "2024-01-02"
     )
 
     @Before
@@ -109,13 +120,14 @@ class BudgetRepositoryImplTest {
     }
 
     @Test
-    fun `createBudget calls remote and returns success`() = runTest {
-        coEvery { remoteDataSource.createBudget("t1", any()) } returns dummyBudgetDto
+    fun `getTripMembers returns domain list with names`() = runTest {
+        coEvery { tripRemoteDataSource.getTripMembers("t1") } returns listOf(dummyMemberDto)
 
-        val result = repository.createBudget("t1", 1000.0, "USD")
-        
+        val result = repository.getTripMembers("t1")
+
         assertTrue(result.isSuccess)
-        assertEquals("b1", result.getOrNull()?.id)
+        val member = result.getOrNull()?.first()
+        assertEquals("u1", member?.userId)
     }
 
     @Test
