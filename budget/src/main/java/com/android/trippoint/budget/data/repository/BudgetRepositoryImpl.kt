@@ -213,7 +213,7 @@ class BudgetRepositoryImpl(
             totalAmount = totalAmount,
             spentAmount = 0.0,
             currency = currency,
-            title = "Trip Budget",
+            title = "Budget", // Generic fallback instead of specific mock
             createdAt = createdAt,
             updatedAt = updatedAt
         )
@@ -235,17 +235,11 @@ class BudgetRepositoryImpl(
     }
 
     private fun TripMemberDto.toDomain(): TripMember {
-        val mockName = when (userId) {
-            "u1" -> "Khizar"
-            "u2" -> "Rohit"
-            "u3" -> "Rameez"
-            else -> "User ${userId.take(4)}"
-        }
         return TripMember(
             id = id,
             tripId = tripId,
             userId = userId,
-            userName = mockName,
+            userName = userName, // Mapped from real API field
             role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,

@@ -156,9 +156,15 @@ fun AddExpenseScreen(
             if (uiState.members.isNotEmpty()) {
                 TripPointDropdown(
                     value = uiState.paidBy,
-                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+                    onValueChange = { selected ->
+                        // Find the userId for the selected name/id
+                        val member = uiState.members.find { 
+                            (it.userName ?: it.userId) == selected 
+                        }
+                        onIntent(AddExpenseContract.Intent.PaidByChanged(member?.userId ?: selected))
+                    },
                     label = "Paid By",
-                    options = uiState.members.map { it.userId }, // Ideally should show names
+                    options = uiState.members.map { it.userName ?: it.userId },
                     modifier = Modifier.fillMaxWidth()
                 )
             } else {
