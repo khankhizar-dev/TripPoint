@@ -50,6 +50,7 @@
     <string name="create_trip_end_date_label">End Date</string>
     <string name="create_trip_travelers_label">Travelers</string>
     <string name="create_trip_next_button">Next</string>
+    <string name="create_trip_date_range">%1$s - %2$s</string>
 
     <!-- Add Details -->
     <string name="add_details_title">Add Details</string>
@@ -66,6 +67,10 @@
     <string name="invite_people_search_placeholder">Search people</string>
     <string name="invite_people_via_link">Invite via link</string>
     <string name="invite_people_button">Invite</string>
+    <string name="invite_people_manual_label">Invite via Email or Phone</string>
+    <string name="invite_people_manual_placeholder">friend@example.com</string>
+    <string name="invite_people_contacts_title">Search from Contacts</string>
+    <string name="invite_people_invited">Invited</string>
 
     <!-- Trip Summary -->
     <string name="trip_summary_title">Trip Summary</string>
@@ -89,6 +94,19 @@
     <string name="event_details_terminal">Terminal</string>
     <string name="event_details_gate">Gate</string>
     <string name="event_details_seat">Seat</string>
+    <string name="event_details_flight_activity">Flight Activity</string>
+    <string name="event_details_origin">Origin</string>
+    <string name="event_details_destination">Destination</string>
+    <string name="event_details_starts_at">Starts at %1$s</string>
+    <string name="event_details_ends_at">Ends at %1$s</string>
+    <string name="event_details_description">Description</string>
+    <string name="event_details_no_description">No description provided.</string>
+    <string name="event_details_location">Location</string>
+    <string name="event_details_primary_traveler">Primary Traveler</string>
+    <string name="event_details_fetching">FETCHING...</string>
+    <string name="event_details_edit">Edit</string>
+    <string name="event_details_share">Share</string>
+    <string name="event_details_delete">Delete</string>
 
     <!-- Add Event -->
     <string name="add_event_title">Add Event</string>
@@ -220,6 +238,44 @@
     <string name="budget_share">Share</string>
     <string name="budget_create_title">Setup Budget</string>
     <string name="budget_limit_label">Budget Limit</string>
+    <string name="budget_not_set">Not Set</string>
+    <string name="budget_title_default">Budget</string>
+    <string name="budget_member_balances">Member Balances</string>
+    <string name="budget_settlement_plan">Settlement Plan</string>
+    <string name="budget_spending_trends">Spending Trends</string>
+    <string name="budget_view_analytics">View analytics</string>
+    <string name="budget_reports">Reports</string>
+    <string name="budget_export_data">Export data</string>
+    <string name="budget_who_owes_whom">Who owes whom?</string>
+    <string name="budget_ai_receipt_scan">AI Receipt Scan</string>
+    <string name="budget_category_breakdown">Category Breakdown</string>
+    <string name="budget_view_all">View All</string>
+    <string name="budget_no_setup_title">No budget setup</string>
+    <string name="budget_no_setup_desc">Set a budget to track your trip expenses.</string>
+    <string name="budget_no_budgets_title">No budgets yet</string>
+    <string name="budget_no_budgets_desc">Start planning your trip expenses by creating a budget.</string>
+    <string name="budget_paid_by_label">Paid By</string>
+    <string name="budget_paid_by_placeholder">Enter user UUID</string>
+    <string name="budget_spent_prefix">Spent: %1$s</string>
+    <string name="budget_limit_prefix">Limit: %1$s</string>
+    <string name="budget_paid_by_prefix">Paid by %1$s • %2$s</string>
+    <string name="budget_unknown_user">Unknown</string>
+    <string name="budget_no_expenses_title">No expenses yet</string>
+    <string name="budget_no_expenses_desc">Start tracking your spending for this trip.</string>
+    <string name="documents_loading">Fetching your documents...</string>
+    <string name="documents_offline_title">You\'re offline</string>
+    <string name="documents_offline_desc">Showing your offline documents.</string>
+    <string name="documents_details_title">Document Details</string>
+    <string name="documents_expiry_never">Never</string>
+    <string name="documents_fav_added">Added to favorites</string>
+    <string name="documents_fav_removed">Removed from favorites</string>
+    <string name="documents_default_issuer">Govt. of India</string>
+
+    <!-- Errors -->
+    <string name="error_failed_load_trip">Failed to load trip details</string>
+    <string name="error_invalid_amount">Enter a valid amount</string>
+    <string name="error_select_payer">Please specify who paid</string>
+    <string name="error_title_file_required">Title and file are required</string>
 
     <!-- Travel Documents -->
     <string name="documents_title">My Documents</string>
@@ -304,4 +360,9 @@
     <string name="bookings_itinerary_aircraft">Aircraft</string>
     <string name="bookings_itinerary_details">Details</string>
     <string name="bookings_itinerary_non_stop">Non-stop</string>
+
+    <string name="filter_sort_title">Filter &amp; Sort</string>
+    <string name="filter_sort_show">Show</string>
+    <string name="filter_sort_sort_by">Sort By</string>
+    <string name="filter_sort_apply">Apply</string>
 </resources>

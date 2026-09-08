@@ -27,8 +27,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.android.trippoint.core.designsystem.components.AlertVariant
 import com.android.trippoint.core.designsystem.components.ButtonVariant
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
@@ -40,6 +44,7 @@ import com.android.trippoint.core.designsystem.components.TripPointInfoCard
 import com.android.trippoint.core.designsystem.components.TripPointInteractiveCard
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 
 @Suppress("LongParameterList")
@@ -59,10 +64,10 @@ fun BudgetOverviewRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
+    val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onIntent(BudgetOverviewContract.Intent.LoadBudget(tripId, budgetId))
             }
         }
@@ -107,7 +112,7 @@ fun BudgetOverviewScreen(
     Scaffold(
         topBar = {
             TripPointTopAppBar(
-                title = "Budget Overview",
+                title = stringResource(id = designR.string.budget_overview_title),
                 onNavClick = { onIntent(BudgetOverviewContract.Intent.BackClicked) }
             )
         },
@@ -118,7 +123,7 @@ fun BudgetOverviewScreen(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                    Icon(Icons.Default.Add, contentDescription = null)
                 }
             }
         }
@@ -151,108 +156,114 @@ private fun BudgetOverviewContent(
         Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             LoadingIndicator()
         }
-    } else if (uiState.error != null) {
-        Box(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(24.dp), 
-            contentAlignment = Alignment.Center
-        ) {
-            TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
-        }
-    } else if (uiState.budget == null) {
-        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            TripPointEmptyState(
-                title = "No budget setup",
-                subtitle = "Set a budget to track your trip expenses.",
-                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_empty_trip,
-                actionText = "Setup Budget",
-                onActionClick = onSetupBudgetClick
-            )
-        }
     } else {
-        uiState.budget.let { budget ->
-            Column(
+        val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+        if (errorMessage != null) {
+            Box(
                 modifier = modifier
                     .fillMaxSize()
-                    .padding(horizontal = 24.dp)
-                    .verticalScroll(rememberScrollState())
+                    .padding(24.dp), 
+                contentAlignment = Alignment.Center
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointBudgetCard(
-                    title = budget.title,
-                    totalBudget = "${budget.currency} ${budget.totalAmount}",
-                    spentSoFar = "${budget.currency} ${budget.spentAmount}",
-                    progress = budget.progress,
-                    onClick = { /* Already on overview */ },
-                    modifier = Modifier.fillMaxWidth()
+                TripPointAlert(message = errorMessage, variant = AlertVariant.Error)
+            }
+        } else if (uiState.budget == null) {
+            Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                TripPointEmptyState(
+                    title = stringResource(id = designR.string.budget_no_setup_title),
+                    subtitle = stringResource(id = designR.string.budget_no_setup_desc),
+                    imageResId = designR.drawable.illustration_empty_trip,
+                    actionText = stringResource(id = designR.string.budget_create_title),
+                    onActionClick = onSetupBudgetClick
                 )
-                
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+            }
+        } else {
+            uiState.budget.let { budget ->
+                Column(
+                    modifier = modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 24.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    TripPointInteractiveCard(
-                        title = "Spending Trends",
-                        subtitle = "View analytics",
-                        onClick = onTrendsClick,
-                        modifier = Modifier.weight(1f)
-                    )
-                    TripPointInteractiveCard(
-                        title = "Reports",
-                        subtitle = "Export data",
-                        onClick = onReportsClick,
-                        modifier = Modifier.weight(1f)
-                    )
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TripPointInteractiveCard(
-                    title = "Settlements",
-                    subtitle = "Who owes whom?",
-                    onClick = onSettlementsClick,
-                    modifier = Modifier.fillMaxWidth()
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                TripPointButton(
-                    text = "AI Receipt Scan",
-                    onClick = onScannerClick,
-                    modifier = Modifier.fillMaxWidth(),
-                    variant = ButtonVariant.Secondary,
-                    leadingIcon = Icons.Default.Camera
-                )
-
-                Spacer(modifier = Modifier.height(32.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Category Breakdown",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    TextButton(onClick = onViewAllExpenses) {
-                        Text(text = "View All", style = MaterialTheme.typography.labelLarge)
-                    }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                budget.categories.forEach { category ->
-                    CategoryItem(category)
                     Spacer(modifier = Modifier.height(16.dp))
+                    
+                    TripPointBudgetCard(
+                        title = budget.title,
+                        totalBudget = "${budget.currency} ${budget.totalAmount}",
+                        spentSoFar = "${budget.currency} ${budget.spentAmount}",
+                        progress = budget.progress,
+                        onClick = { /* Already on overview */ },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        TripPointInteractiveCard(
+                            title = stringResource(id = designR.string.budget_spending_trends),
+                            subtitle = stringResource(id = designR.string.budget_view_analytics),
+                            onClick = onTrendsClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                        TripPointInteractiveCard(
+                            title = stringResource(id = designR.string.budget_reports),
+                            subtitle = stringResource(id = designR.string.budget_export_data),
+                            onClick = onReportsClick,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TripPointInteractiveCard(
+                        title = stringResource(id = designR.string.budget_settlements_title),
+                        subtitle = stringResource(id = designR.string.budget_who_owes_whom),
+                        onClick = onSettlementsClick,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    TripPointButton(
+                        text = stringResource(id = designR.string.budget_ai_receipt_scan),
+                        onClick = onScannerClick,
+                        modifier = Modifier.fillMaxWidth(),
+                        variant = ButtonVariant.Secondary,
+                        leadingIcon = Icons.Default.Camera
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(id = designR.string.budget_category_breakdown),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        TextButton(onClick = onViewAllExpenses) {
+                            Text(
+                                text = stringResource(id = designR.string.budget_view_all), 
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    }
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    budget.categories.forEach { category ->
+                        CategoryItem(category)
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
-                
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
@@ -267,12 +278,12 @@ private fun CategoryItem(category: com.android.trippoint.budget.domain.model.Bud
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "Spent: ${category.spentAmount}",
+                    text = stringResource(id = designR.string.budget_spent_prefix, category.spentAmount.toString()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
-                    text = "Limit: ${category.allocatedAmount}",
+                    text = stringResource(id = designR.string.budget_limit_prefix, category.allocatedAmount.toString()),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

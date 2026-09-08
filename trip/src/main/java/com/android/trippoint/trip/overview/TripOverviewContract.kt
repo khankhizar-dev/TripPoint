@@ -24,7 +24,8 @@ class TripOverviewContract {
         val trip: Trip? = null,
         val selectedTab: Int = 0,
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val errorResId: Int? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

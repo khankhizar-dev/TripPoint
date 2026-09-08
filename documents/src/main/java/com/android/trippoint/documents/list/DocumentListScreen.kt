@@ -140,7 +140,7 @@ private fun DocumentListTopBar(
             onNavClick = { onIntent(DocumentListContract.Intent.BackClicked) },
             actions = {
                 IconButton(onClick = onSearchClick) {
-                    Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                    Icon(imageVector = Icons.Default.Search, contentDescription = null)
                 }
             }
         )
@@ -158,7 +158,7 @@ private fun DocumentListFab(
             containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary
         ) {
-            Icon(Icons.Default.Add, contentDescription = "Add Document")
+            Icon(Icons.Default.Add, contentDescription = null)
         }
     }
 }
@@ -235,7 +235,7 @@ private fun DocumentListContent(
                     DocumentCard(
                         title = document.title,
                         date = document.createdAt,
-                        size = document.fileSize,
+                        size = document.fileSize ?: "",
                         isFavorite = document.isFavorite,
                         isSelected = isSelected,
                         isSelectionMode = uiState.isSelectionMode,
@@ -264,7 +264,7 @@ private fun DocumentListContent(
                     DocumentCard(
                         title = document.title,
                         date = document.createdAt,
-                        size = document.fileSize,
+                        size = document.fileSize ?: "",
                         isFavorite = document.isFavorite,
                         isSelected = isSelected,
                         isSelectionMode = uiState.isSelectionMode,
@@ -306,14 +306,14 @@ private fun DocumentListContent(
 @Composable
 private fun SelectionTopBar(selectedCount: Int, onClearSelection: () -> Unit) {
     TripPointTopAppBar(
-        title = "$selectedCount Selected",
+        title = stringResource(id = designR.string.documents_count_suffix, selectedCount),
         onNavClick = onClearSelection,
         actions = {
             IconButton(onClick = { }) {
-                Icon(Icons.Default.Share, contentDescription = "Share")
+                Icon(Icons.Default.Share, contentDescription = null)
             }
             IconButton(onClick = { }) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete")
+                Icon(Icons.Default.Delete, contentDescription = null)
             }
         }
     )
@@ -329,7 +329,7 @@ private fun LoadingStateView() {
         LoadingIndicator()
         Spacer(modifier = Modifier.height(16.dp))
         Text(
-            text = "Fetching your documents...",
+            text = stringResource(id = designR.string.documents_loading),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -339,10 +339,10 @@ private fun LoadingStateView() {
 @Composable
 private fun EmptyStateView(onAddClick: () -> Unit) {
     TripPointEmptyState(
-        title = "No documents yet",
-        subtitle = "Upload or scan to get started.",
+        title = stringResource(id = designR.string.documents_empty_title),
+        subtitle = stringResource(id = designR.string.documents_empty_desc),
         imageResId = designR.drawable.illustration_empty_trip,
-        actionText = "Upload Document",
+        actionText = stringResource(id = designR.string.documents_add_title),
         onActionClick = onAddClick
     )
 }
@@ -350,10 +350,10 @@ private fun EmptyStateView(onAddClick: () -> Unit) {
 @Composable
 private fun OfflineStateView(onRetry: () -> Unit) {
     ErrorView(
-        title = "You're offline",
-        description = "Showing your offline documents.",
+        title = stringResource(id = designR.string.documents_offline_title),
+        description = stringResource(id = designR.string.documents_offline_desc),
         icon = Icons.Default.CloudOff,
-        actionText = "Retry",
+        actionText = stringResource(id = designR.string.core_designsystem_retry),
         onActionClick = onRetry
     )
 }
@@ -361,10 +361,10 @@ private fun OfflineStateView(onRetry: () -> Unit) {
 @Composable
 private fun ErrorStateView(message: String?, onRetry: () -> Unit) {
     ErrorView(
-        title = "Failed to load documents",
-        description = message ?: "Unknown error",
+        title = stringResource(id = designR.string.state_error_title),
+        description = message ?: stringResource(id = designR.string.state_error_desc),
         icon = Icons.Default.Error,
-        actionText = "Retry",
+        actionText = stringResource(id = designR.string.core_designsystem_retry),
         onActionClick = onRetry
     )
 }
@@ -396,10 +396,10 @@ private fun RecentDocumentsHeader(onViewAll: () -> Unit) {
 @Composable
 private fun CategoriesGridPreview(onNavigateToCategories: () -> Unit) {
     val categories = listOf(
-        Triple("Passports", TripPointIcons.Docs, "2"),
-        Triple("Tickets", TripPointIcons.Flight, "4"),
-        Triple("IDs", TripPointIcons.Profile, "1"),
-        Triple("Hotels", TripPointIcons.Hotel, "3")
+        Triple(stringResource(id = designR.string.documents_type_passport_visa), TripPointIcons.Docs, "2"),
+        Triple(stringResource(id = designR.string.documents_type_tickets_boarding), TripPointIcons.Flight, "4"),
+        Triple(stringResource(id = designR.string.documents_type_id_proofs), TripPointIcons.Profile, "1"),
+        Triple(stringResource(id = designR.string.documents_type_hotel_vouchers), TripPointIcons.Hotel, "3")
     )
     
     Column(modifier = Modifier.padding(horizontal = 24.dp)) {

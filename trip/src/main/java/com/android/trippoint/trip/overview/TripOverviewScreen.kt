@@ -102,7 +102,6 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddExpense -> {
-                    // Navigate directly to budgets list for that trip
                     onNavigateToBudgets(effect.tripId)
                 }
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
@@ -153,13 +152,23 @@ fun TripOverviewScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LoadingIndicator()
             }
-        } else if (uiState.trip != null) {
-            TripOverviewContent(
-                trip = uiState.trip,
-                selectedTab = uiState.selectedTab,
-                onIntent = onIntent,
-                modifier = Modifier.padding(innerPadding)
-            )
+        } else {
+            val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+            if (errorMessage != null) {
+                Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+                    com.android.trippoint.core.designsystem.components.TripPointAlert(
+                        message = errorMessage,
+                        variant = com.android.trippoint.core.designsystem.components.AlertVariant.Error
+                    )
+                }
+            } else if (uiState.trip != null) {
+                TripOverviewContent(
+                    trip = uiState.trip,
+                    selectedTab = uiState.selectedTab,
+                    onIntent = onIntent,
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
         }
     }
 }
@@ -236,7 +245,7 @@ private fun TripOverviewContent(
                 style = MaterialTheme.typography.displayLarge
             )
             Text(
-                text = "${trip.startDate} - ${trip.endDate}",
+                text = stringResource(id = designR.string.create_trip_date_range, trip.startDate, trip.endDate),
                 style = MaterialTheme.typography.bodyMedium
             )
             Spacer(modifier = Modifier.height(16.dp))
@@ -412,7 +421,7 @@ private fun StatsSection(
     ) {
         StatItem(
             label = stringResource(id = designR.string.trip_overview_budget_label),
-            value = trip.budget,
+            value = trip.budget.ifBlank { stringResource(id = designR.string.budget_not_set) },
             onClick = onBudgetClick,
             modifier = Modifier.weight(1f)
         )
@@ -450,7 +459,7 @@ private fun StatItem(
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = value.ifBlank { "N/A" }, 
+                text = value, 
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurface

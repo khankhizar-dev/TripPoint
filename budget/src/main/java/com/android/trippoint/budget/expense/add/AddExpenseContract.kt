@@ -1,8 +1,10 @@
 package com.android.trippoint.budget.expense.add
 
+import com.android.trippoint.budget.domain.model.Expense
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState
+import com.android.trippoint.core.common.model.TripMember
 
 class AddExpenseContract {
     sealed class Intent : UiIntent {
@@ -24,9 +26,10 @@ class AddExpenseContract {
         val date: String = "",
         val description: String = "",
         val paidBy: String = "",
-        val members: List<com.android.trippoint.core.common.model.TripMember> = emptyList(),
+        val members: List<TripMember> = emptyList(),
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val errorResId: Int? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

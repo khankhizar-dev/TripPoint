@@ -93,6 +93,22 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                val budgetStatsProvider = remember {
+                    com.android.trippoint.budget.data.provider.BudgetStatsProviderImpl(budgetRepository)
+                }
+                
+                val itineraryStatsProvider = remember {
+                    com.android.trippoint.itinerary.data.provider.ItineraryStatsProviderImpl(itineraryRepository)
+                }
+                
+                val getTripOverviewUseCase = remember {
+                    com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase(
+                        tripRepository,
+                        budgetStatsProvider,
+                        itineraryStatsProvider
+                    )
+                }
+
                 val documentRepository = remember {
                     val api = NetworkModule.provideTripPointApi(
                         authTokenProvider = { preferencesManager.getAuthToken() },
@@ -113,6 +129,7 @@ class MainActivity : ComponentActivity() {
                         bookingRepository = bookingRepository,
                         budgetRepository = budgetRepository,
                         documentRepository = documentRepository,
+                        getTripOverviewUseCase = getTripOverviewUseCase,
                         preferencesManager = preferencesManager,
                         modifier = Modifier.padding(innerPadding)
                     )

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.trippoint.budget.domain.repository.BudgetRepository
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.core.network.CreateExpenseInput
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.launch
 
 class AddExpenseViewModel(
@@ -45,24 +46,24 @@ class AddExpenseViewModel(
         val amountValue = state.amount.toDoubleOrNull() ?: 0.0
         
         if (amountValue <= 0) {
-            setState { copy(error = "Enter a valid amount") }
+            setState { copy(errorResId = designR.string.error_invalid_amount) }
             return
         }
 
         if (state.paidBy.isBlank()) {
-            setState { copy(error = "Please specify who paid") }
+            setState { copy(errorResId = designR.string.error_select_payer) }
             return
         }
 
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(isLoading = true, error = null, errorResId = null) }
             val input = CreateExpenseInput(
                 category = state.category.uppercase(),
                 title = state.description.ifBlank { state.category },
                 description = state.description,
                 amount = amountValue,
                 currency = "USD", 
-                expenseDate = "${state.date}T12:00:00", // Append time for LocalDateTime parsing
+                expenseDate = "${state.date}T12:00:00",
                 paymentMethod = "CASH", 
                 paidBy = state.paidBy, 
                 recurring = false,

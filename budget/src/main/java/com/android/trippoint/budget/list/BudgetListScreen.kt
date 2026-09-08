@@ -15,12 +15,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.android.trippoint.core.designsystem.components.AlertVariant
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointAlert
@@ -40,10 +45,10 @@ fun BudgetListRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val lifecycleOwner = androidx.lifecycle.compose.LocalLifecycleOwner.current
-    androidx.compose.runtime.DisposableEffect(lifecycleOwner) {
-        val observer = androidx.lifecycle.LifecycleEventObserver { _, event ->
-            if (event == androidx.lifecycle.Lifecycle.Event.ON_RESUME) {
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
                 viewModel.onIntent(BudgetListContract.Intent.LoadBudgets(tripId))
             }
         }
@@ -77,7 +82,7 @@ fun BudgetListScreen(
     Scaffold(
         topBar = {
             TripPointTopAppBar(
-                title = "My Budgets",
+                title = stringResource(id = designR.string.budget_list_title),
                 onNavClick = { onIntent(BudgetListContract.Intent.BackClicked) }
             )
         },
@@ -87,7 +92,7 @@ fun BudgetListScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Budget")
+                Icon(Icons.Default.Add, contentDescription = null)
             }
         }
     ) { innerPadding ->
@@ -115,10 +120,10 @@ private fun BudgetListContent(
         }
     } else if (uiState.budgets.isEmpty()) {
         TripPointEmptyState(
-            title = "No budgets yet",
-            subtitle = "Start planning your trip expenses by creating a budget.",
+            title = stringResource(id = designR.string.budget_no_budgets_title),
+            subtitle = stringResource(id = designR.string.budget_no_budgets_desc),
             imageResId = designR.drawable.illustration_empty_trip,
-            actionText = "Create Budget",
+            actionText = stringResource(id = designR.string.budget_create_title),
             onActionClick = { onIntent(BudgetListContract.Intent.CreateBudgetClicked) }
         )
     } else {

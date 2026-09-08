@@ -66,9 +66,6 @@ import com.android.trippoint.budget.trends.SpendingTrendsRoute
 import com.android.trippoint.budget.trends.SpendingTrendsViewModel
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.navigation.Screen
-import com.android.trippoint.core.network.BudgetRemoteDataSource
-import com.android.trippoint.core.network.ItineraryRemoteDataSource
-import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.documents.add.AddDocumentRoute
 import com.android.trippoint.documents.add.AddDocumentViewModel
 import com.android.trippoint.documents.add.UploadOptionsRoute
@@ -105,6 +102,7 @@ import com.android.trippoint.trip.create.CreateTripViewModel
 import com.android.trippoint.trip.details.AddDetailsRoute
 import com.android.trippoint.trip.details.AddDetailsViewModel
 import com.android.trippoint.trip.domain.repository.TripRepository
+import com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase
 import com.android.trippoint.trip.invite.InvitePeopleRoute
 import com.android.trippoint.trip.invite.InvitePeopleViewModel
 import com.android.trippoint.trip.overview.TripOverviewRoute
@@ -131,6 +129,7 @@ fun AppNavGraph(
     bookingRepository: BookingRepository,
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
+    getTripOverviewUseCase: GetTripOverviewUseCase,
     preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
 ) {
@@ -140,7 +139,7 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         authNavGraph(navController)
-        tripNavGraph(navController, tripRepository, preferencesManager)
+        tripNavGraph(navController, tripRepository, getTripOverviewUseCase, preferencesManager)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
@@ -350,6 +349,7 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
 private fun NavGraphBuilder.tripNavGraph(
     navController: NavHostController, 
     tripRepository: TripRepository,
+    getTripOverviewUseCase: GetTripOverviewUseCase,
     preferencesManager: PreferencesManager
 ) {
     composable(Screen.Home.route) {
@@ -381,18 +381,9 @@ private fun NavGraphBuilder.tripNavGraph(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    val api = NetworkModule.provideTripPointApi(
-                        { preferencesManager.getAuthToken() },
-                        { preferencesManager.getRefreshToken() },
-                        { t, r -> 
-                            preferencesManager.setAuthToken(t)
-                            preferencesManager.setRefreshToken(r)
-                        }
-                    )
                     return TripOverviewViewModel(
                         tripRepository,
-                        BudgetRemoteDataSource(api),
-                        ItineraryRemoteDataSource(api)
+                        getTripOverviewUseCase
                     ) as T
                 }
             }
@@ -1347,7 +1338,14 @@ private fun NavGraphBuilder.addDocumentScanDestination(navController: NavHostCon
         )
     ) { backStackEntry ->
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
-        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ScanDocumentViewModel() as T
+                }
+            }
+        )
         ScanDocumentRoute(
             tripId = tripId,
             viewModel = viewModel,

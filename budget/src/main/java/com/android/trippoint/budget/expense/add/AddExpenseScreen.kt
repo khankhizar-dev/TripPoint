@@ -100,9 +100,10 @@ fun AddExpenseScreen(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (uiState.error != null) {
+            val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+            if (errorMessage != null) {
                 TripPointAlert(
-                    message = uiState.error!!,
+                    message = errorMessage,
                     variant = AlertVariant.Error,
                     modifier = Modifier.padding(top = 16.dp)
                 )
@@ -123,7 +124,13 @@ fun AddExpenseScreen(
                 value = uiState.category,
                 onValueChange = { onIntent(AddExpenseContract.Intent.CategoryChanged(it)) },
                 label = stringResource(id = designR.string.budget_category_label),
-                options = listOf("Food", "Transport", "Activities", "Accommodation", "Other")
+                options = listOf(
+                    stringResource(id = designR.string.budget_category_food),
+                    stringResource(id = designR.string.budget_category_transport),
+                    stringResource(id = designR.string.budget_category_activities),
+                    stringResource(id = designR.string.budget_category_accommodation),
+                    stringResource(id = designR.string.budget_category_other)
+                )
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -163,7 +170,7 @@ fun AddExpenseScreen(
                         }
                         onIntent(AddExpenseContract.Intent.PaidByChanged(member?.userId ?: selected))
                     },
-                    label = "Paid By",
+                    label = stringResource(id = designR.string.budget_paid_by_label),
                     options = uiState.members.map { it.userName ?: it.userId },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -171,8 +178,8 @@ fun AddExpenseScreen(
                 TripPointTextField(
                     value = uiState.paidBy,
                     onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
-                    label = "Paid By (User ID)",
-                    placeholder = "Enter user UUID"
+                    label = stringResource(id = designR.string.budget_paid_by_label),
+                    placeholder = stringResource(id = designR.string.budget_paid_by_placeholder)
                 )
             }
 

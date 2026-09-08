@@ -92,12 +92,12 @@ fun EventDetailsScreen(
                 title = { Text(text = stringResource(id = designR.string.event_details_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onIntent(EventDetailsContract.Intent.BackClicked) }) {
-                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = null)
                     }
                 },
                 actions = {
                     IconButton(onClick = { /* More options */ }) {
-                        Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = "More")
+                        Icon(imageVector = Icons.Default.MoreHoriz, contentDescription = null)
                     }
                 }
             )
@@ -187,13 +187,13 @@ private fun GenericBanner(event: TimelineEvent) {
         Spacer(modifier = Modifier.height(24.dp))
         
         Text(
-            text = "Starts at ${event.startTime}",
+            text = stringResource(id = designR.string.event_details_starts_at, event.startTime),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         if (event.endTime != null) {
             Text(
-                text = "Ends at ${event.endTime}",
+                text = stringResource(id = designR.string.event_details_ends_at, event.endTime),
                 style = MaterialTheme.typography.bodyMedium
             )
         }
@@ -221,7 +221,7 @@ private fun FlightBanner(event: TimelineEvent) {
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "Flight Activity",
+                    text = stringResource(id = designR.string.event_details_flight_activity),
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -246,7 +246,10 @@ private fun FlightBanner(event: TimelineEvent) {
                     style = MaterialTheme.typography.titleLarge, 
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = event.location ?: "Origin", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = event.location ?: stringResource(id = designR.string.event_details_origin), 
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
             
             Box(
@@ -263,7 +266,10 @@ private fun FlightBanner(event: TimelineEvent) {
                     style = MaterialTheme.typography.titleLarge, 
                     fontWeight = FontWeight.Bold
                 )
-                Text(text = "Destination", style = MaterialTheme.typography.bodySmall)
+                Text(
+                    text = stringResource(id = designR.string.event_details_destination), 
+                    style = MaterialTheme.typography.bodySmall
+                )
             }
         }
     }
@@ -273,13 +279,13 @@ private fun FlightBanner(event: TimelineEvent) {
 private fun DescriptionSection(event: TimelineEvent) {
     Column {
         Text(
-            text = "Description",
+            text = stringResource(id = designR.string.event_details_description),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = event.description ?: "No description provided.",
+            text = event.description ?: stringResource(id = designR.string.event_details_no_description),
             style = MaterialTheme.typography.bodyLarge
         )
     }
@@ -289,7 +295,7 @@ private fun DescriptionSection(event: TimelineEvent) {
 private fun LocationSection(event: TimelineEvent) {
     Column {
         Text(
-            text = "Location",
+            text = stringResource(id = designR.string.event_details_location),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold
         )
@@ -322,7 +328,10 @@ private fun PassengerSection() {
                     .background(Color.LightGray)
             )
             Spacer(modifier = Modifier.width(16.dp))
-            Text(text = "Primary Traveler", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                text = stringResource(id = designR.string.event_details_primary_traveler), 
+                style = MaterialTheme.typography.bodyLarge
+            )
         }
     }
 }
@@ -337,7 +346,7 @@ private fun PnrSection() {
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "FETCHING...", 
+            text = stringResource(id = designR.string.event_details_fetching), 
             style = MaterialTheme.typography.headlineMedium, 
             color = MaterialTheme.colorScheme.primary
         )
@@ -386,17 +395,17 @@ private fun EventDetailsBottomBar(onIntent: (EventDetailsContract.Intent) -> Uni
     ) {
         ActionButton(
             icon = Icons.Default.Edit, 
-            label = "Edit", 
+            label = stringResource(id = designR.string.event_details_edit), 
             onClick = { onIntent(EventDetailsContract.Intent.EditClicked) }
         )
         ActionButton(
             icon = Icons.Default.Share, 
-            label = "Share", 
+            label = stringResource(id = designR.string.event_details_share), 
             onClick = { onIntent(EventDetailsContract.Intent.ShareClicked) }
         )
         ActionButton(
             icon = Icons.Default.Delete, 
-            label = "Delete", 
+            label = stringResource(id = designR.string.event_details_delete), 
             onClick = { onIntent(EventDetailsContract.Intent.DeleteClicked) }
         )
     }
@@ -408,7 +417,7 @@ private fun ActionButton(icon: androidx.compose.ui.graphics.vector.ImageVector, 
         horizontalAlignment = Alignment.CenterHorizontally, 
         modifier = Modifier.clickable { onClick() }
     ) {
-        Icon(imageVector = icon, contentDescription = label, tint = MaterialTheme.colorScheme.primary)
+        Icon(imageVector = icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
         Text(text = label, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
     }
 }
