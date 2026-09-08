@@ -117,6 +117,10 @@ import com.android.trippoint.ui.settings.NotificationsRoute
 import com.android.trippoint.ui.settings.PreferencesRoute
 import com.android.trippoint.ui.settings.SecurityRoute
 import com.android.trippoint.ui.settings.SettingsRoute
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.ItineraryRemoteDataSource
+import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.ui.settings.SupportRoute
 
 @Composable
@@ -127,6 +131,7 @@ fun AppNavGraph(
     bookingRepository: BookingRepository,
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
+    preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -135,7 +140,7 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         authNavGraph(navController)
-        tripNavGraph(navController, tripRepository)
+        tripNavGraph(navController, tripRepository, preferencesManager)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
@@ -342,7 +347,11 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
 }
 
 @Suppress("LongMethod")
-private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripRepository: TripRepository) {
+private fun NavGraphBuilder.tripNavGraph(
+    navController: NavHostController, 
+    tripRepository: TripRepository,
+    preferencesManager: PreferencesManager
+) {
     composable(Screen.Home.route) {
         HomeRoute(
             onNavigateToLogin = {
@@ -372,7 +381,19 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return TripOverviewViewModel(tripRepository) as T
+                    val api = NetworkModule.provideTripPointApi(
+                        { preferencesManager.getAuthToken() },
+                        { preferencesManager.getRefreshToken() },
+                        { t, r -> 
+                            preferencesManager.setAuthToken(t)
+                            preferencesManager.setRefreshToken(r)
+                        }
+                    )
+                    return TripOverviewViewModel(
+                        tripRepository,
+                        BudgetRemoteDataSource(api),
+                        ItineraryRemoteDataSource(api)
+                    ) as T
                 }
             }
         )
@@ -384,7 +405,6 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
             onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
-            onNavigateToAddExpense = { id -> navController.navigate(Screen.Budgets.createRoute(id)) },
             onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) }
         )
     }

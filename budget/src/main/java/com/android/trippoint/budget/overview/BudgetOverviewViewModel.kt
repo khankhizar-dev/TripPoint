@@ -34,9 +34,11 @@ class BudgetOverviewViewModel(
             if (summaryResult.isSuccess && overviewResult.isSuccess) {
                 val summary = summaryResult.getOrThrow()
                 val overview = overviewResult.getOrThrow()
+                val expenses = expensesResult.getOrDefault(emptyList())
                 
-                val categorySum = summary.categoryBreakdown.sumOf { it.amount }
-                val spentAmount = if (summary.spentAmount > 0) summary.spentAmount else categorySum
+                val categorySum = overview.categoryBreakdown.sumOf { it.amount }
+                val expenseSum = expenses.sumOf { it.amount }
+                val spentAmount = maxOf(summary.spentAmount, categorySum, expenseSum)
 
                 val budget = Budget(
                     id = summary.budget.id,
@@ -61,19 +63,24 @@ class BudgetOverviewViewModel(
                     copy(
                         isLoading = false, 
                         budget = budget,
-                        expenses = expensesResult.getOrDefault(emptyList()),
+                        expenses = expenses,
                         error = null
                     ) 
                 }
             } else {
                 // If combined fails, try individual budget fetch
                 val budgetResult = repository.getBudget(tripId)
+                val expenses = expensesResult.getOrDefault(emptyList())
+                
                 if (budgetResult.isSuccess) {
+                    val budgetDto = budgetResult.getOrNull()
+                    val spentAmount = expenses.sumOf { it.amount }
+                    
                     setState { 
                         copy(
                             isLoading = false, 
-                            budget = budgetResult.getOrNull(),
-                            expenses = expensesResult.getOrDefault(emptyList()),
+                            budget = budgetDto?.copy(spentAmount = spentAmount),
+                            expenses = expenses,
                             error = null
                         ) 
                     }

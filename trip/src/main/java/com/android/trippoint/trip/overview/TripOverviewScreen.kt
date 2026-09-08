@@ -308,7 +308,11 @@ private fun TripOverviewContent(
             Spacer(modifier = Modifier.height(24.dp))
             QuickActionsSection(onIntent)
             Spacer(modifier = Modifier.height(24.dp))
-            StatsSection(trip)
+            StatsSection(
+                trip = trip,
+                onBudgetClick = { onIntent(TripOverviewContract.Intent.AddExpenseClicked) },
+                onTasksClick = { onIntent(TripOverviewContract.Intent.AddTaskClicked) }
+            )
         }
     }
 }
@@ -396,7 +400,11 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun StatsSection(trip: Trip) {
+private fun StatsSection(
+    trip: Trip,
+    onBudgetClick: () -> Unit,
+    onTasksClick: () -> Unit
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -404,19 +412,27 @@ private fun StatsSection(trip: Trip) {
         StatItem(
             label = stringResource(id = designR.string.trip_overview_budget_label),
             value = trip.budget,
+            onClick = onBudgetClick,
             modifier = Modifier.weight(1f)
         )
         StatItem(
             label = stringResource(id = designR.string.trip_overview_tasks_label),
             value = "${trip.completedTasksCount}/${trip.tasksCount}",
+            onClick = onTasksClick,
             modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun StatItem(label: String, value: String, modifier: Modifier = Modifier) {
+private fun StatItem(
+    label: String, 
+    value: String, 
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     Card(
+        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))

@@ -104,6 +104,7 @@ class MainActivity : ComponentActivity() {
                         bookingRepository = bookingRepository,
                         budgetRepository = budgetRepository,
                         documentRepository = documentRepository,
+                        preferencesManager = preferencesManager,
                         modifier = Modifier.padding(innerPadding)
                     )
                 }
