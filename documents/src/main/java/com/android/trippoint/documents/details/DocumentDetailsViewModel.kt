@@ -23,7 +23,8 @@ class DocumentDetailsViewModel(
                 sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(designR.string.documents_share_coming_soon))
             }
             DocumentDetailsContract.Intent.DownloadClicked -> {
-                sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(designR.string.documents_download_coming_soon))
+                val resId = designR.string.documents_download_coming_soon
+                sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(resId))
             }
             DocumentDetailsContract.Intent.FavoriteClicked -> toggleFavorite()
             DocumentDetailsContract.Intent.DeleteClicked -> trashDocument()

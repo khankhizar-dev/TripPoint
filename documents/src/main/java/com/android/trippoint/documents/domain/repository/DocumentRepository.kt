@@ -11,6 +11,7 @@ interface DocumentRepository {
     
     suspend fun getDocument(tripId: String, documentId: String): Result<Document>
     
+    @Suppress("LongParameterList")
     suspend fun uploadDocument(
         tripId: String,
         name: String,

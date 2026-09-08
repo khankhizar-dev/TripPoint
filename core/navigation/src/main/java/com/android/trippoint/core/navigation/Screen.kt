@@ -68,7 +68,11 @@ sealed class Screen(val route: String) {
         fun createRoute(tripId: String) = "filter_sort/$tripId"
     }
     object Bookings : Screen("bookings?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "bookings?tripId=$tripId" else "bookings"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "bookings?tripId=$tripId"
+        } else {
+            "bookings"
+        }
     }
     object BookingDetails : Screen("booking_details/{bookingId}?tripId={tripId}") {
         fun createRoute(tripId: String, bookingId: String) = "booking_details/$bookingId?tripId=$tripId"
@@ -159,10 +163,18 @@ sealed class Screen(val route: String) {
         fun createRoute(budgetId: String) = "receipt_scanner/$budgetId"
     }
     object Documents : Screen("documents?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "documents?tripId=$tripId" else "documents"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "documents?tripId=$tripId"
+        } else {
+            "documents"
+        }
     }
     object DocumentCategories : Screen("document_categories?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_categories?tripId=$tripId" else "document_categories"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_categories?tripId=$tripId"
+        } else {
+            "document_categories"
+        }
     }
     object DocumentDetails : Screen("document_details/{documentId}?tripId={tripId}") {
         fun createRoute(documentId: String, tripId: String? = null) = if (!tripId.isNullOrBlank()) {
@@ -172,15 +184,38 @@ sealed class Screen(val route: String) {
         }
     }
     object DocumentUploadOptions : Screen("document_upload_options?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_upload_options?tripId=$tripId" else "document_upload_options"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_upload_options?tripId=$tripId"
+        } else {
+            "document_upload_options"
+        }
     }
     object AddDocument : Screen("add_document?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "add_document?tripId=$tripId" else "add_document"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "add_document?tripId=$tripId"
+        } else {
+            "add_document"
+        }
     }
     object DocumentScan : Screen("document_scan?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_scan?tripId=$tripId" else "document_scan"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_scan?tripId=$tripId"
+        } else {
+            "document_scan"
+        }
+    }
+    object DocumentScanConfirm : Screen("document_scan_confirm?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_scan_confirm?tripId=$tripId"
+        } else {
+            "document_scan_confirm"
+        }
     }
     object DocumentSearch : Screen("document_search?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_search?tripId=$tripId" else "document_search"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_search?tripId=$tripId"
+        } else {
+            "document_search"
+        }
     }
 }

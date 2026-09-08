@@ -1,6 +1,5 @@
 package com.android.trippoint.budget.expense.add
 
-import com.android.trippoint.budget.domain.model.Expense
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState

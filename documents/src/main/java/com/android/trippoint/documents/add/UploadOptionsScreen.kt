@@ -74,20 +74,26 @@ fun UploadOptionsRoute(
     UploadOptionsScreen(
         onBackClick = onNavigateBack,
         onScanClick = {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val cameraPermission = Manifest.permission.CAMERA
+            val isGranted = ContextCompat.checkSelfPermission(context, cameraPermission) == 
+                    PackageManager.PERMISSION_GRANTED
+            if (isGranted) {
                 onNavigateToScan()
             } else {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
+                permissionLauncher.launch(cameraPermission)
             }
         },
         onUploadClick = { 
             documentPickerLauncher.launch(arrayOf("*/*")) 
         },
         onPhotoClick = {
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+            val cameraPermission = Manifest.permission.CAMERA
+            val isGranted = ContextCompat.checkSelfPermission(context, cameraPermission) == 
+                    PackageManager.PERMISSION_GRANTED
+            if (isGranted) {
                 takePhotoLauncher.launch(tempUri)
             } else {
-                permissionLauncher.launch(Manifest.permission.CAMERA)
+                permissionLauncher.launch(cameraPermission)
             }
         },
         onCloudClick = {

@@ -27,6 +27,7 @@ import com.android.trippoint.documents.data.repository.DocumentRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)

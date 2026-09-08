@@ -46,6 +46,7 @@ class DocumentRemoteDataSource(
         return moshi.adapter(DocumentDto::class.java).fromJsonValue(data)
     }
 
+    @Suppress("LongParameterList")
     suspend fun uploadDocument(
         tripId: String,
         name: String,

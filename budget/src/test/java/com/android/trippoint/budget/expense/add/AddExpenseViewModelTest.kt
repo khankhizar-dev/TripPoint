@@ -77,7 +77,8 @@ class AddExpenseViewModelTest {
     fun `SaveClicked with invalid amount shows error`() {
         viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("abc"))
         viewModel.onIntent(AddExpenseContract.Intent.SaveClicked)
-        assertEquals(com.android.trippoint.core.designsystem.R.string.error_invalid_amount, viewModel.uiState.value.errorResId)
+        val expected = com.android.trippoint.core.designsystem.R.string.error_invalid_amount
+        assertEquals(expected, viewModel.uiState.value.errorResId)
     }
 
     @Test
