@@ -61,8 +61,9 @@ fun AddDocumentScreen(
     uiState: AddDocumentContract.State,
     onIntent: (AddDocumentContract.Intent) -> Unit
 ) {
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+    // Using OpenDocument for better access to system roots
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: android.net.Uri? ->
         uri?.let {
             onIntent(AddDocumentContract.Intent.FileSelected(it.toString()))
@@ -91,7 +92,7 @@ fun AddDocumentScreen(
             }
 
             TripPointFileUpload(
-                onUploadClick = { filePickerLauncher.launch("*/*") },
+                onUploadClick = { documentPickerLauncher.launch(arrayOf("*/*")) },
                 label = uiState.fileUrl ?: stringResource(id = designR.string.documents_upload_label)
             )
 

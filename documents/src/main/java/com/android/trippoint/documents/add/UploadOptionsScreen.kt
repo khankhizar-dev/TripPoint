@@ -1,5 +1,8 @@
 package com.android.trippoint.documents.add
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
@@ -11,8 +14,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.android.trippoint.core.designsystem.components.TripPointInteractiveCard
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import com.android.trippoint.core.designsystem.R as designR
@@ -24,7 +29,7 @@ fun UploadOptionsRoute(
     onNavigateToScan: () -> Unit,
     onNavigateToManual: () -> Unit
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
     
     // For Take Photo (full resolution)
     val tempFile = remember { 
@@ -42,28 +47,51 @@ fun UploadOptionsRoute(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success) {
-            // Document captured to tempUri, navigate to details/manual add
             onNavigateToManual()
         }
     }
 
-    // For Cloud/File import
-    val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            takePhotoLauncher.launch(tempUri)
+        } else {
+            val message = context.resources.getString(designR.string.error_camera_permission_denied)
+            Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // Using OpenDocument for better access to Cloud roots (Google Drive, Dropbox)
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: android.net.Uri? ->
         uri?.let {
-            // Handle cloud/file Uri
             onNavigateToManual()
         }
     }
 
     UploadOptionsScreen(
         onBackClick = onNavigateBack,
-        onScanClick = onNavigateToScan,
-        onUploadClick = { filePickerLauncher.launch("*/*") },
-        onPhotoClick = { takePhotoLauncher.launch(tempUri) },
+        onScanClick = {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                onNavigateToScan()
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
+        onUploadClick = { 
+            documentPickerLauncher.launch(arrayOf("*/*")) 
+        },
+        onPhotoClick = {
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
+                takePhotoLauncher.launch(tempUri)
+            } else {
+                permissionLauncher.launch(Manifest.permission.CAMERA)
+            }
+        },
         onCloudClick = {
-            filePickerLauncher.launch("*/*") // Cloud providers are integrated in system picker
+            documentPickerLauncher.launch(arrayOf("*/*"))
         }
     )
 }

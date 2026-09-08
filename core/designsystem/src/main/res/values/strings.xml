@@ -281,6 +281,7 @@
     <string name="documents_expiry_placeholder">YYYY-MM-DD</string>
     <string name="documents_ref_placeholder">e.g. A1234567</string>
     <string name="documents_error_title_file_required">Title and file are required</string>
+    <string name="error_camera_permission_denied">Camera permission is required to take photos. Please enable it in settings.</string>
 
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>
