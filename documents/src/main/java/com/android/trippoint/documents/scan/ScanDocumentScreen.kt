@@ -44,11 +44,16 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ScanDocumentRoute(
+    tripId: String,
     viewModel: ScanDocumentViewModel,
     onNavigateBack: () -> Unit,
     onDocumentCaptured: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(ScanDocumentContract.Intent.LoadTripId(tripId))
+    }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->

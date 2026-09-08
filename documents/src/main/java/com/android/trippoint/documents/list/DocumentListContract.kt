@@ -8,7 +8,7 @@ import com.android.trippoint.documents.domain.model.DocumentType
 
 class DocumentListContract {
     sealed class Intent : UiIntent {
-        object LoadDocuments : Intent()
+        data class LoadDocuments(val tripId: String) : Intent()
         data class TabSelected(val index: Int) : Intent()
         data class SearchQueryChanged(val query: String) : Intent()
         data class DocumentClicked(val id: String) : Intent()
@@ -22,6 +22,7 @@ class DocumentListContract {
     }
 
     data class State(
+        val tripId: String = "",
         val documents: List<Document> = emptyList(),
         val recentDocuments: List<Document> = emptyList(),
         val selectedTab: Int = 0,

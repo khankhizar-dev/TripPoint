@@ -29,10 +29,15 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AddDocumentRoute(
+    tripId: String,
     viewModel: AddDocumentViewModel,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(AddDocumentContract.Intent.LoadTripId(tripId))
+    }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->

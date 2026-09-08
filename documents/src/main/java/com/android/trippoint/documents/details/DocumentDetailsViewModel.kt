@@ -16,7 +16,7 @@ class DocumentDetailsViewModel(
 ) {
     override fun onIntent(intent: DocumentDetailsContract.Intent) {
         when (intent) {
-            is DocumentDetailsContract.Intent.LoadDocument -> loadDocument(intent.id)
+            is DocumentDetailsContract.Intent.LoadDocument -> loadDocument(intent.tripId, intent.id)
             DocumentDetailsContract.Intent.BackClicked -> sendEffect(DocumentDetailsContract.Effect.NavigateBack)
             DocumentDetailsContract.Intent.ShareClicked -> {
                 sendEffect(DocumentDetailsContract.Effect.ShowMessage("Share functionality coming soon"))
@@ -25,14 +25,14 @@ class DocumentDetailsViewModel(
                 sendEffect(DocumentDetailsContract.Effect.ShowMessage("Download functionality coming soon"))
             }
             DocumentDetailsContract.Intent.FavoriteClicked -> toggleFavorite()
-            DocumentDetailsContract.Intent.DeleteClicked -> deleteDocument()
+            DocumentDetailsContract.Intent.DeleteClicked -> trashDocument()
         }
     }
 
-    private fun loadDocument(id: String) {
+    private fun loadDocument(tripId: String, id: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            val result = repository.getDocument(id)
+            setState { copy(isLoading = true, tripId = tripId) }
+            val result = repository.getDocument(tripId, id)
             if (result.isSuccess) {
                 setState { copy(isLoading = false, document = result.getOrNull(), error = null) }
             } else {
@@ -42,11 +42,12 @@ class DocumentDetailsViewModel(
     }
 
     private fun toggleFavorite() {
+        val tripId = uiState.value.tripId
         val doc = uiState.value.document ?: return
         viewModelScope.launch {
-            val result = repository.toggleFavorite(doc.id)
+            val result = repository.toggleFavorite(tripId, doc.id, !doc.isFavorite)
             if (result.isSuccess) {
-                val updatedDoc = doc.copy(isFavorite = result.getOrDefault(doc.isFavorite))
+                val updatedDoc = result.getOrThrow()
                 setState { copy(document = updatedDoc) }
                 sendEffect(DocumentDetailsContract.Effect.ShowMessage(
                     if (updatedDoc.isFavorite) "Added to favorites" else "Removed from favorites"
@@ -55,10 +56,11 @@ class DocumentDetailsViewModel(
         }
     }
 
-    private fun deleteDocument() {
+    private fun trashDocument() {
+        val tripId = uiState.value.tripId
         val doc = uiState.value.document ?: return
         viewModelScope.launch {
-            val result = repository.deleteDocument(doc.id)
+            val result = repository.trashDocument(tripId, doc.id)
             if (result.isSuccess) {
                 sendEffect(DocumentDetailsContract.Effect.NavigateBack)
             }

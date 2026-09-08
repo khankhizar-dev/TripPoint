@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun DocumentDetailsRoute(
+    tripId: String,
     documentId: String,
     viewModel: DocumentDetailsViewModel,
     onNavigateBack: () -> Unit,
@@ -59,8 +60,8 @@ fun DocumentDetailsRoute(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(documentId) {
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument(documentId))
+    LaunchedEffect(tripId, documentId) {
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument(tripId, documentId))
     }
 
     LaunchedEffect(viewModel.effect) {

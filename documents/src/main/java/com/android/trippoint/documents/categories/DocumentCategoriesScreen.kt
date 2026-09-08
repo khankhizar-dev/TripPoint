@@ -28,14 +28,15 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun DocumentCategoriesRoute(
+    tripId: String,
     viewModel: DocumentCategoriesViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToDocumentsByType: (DocumentType) -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories)
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories(tripId))
     }
 
     LaunchedEffect(viewModel.effect) {

@@ -2,21 +2,35 @@ package com.android.trippoint.documents.domain.repository
 
 import com.android.trippoint.documents.domain.model.Document
 import com.android.trippoint.documents.domain.model.DocumentType
+import com.android.trippoint.core.network.DocumentFilterInput
+import com.android.trippoint.core.network.UpdateDocumentInput
+import java.io.File
 
 interface DocumentRepository {
-    suspend fun getDocuments(
-        type: DocumentType? = null,
-        isFavorite: Boolean? = null,
-        isShared: Boolean? = null,
-        isRecent: Boolean? = null
-    ): Result<List<Document>>
-    suspend fun getDocument(id: String): Result<Document>
+    suspend fun getDocuments(tripId: String, filter: DocumentFilterInput? = null): Result<List<Document>>
+    
+    suspend fun getDocument(tripId: String, documentId: String): Result<Document>
+    
     suspend fun uploadDocument(
-        title: String,
-        type: DocumentType,
-        fileUrl: String,
-        expiryDate: String?
+        tripId: String,
+        name: String,
+        category: DocumentType,
+        source: String,
+        file: File,
+        description: String? = null,
+        documentNumber: String? = null,
+        issuedBy: String? = null,
+        issuedDate: String? = null,
+        expiryDate: String? = null
     ): Result<Document>
-    suspend fun deleteDocument(id: String): Result<Boolean>
-    suspend fun toggleFavorite(id: String): Result<Boolean>
+
+    suspend fun updateDocument(tripId: String, documentId: String, input: UpdateDocumentInput): Result<Document>
+
+    suspend fun toggleFavorite(tripId: String, documentId: String, favorite: Boolean): Result<Document>
+
+    suspend fun trashDocument(tripId: String, documentId: String): Result<Document>
+
+    suspend fun restoreDocument(tripId: String, documentId: String): Result<Document>
+
+    suspend fun permanentlyDeleteDocument(tripId: String, documentId: String): Result<Boolean>
 }

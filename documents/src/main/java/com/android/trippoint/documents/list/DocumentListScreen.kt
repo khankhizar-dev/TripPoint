@@ -52,6 +52,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun DocumentListRoute(
+    tripId: String,
     viewModel: DocumentListViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToDetails: (String) -> Unit,
@@ -62,8 +63,8 @@ fun DocumentListRoute(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    LaunchedEffect(Unit) {
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments(tripId))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -170,10 +171,12 @@ private fun DocumentListStates(
 ) {
     when {
         uiState.isLoading -> LoadingStateView()
-        uiState.isOffline -> OfflineStateView(onRetry = { onIntent(DocumentListContract.Intent.LoadDocuments) })
+        uiState.isOffline -> OfflineStateView(onRetry = { 
+            onIntent(DocumentListContract.Intent.LoadDocuments(uiState.tripId)) 
+        })
         uiState.error != null -> ErrorStateView(
             message = uiState.error, 
-            onRetry = { onIntent(DocumentListContract.Intent.LoadDocuments) }
+            onRetry = { onIntent(DocumentListContract.Intent.LoadDocuments(uiState.tripId)) }
         )
         uiState.documents.isEmpty() && uiState.recentDocuments.isEmpty() -> {
             EmptyStateView(onAddClick = { onIntent(DocumentListContract.Intent.AddDocumentClicked) })

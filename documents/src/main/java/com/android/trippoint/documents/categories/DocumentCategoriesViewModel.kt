@@ -19,7 +19,7 @@ class DocumentCategoriesViewModel(
 ) {
     override fun onIntent(intent: DocumentCategoriesContract.Intent) {
         when (intent) {
-            DocumentCategoriesContract.Intent.LoadCategories -> loadCategories()
+            is DocumentCategoriesContract.Intent.LoadCategories -> loadCategories(intent.tripId)
             is DocumentCategoriesContract.Intent.CategoryClicked -> {
                 sendEffect(DocumentCategoriesContract.Effect.NavigateToDocumentsByType(intent.type))
             }
@@ -27,10 +27,10 @@ class DocumentCategoriesViewModel(
         }
     }
 
-    private fun loadCategories() {
+    private fun loadCategories(tripId: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            val result = repository.getDocuments()
+            setState { copy(isLoading = true, tripId = tripId) }
+            val result = repository.getDocuments(tripId)
             if (result.isSuccess) {
                 val docs = result.getOrDefault(emptyList())
                 val categories = listOf(
@@ -41,21 +41,21 @@ class DocumentCategoriesViewModel(
                         TripPointIcons.Docs
                     ),
                     CategoryInfo(
-                        DocumentType.TICKET_BOARDING,
+                        DocumentType.TICKETS_BOARDING,
                         "Tickets & Boarding",
-                        docs.count { it.type == DocumentType.TICKET_BOARDING },
+                        docs.count { it.type == DocumentType.TICKETS_BOARDING },
                         TripPointIcons.Flight
                     ),
                     CategoryInfo(
-                        DocumentType.ID_PROOFS,
+                        DocumentType.ID_PROOF,
                         "ID Proofs",
-                        docs.count { it.type == DocumentType.ID_PROOFS },
+                        docs.count { it.type == DocumentType.ID_PROOF },
                         TripPointIcons.Profile
                     ),
                     CategoryInfo(
-                        DocumentType.HOTEL_VOUCHERS,
+                        DocumentType.HOTEL_VOUCHER,
                         "Hotel Vouchers",
-                        docs.count { it.type == DocumentType.HOTEL_VOUCHERS },
+                        docs.count { it.type == DocumentType.HOTEL_VOUCHER },
                         TripPointIcons.Hotel
                     ),
                     CategoryInfo(

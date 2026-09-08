@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.documents.domain.repository.DocumentRepository
 import kotlinx.coroutines.launch
+import java.io.File
 
 class AddDocumentViewModel(
     private val repository: DocumentRepository,
@@ -16,6 +17,7 @@ class AddDocumentViewModel(
 ) {
     override fun onIntent(intent: AddDocumentContract.Intent) {
         when (intent) {
+            is AddDocumentContract.Intent.LoadTripId -> setState { copy(tripId = intent.tripId) }
             is AddDocumentContract.Intent.TitleChanged -> setState { copy(title = intent.value) }
             is AddDocumentContract.Intent.TypeChanged -> setState { copy(type = intent.value) }
             is AddDocumentContract.Intent.ExpiryChanged -> setState { copy(expiryDate = intent.value) }
@@ -28,17 +30,21 @@ class AddDocumentViewModel(
 
     private fun saveDocument() {
         val state = uiState.value
-        if ((state.title.isBlank() || state.fileUrl == null)) {
+        if (state.title.isBlank() || state.fileUrl == null) {
             setState { copy(error = "Title and file are required") }
             return
         }
 
         viewModelScope.launch {
             setState { copy(isLoading = true) }
+            val file = File(state.fileUrl)
             val result = repository.uploadDocument(
-                title = state.title,
-                type = state.type,
-                fileUrl = state.fileUrl,
+                tripId = state.tripId,
+                name = state.title,
+                category = state.type,
+                source = "DEVICE",
+                file = file,
+                documentNumber = state.referenceNumber.takeIf { it.isNotBlank() },
                 expiryDate = state.expiryDate.takeIf { it.isNotBlank() }
             )
             if (result.isSuccess) {

@@ -7,6 +7,7 @@ import com.android.trippoint.documents.domain.model.DocumentType
 
 class AddDocumentContract {
     sealed class Intent : UiIntent {
+        data class LoadTripId(val tripId: String) : Intent()
         data class TitleChanged(val value: String) : Intent()
         data class TypeChanged(val value: DocumentType) : Intent()
         data class ExpiryChanged(val value: String) : Intent()
@@ -17,6 +18,7 @@ class AddDocumentContract {
     }
 
     data class State(
+        val tripId: String = "",
         val title: String = "",
         val type: DocumentType = DocumentType.PASSPORT_VISA,
         val expiryDate: String = "",

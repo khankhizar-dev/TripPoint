@@ -3,7 +3,6 @@ package com.android.trippoint.trip.overview
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.core.common.model.Traveler
-import com.android.trippoint.core.common.model.TripStatus
 import com.android.trippoint.core.network.BudgetRemoteDataSource
 import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.trip.domain.repository.TripRepository
@@ -26,7 +25,7 @@ class TripOverviewViewModel(
                 when (intent.tabIndex) {
                     1 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
                     2 -> sendEffect(TripOverviewContract.Effect.NavigateToBookings(tripId))
-                    3 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId)) // Or dedicated
+                    3 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
                     4 -> sendEffect(TripOverviewContract.Effect.NavigateToBudgets(tripId))
                 }
             }

@@ -18,9 +18,9 @@ data class Document(
 
 enum class DocumentType {
     PASSPORT_VISA,
-    TICKET_BOARDING,
-    ID_PROOFS,
-    HOTEL_VOUCHERS,
+    TICKETS_BOARDING,
+    ID_PROOF,
+    HOTEL_VOUCHER,
     INSURANCE,
     OTHER
 }

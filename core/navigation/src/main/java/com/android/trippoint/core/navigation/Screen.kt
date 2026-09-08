@@ -158,13 +158,29 @@ sealed class Screen(val route: String) {
     object ReceiptScanner : Screen("receipt_scanner/{budgetId}") {
         fun createRoute(budgetId: String) = "receipt_scanner/$budgetId"
     }
-    object Documents : Screen("documents")
-    object DocumentCategories : Screen("document_categories")
-    object DocumentDetails : Screen("document_details/{documentId}") {
-        fun createRoute(id: String) = "document_details/$id"
+    object Documents : Screen("documents?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "documents?tripId=$tripId" else "documents"
     }
-    object DocumentUploadOptions : Screen("document_upload_options")
-    object AddDocument : Screen("add_document")
-    object DocumentScan : Screen("document_scan")
-    object DocumentSearch : Screen("document_search")
+    object DocumentCategories : Screen("document_categories?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_categories?tripId=$tripId" else "document_categories"
+    }
+    object DocumentDetails : Screen("document_details/{documentId}?tripId={tripId}") {
+        fun createRoute(documentId: String, tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "document_details/$documentId?tripId=$tripId"
+        } else {
+            "document_details/$documentId"
+        }
+    }
+    object DocumentUploadOptions : Screen("document_upload_options?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_upload_options?tripId=$tripId" else "document_upload_options"
+    }
+    object AddDocument : Screen("add_document?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "add_document?tripId=$tripId" else "add_document"
+    }
+    object DocumentScan : Screen("document_scan?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_scan?tripId=$tripId" else "document_scan"
+    }
+    object DocumentSearch : Screen("document_search?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "document_search?tripId=$tripId" else "document_search"
+    }
 }

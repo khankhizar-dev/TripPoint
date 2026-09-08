@@ -19,7 +19,7 @@ class DocumentListViewModel(
 
     override fun onIntent(intent: DocumentListContract.Intent) {
         when (intent) {
-            DocumentListContract.Intent.LoadDocuments -> loadDocuments()
+            is DocumentListContract.Intent.LoadDocuments -> loadDocuments(intent.tripId)
             is DocumentListContract.Intent.TabSelected -> {
                 setState { copy(selectedTab = intent.index) }
                 filterDocuments()
@@ -70,15 +70,15 @@ class DocumentListViewModel(
         }
     }
 
-    private fun loadDocuments() {
+    private fun loadDocuments(tripId: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            val result = repository.getDocuments()
-            val recentResult = repository.getDocuments(isRecent = true)
+            setState { copy(isLoading = true, tripId = tripId) }
+            val result = repository.getDocuments(tripId)
             
             if (result.isSuccess) {
                 allDocuments = result.getOrDefault(emptyList())
-                val recentDocs = recentResult.getOrDefault(emptyList())
+                // Sort by updatedAt for recent documents
+                val recentDocs = allDocuments.sortedByDescending { it.updatedAt }.take(5)
                 setState { 
                     copy(
                         isLoading = false, 
@@ -103,7 +103,7 @@ class DocumentListViewModel(
         
         filtered = when (tab) {
             0 -> filtered // All
-            1 -> filtered // Recent tab - in a real app this might be different, but for now we'll just show all
+            1 -> filtered // Recent - in this UI we just show list, top section handles recent
             2 -> filtered.filter { it.isFavorite }
             else -> filtered
         }
@@ -113,9 +113,11 @@ class DocumentListViewModel(
 
     private fun toggleFavorite(id: String) {
         viewModelScope.launch {
-            val result = repository.toggleFavorite(id)
+            val tripId = uiState.value.tripId
+            val doc = allDocuments.find { it.id == id } ?: return@launch
+            val result = repository.toggleFavorite(tripId, id, !doc.isFavorite)
             if (result.isSuccess) {
-                loadDocuments() // Refresh
+                loadDocuments(tripId) // Refresh
             }
         }
     }

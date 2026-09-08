@@ -14,6 +14,7 @@ class ScanDocumentViewModel : BaseViewModel<
 ) {
     override fun onIntent(intent: ScanDocumentContract.Intent) {
         when (intent) {
+            is ScanDocumentContract.Intent.LoadTripId -> setState { copy(tripId = intent.tripId) }
             ScanDocumentContract.Intent.CaptureClicked -> captureDocument()
             is ScanDocumentContract.Intent.AutoCaptureToggled -> {
                 setState { copy(isAutoCaptureEnabled = intent.enabled) }

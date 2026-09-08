@@ -7,7 +7,7 @@ import com.android.trippoint.documents.domain.model.Document
 
 class DocumentDetailsContract {
     sealed class Intent : UiIntent {
-        data class LoadDocument(val id: String) : Intent()
+        data class LoadDocument(val tripId: String, val id: String) : Intent()
         object BackClicked : Intent()
         object ShareClicked : Intent()
         object DownloadClicked : Intent()
@@ -16,6 +16,7 @@ class DocumentDetailsContract {
     }
 
     data class State(
+        val tripId: String = "",
         val document: Document? = null,
         val isLoading: Boolean = false,
         val error: String? = null
