@@ -42,4 +42,8 @@ interface BudgetRepository {
     ): Result<List<CategoryExpenseReportDto>>
 
     suspend fun getSettlementSummary(tripId: String): Result<SettlementSummaryDto>
+
+    suspend fun getTripMembers(tripId: String): Result<List<com.android.trippoint.core.common.model.TripMember>>
+
+    fun getCurrentUserId(): String?
 }

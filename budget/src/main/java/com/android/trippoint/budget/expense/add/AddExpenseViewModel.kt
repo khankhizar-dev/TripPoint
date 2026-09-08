@@ -13,9 +13,7 @@ class AddExpenseViewModel(
 ) {
     override fun onIntent(intent: AddExpenseContract.Intent) {
         when (intent) {
-            is AddExpenseContract.Intent.LoadIds -> setState { 
-                copy(tripId = intent.tripId, budgetId = intent.budgetId) 
-            }
+            is AddExpenseContract.Intent.LoadIds -> loadInitialData(intent.tripId, intent.budgetId)
             is AddExpenseContract.Intent.AmountChanged -> setState { copy(amount = intent.value) }
             is AddExpenseContract.Intent.CategoryChanged -> setState { copy(category = intent.value) }
             is AddExpenseContract.Intent.DateChanged -> setState { copy(date = intent.value) }
@@ -23,6 +21,22 @@ class AddExpenseViewModel(
             is AddExpenseContract.Intent.PaidByChanged -> setState { copy(paidBy = intent.value) }
             AddExpenseContract.Intent.SaveClicked -> saveExpense()
             AddExpenseContract.Intent.BackClicked -> sendEffect(AddExpenseContract.Effect.NavigateBack)
+        }
+    }
+
+    private fun loadInitialData(tripId: String, budgetId: String) {
+        setState { 
+            copy(
+                tripId = tripId, 
+                budgetId = budgetId,
+                paidBy = repository.getCurrentUserId() ?: ""
+            ) 
+        }
+        viewModelScope.launch {
+            val result = repository.getTripMembers(tripId)
+            if (result.isSuccess) {
+                setState { copy(members = result.getOrDefault(emptyList())) }
+            }
         }
     }
 
@@ -48,7 +62,7 @@ class AddExpenseViewModel(
                 description = state.description,
                 amount = amountValue,
                 currency = "USD", 
-                expenseDate = state.date,
+                expenseDate = "${state.date}T12:00:00", // Append time for LocalDateTime parsing
                 paymentMethod = "CASH", 
                 paidBy = state.paidBy, 
                 recurring = false,

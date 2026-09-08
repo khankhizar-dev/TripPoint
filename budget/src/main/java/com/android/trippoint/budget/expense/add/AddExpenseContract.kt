@@ -24,6 +24,7 @@ class AddExpenseContract {
         val date: String = "",
         val description: String = "",
         val paidBy: String = "",
+        val members: List<com.android.trippoint.core.common.model.TripMember> = emptyList(),
         val isLoading: Boolean = false,
         val error: String? = null
     ) : UiState

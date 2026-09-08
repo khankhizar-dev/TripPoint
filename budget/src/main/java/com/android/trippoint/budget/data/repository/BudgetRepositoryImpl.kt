@@ -3,32 +3,31 @@ package com.android.trippoint.budget.data.repository
 import com.android.trippoint.budget.domain.model.Budget
 import com.android.trippoint.budget.domain.model.Expense
 import com.android.trippoint.budget.domain.repository.BudgetRepository
-import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.common.model.InvitationStatus
+import com.android.trippoint.core.common.model.TravelerRole
+import com.android.trippoint.core.common.model.TripMember
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.network.BudgetDto
-import com.android.trippoint.core.network.BudgetSummaryDto
 import com.android.trippoint.core.network.BudgetOverviewDto
-import com.android.trippoint.core.network.ExpenseDto
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.BudgetSummaryDto
+import com.android.trippoint.core.network.CreateBudgetInput
+import com.android.trippoint.core.network.CreateExpenseInput
 import com.android.trippoint.core.network.DailyExpenseReportDto
 import com.android.trippoint.core.network.CategoryExpenseReportDto
-import com.android.trippoint.core.network.SettlementSummaryDto
-import com.android.trippoint.core.network.CreateBudgetInput
-import com.android.trippoint.core.network.UpdateBudgetInput
-import com.android.trippoint.core.network.CreateExpenseInput
-import com.android.trippoint.core.network.UpdateExpenseInput
+import com.android.trippoint.core.network.ExpenseDto
 import com.android.trippoint.core.network.ExpenseFilterInput
+import com.android.trippoint.core.network.SettlementSummaryDto
+import com.android.trippoint.core.network.TripMemberDto
+import com.android.trippoint.core.network.TripRemoteDataSource
+import com.android.trippoint.core.network.UpdateBudgetInput
+import com.android.trippoint.core.network.UpdateExpenseInput
 
 class BudgetRepositoryImpl(
-    private val remoteDataSource: BudgetRemoteDataSource
+    private val remoteDataSource: BudgetRemoteDataSource,
+    private val tripRemoteDataSource: TripRemoteDataSource,
+    private val preferencesManager: PreferencesManager
 ) : BudgetRepository {
-
-    override suspend fun getBudgets(): Result<List<Budget>> {
-        return try {
-            val dtos = remoteDataSource.getBudgets()
-            Result.success(dtos.map { it.toDomain() })
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
-    }
 
     override suspend fun getBudget(tripId: String): Result<Budget> {
         return try {
@@ -187,6 +186,26 @@ class BudgetRepositoryImpl(
         }
     }
 
+    override suspend fun getTripMembers(tripId: String): Result<List<TripMember>> {
+        return try {
+            val dtos = tripRemoteDataSource.getTripMembers(tripId)
+            Result.success(dtos.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override fun getCurrentUserId(): String? = preferencesManager.getUserId()
+
+    override suspend fun getBudgets(): Result<List<Budget>> {
+        return try {
+            val dtos = remoteDataSource.getBudgets()
+            Result.success(dtos.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private fun BudgetDto.toDomain(): Budget {
         return Budget(
             id = id,
@@ -212,6 +231,18 @@ class BudgetRepositoryImpl(
             paidBy = paidBy,
             createdBy = createdBy,
             createdAt = createdAt
+        )
+    }
+
+    private fun TripMemberDto.toDomain(): TripMember {
+        return TripMember(
+            id = id,
+            tripId = tripId,
+            userId = userId,
+            role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
+            status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
+            invitedAt = invitedAt,
+            joinedAt = joinedAt
         )
     }
 }

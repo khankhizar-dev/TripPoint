@@ -34,6 +34,7 @@ import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointAlert
 import com.android.trippoint.core.designsystem.components.TripPointBudgetCard
 import com.android.trippoint.core.designsystem.components.TripPointButton
+import com.android.trippoint.core.designsystem.components.TripPointEmptyState
 import com.android.trippoint.core.designsystem.components.TripPointInfoCard
 import com.android.trippoint.core.designsystem.components.TripPointInteractiveCard
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
@@ -52,7 +53,8 @@ fun BudgetOverviewRoute(
     onNavigateToTrends: (String, String) -> Unit,
     onNavigateToReports: (String, String) -> Unit,
     onNavigateToSettlements: (String) -> Unit,
-    onNavigateToScanner: (String) -> Unit
+    onNavigateToScanner: (String) -> Unit,
+    onNavigateToSetupBudget: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -78,7 +80,8 @@ fun BudgetOverviewRoute(
         onTrendsClick = { onNavigateToTrends(tripId, budgetId) },
         onReportsClick = { onNavigateToReports(tripId, budgetId) },
         onSettlementsClick = { onNavigateToSettlements(tripId) },
-        onScannerClick = { onNavigateToScanner(budgetId) }
+        onScannerClick = { onNavigateToScanner(budgetId) },
+        onSetupBudgetClick = { onNavigateToSetupBudget(tripId) }
     )
 }
 
@@ -90,7 +93,8 @@ fun BudgetOverviewScreen(
     onTrendsClick: () -> Unit,
     onReportsClick: () -> Unit,
     onSettlementsClick: () -> Unit,
-    onScannerClick: () -> Unit
+    onScannerClick: () -> Unit,
+    onSetupBudgetClick: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -100,12 +104,14 @@ fun BudgetOverviewScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onIntent(BudgetOverviewContract.Intent.AddExpenseClicked) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Expense")
+            if (uiState.budget != null) {
+                FloatingActionButton(
+                    onClick = { onIntent(BudgetOverviewContract.Intent.AddExpenseClicked) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                }
             }
         }
     ) { innerPadding ->
@@ -116,6 +122,7 @@ fun BudgetOverviewScreen(
             onReportsClick = onReportsClick,
             onSettlementsClick = onSettlementsClick,
             onScannerClick = onScannerClick,
+            onSetupBudgetClick = onSetupBudgetClick,
             modifier = Modifier.padding(innerPadding)
         )
     }
@@ -129,6 +136,7 @@ private fun BudgetOverviewContent(
     onReportsClick: () -> Unit,
     onSettlementsClick: () -> Unit,
     onScannerClick: () -> Unit,
+    onSetupBudgetClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     if (uiState.isLoading) {
@@ -136,11 +144,26 @@ private fun BudgetOverviewContent(
             LoadingIndicator()
         }
     } else if (uiState.error != null) {
-        Box(modifier = modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
-            TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(24.dp), 
+            contentAlignment = Alignment.Center
+        ) {
+            TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
+        }
+    } else if (uiState.budget == null) {
+        Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            TripPointEmptyState(
+                title = "No budget setup",
+                subtitle = "Set a budget to track your trip expenses.",
+                imageResId = com.android.trippoint.core.designsystem.R.drawable.illustration_empty_trip,
+                actionText = "Setup Budget",
+                onActionClick = onSetupBudgetClick
+            )
         }
     } else {
-        uiState.budget?.let { budget ->
+        uiState.budget.let { budget ->
             Column(
                 modifier = modifier
                     .fillMaxSize()
@@ -154,6 +177,7 @@ private fun BudgetOverviewContent(
                     totalBudget = "${budget.currency} ${budget.totalAmount}",
                     spentSoFar = "${budget.currency} ${budget.spentAmount}",
                     progress = budget.progress,
+                    onClick = { /* Already on overview */ },
                     modifier = Modifier.fillMaxWidth()
                 )
                 

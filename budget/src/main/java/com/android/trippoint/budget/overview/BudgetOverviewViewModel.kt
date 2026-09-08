@@ -26,6 +26,8 @@ class BudgetOverviewViewModel(
     private fun loadBudget(tripId: String, budgetId: String) {
         viewModelScope.launch {
             setState { copy(isLoading = true, tripId = tripId, budgetId = budgetId) }
+            
+            // Try fetching summary first (better for overview)
             val summaryResult = repository.getBudgetSummary(tripId)
             val expensesResult = repository.getExpenses(tripId)
             
@@ -54,7 +56,25 @@ class BudgetOverviewViewModel(
                     ) 
                 }
             } else {
-                setState { copy(isLoading = false, error = summaryResult.exceptionOrNull()?.message) }
+                // If summary fails, try fetching budget directly
+                val budgetResult = repository.getBudget(tripId)
+                if (budgetResult.isSuccess) {
+                    setState { 
+                        copy(
+                            isLoading = false, 
+                            budget = budgetResult.getOrNull(),
+                            expenses = expensesResult.getOrDefault(emptyList()),
+                            error = null
+                        ) 
+                    }
+                } else {
+                    val error = budgetResult.exceptionOrNull()?.message ?: summaryResult.exceptionOrNull()?.message
+                    if (error?.contains("not found", ignoreCase = true) == true) {
+                        setState { copy(isLoading = false, budget = null, error = null) }
+                    } else {
+                        setState { copy(isLoading = false, error = error) }
+                    }
+                }
             }
         }
     }

@@ -153,12 +153,22 @@ fun AddExpenseScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            TripPointTextField(
-                value = uiState.paidBy,
-                onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
-                label = "Paid By (User ID)",
-                placeholder = "Enter user UUID"
-            )
+            if (uiState.members.isNotEmpty()) {
+                TripPointDropdown(
+                    value = uiState.paidBy,
+                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+                    label = "Paid By",
+                    options = uiState.members.map { it.userId }, // Ideally should show names
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                TripPointTextField(
+                    value = uiState.paidBy,
+                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+                    label = "Paid By (User ID)",
+                    placeholder = "Enter user UUID"
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 

@@ -24,6 +24,7 @@ class AuthRepositoryImpl(
             if (response != null) {
                 preferencesManager.setAuthToken(response.token)
                 preferencesManager.setRefreshToken(response.refreshToken)
+                preferencesManager.setUserId(response.user.id)
                 // If username is set, profile is complete
                 if (response.user.username != null) {
                     preferencesManager.setProfileSetupCompleted(true)
@@ -43,6 +44,7 @@ class AuthRepositoryImpl(
             if (response != null) {
                 preferencesManager.setAuthToken(response.token)
                 preferencesManager.setRefreshToken(response.refreshToken)
+                preferencesManager.setUserId(response.user.id)
                 // If username is set, profile is complete
                 if (response.user.username != null) {
                     preferencesManager.setProfileSetupCompleted(true)
@@ -131,6 +133,7 @@ class AuthRepositoryImpl(
             if (user == null) {
                 preferencesManager.clearSession()
             } else {
+                preferencesManager.setUserId(user.id)
                 // Consider profile complete if username is set
                 if (user.username != null) {
                     preferencesManager.setProfileSetupCompleted(true)
@@ -176,6 +179,7 @@ class AuthRepositoryImpl(
 
     override fun getAuthToken(): String? = preferencesManager.getAuthToken()
     override fun getRefreshToken(): String? = preferencesManager.getRefreshToken()
+    override fun getUserId(): String? = preferencesManager.getUserId()
     override fun isOnboardingCompleted(): Boolean = preferencesManager.isOnboardingCompleted()
     override fun setOnboardingCompleted(completed: Boolean) = preferencesManager.setOnboardingCompleted(completed)
     override fun isProfileSetupCompleted(): Boolean = preferencesManager.isProfileSetupCompleted()

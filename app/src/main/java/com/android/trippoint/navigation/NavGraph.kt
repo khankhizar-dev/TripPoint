@@ -1034,6 +1034,9 @@ private fun NavGraphBuilder.budgetNavGraph(
             },
             onNavigateToScanner = { bId ->
                 navController.navigate(Screen.ReceiptScanner.createRoute(bId))
+            },
+            onNavigateToSetupBudget = { tId ->
+                navController.navigate(Screen.CreateBudget.createRoute(tId))
             }
         )
     }

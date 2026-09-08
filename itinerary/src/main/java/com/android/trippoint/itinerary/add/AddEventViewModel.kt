@@ -58,7 +58,7 @@ class AddEventViewModel(
                     title = state.name,
                     description = "",
                     type = state.category.uppercase(),
-                    startTime = state.time.ifEmpty { "00:00" },
+                    startTime = "${state.date}T${state.time.ifEmpty { "00:00" }}:00",
                     endTime = null,
                     location = state.location,
                     latitude = null,

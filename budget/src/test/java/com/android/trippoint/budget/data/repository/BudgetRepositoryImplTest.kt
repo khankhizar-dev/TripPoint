@@ -1,10 +1,13 @@
 package com.android.trippoint.budget.data.repository
 
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.network.BudgetDto
 import com.android.trippoint.core.network.BudgetRemoteDataSource
-import com.android.trippoint.core.network.ExpenseDto
 import com.android.trippoint.core.network.CreateExpenseInput
+import com.android.trippoint.core.network.ExpenseDto
+import com.android.trippoint.core.network.TripRemoteDataSource
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -15,6 +18,8 @@ import org.junit.Test
 class BudgetRepositoryImplTest {
 
     private val remoteDataSource: BudgetRemoteDataSource = mockk()
+    private val tripRemoteDataSource: TripRemoteDataSource = mockk()
+    private val preferencesManager: PreferencesManager = mockk()
     private lateinit var repository: BudgetRepositoryImpl
 
     private val dummyBudgetDto = BudgetDto(
@@ -53,7 +58,7 @@ class BudgetRepositoryImplTest {
 
     @Before
     fun setUp() {
-        repository = BudgetRepositoryImpl(remoteDataSource)
+        repository = BudgetRepositoryImpl(remoteDataSource, tripRemoteDataSource, preferencesManager)
     }
 
     @Test
@@ -111,6 +116,12 @@ class BudgetRepositoryImplTest {
         
         assertTrue(result.isSuccess)
         assertEquals("b1", result.getOrNull()?.id)
+    }
+
+    @Test
+    fun `getCurrentUserId returns from preferences`() {
+        every { preferencesManager.getUserId() } returns "u123"
+        assertEquals("u123", repository.getCurrentUserId())
     }
 
     @Test

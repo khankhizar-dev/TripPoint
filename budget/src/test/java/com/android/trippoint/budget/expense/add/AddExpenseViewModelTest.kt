@@ -4,6 +4,7 @@ import app.cash.turbine.test
 import com.android.trippoint.budget.domain.model.Expense
 import com.android.trippoint.budget.domain.repository.BudgetRepository
 import io.mockk.coEvery
+import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -28,6 +29,8 @@ class AddExpenseViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        every { repository.getCurrentUserId() } returns "u1"
+        coEvery { repository.getTripMembers(any()) } returns Result.success(emptyList())
         viewModel = AddExpenseViewModel(repository)
     }
 
@@ -49,8 +52,10 @@ class AddExpenseViewModelTest {
     @Test
     fun `LoadIds updates state correctly`() = runTest {
         viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        runCurrent()
         assertEquals("t1", viewModel.uiState.value.tripId)
         assertEquals("b1", viewModel.uiState.value.budgetId)
+        assertEquals("u1", viewModel.uiState.value.paidBy)
     }
 
     @Test
@@ -81,6 +86,7 @@ class AddExpenseViewModelTest {
         coEvery { repository.createExpense(any(), any()) } returns Result.success(mockExpense)
 
         viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        runCurrent()
         viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("10.0"))
         viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2026-01-01"))
         
@@ -100,6 +106,7 @@ class AddExpenseViewModelTest {
         } returns Result.failure(Exception("Creation failed"))
 
         viewModel.onIntent(AddExpenseContract.Intent.LoadIds("t1", "b1"))
+        runCurrent()
         viewModel.onIntent(AddExpenseContract.Intent.AmountChanged("10.0"))
         viewModel.onIntent(AddExpenseContract.Intent.DateChanged("2026-01-01"))
         

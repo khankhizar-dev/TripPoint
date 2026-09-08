@@ -85,7 +85,11 @@ class MainActivity : ComponentActivity() {
                             preferencesManager.setRefreshToken(refresh)
                         }
                     )
-                    BudgetRepositoryImpl(BudgetRemoteDataSource(api))
+                    BudgetRepositoryImpl(
+                        BudgetRemoteDataSource(api),
+                        TripRemoteDataSource(api),
+                        preferencesManager
+                    )
                 }
 
                 val documentRepository = remember {

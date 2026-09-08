@@ -21,7 +21,8 @@ The `:budget` module handles all financial aspects of a trip, including budget p
 
 ## 🏗 Architecture
 - **MVI (Model-View-Intent)**: State management for all financial screens.
-- **Repository Pattern**: Centralized data management via `BudgetRepository`.
+- **GraphQL Integration**: 100% migrated to real API calls for all budget, expense, and settlement data.
+- **Repository Pattern**: Centralized data management via `BudgetRepository` with secure user UUID attribution.
 - **Clean Code**: 100% compliant with **Detekt** and **Ktlint**.
 
 ## 🧪 Testing

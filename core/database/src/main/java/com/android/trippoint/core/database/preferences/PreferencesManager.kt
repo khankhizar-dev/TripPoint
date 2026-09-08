@@ -58,12 +58,19 @@ class PreferencesManager(context: Context) {
         return sharedPreferences.getString(KEY_REFRESH_TOKEN, null)
     }
 
+    fun setUserId(userId: String?) {
+        sharedPreferences.edit().putString(KEY_USER_ID, userId).apply()
+    }
+
+    fun getUserId(): String? {
+        return sharedPreferences.getString(KEY_USER_ID, null)
+    }
+
     fun clearSession() {
         sharedPreferences.edit()
             .remove(KEY_AUTH_TOKEN)
             .remove(KEY_REFRESH_TOKEN)
-            // Keep KEY_PROFILE_SETUP_COMPLETED so user doesn't have to repeat it locally
-            // until backend persistence is fully ready.
+            .remove(KEY_USER_ID)
             .apply()
     }
 
@@ -73,5 +80,6 @@ class PreferencesManager(context: Context) {
         private const val KEY_PERMISSIONS_REQUESTED = "permissions_requested"
         private const val KEY_AUTH_TOKEN = "auth_token"
         private const val KEY_REFRESH_TOKEN = "refresh_token"
+        private const val KEY_USER_ID = "user_id"
     }
 }

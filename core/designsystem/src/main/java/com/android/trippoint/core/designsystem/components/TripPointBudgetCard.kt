@@ -23,9 +23,12 @@ fun TripPointBudgetCard(
     spentSoFar: String,
     progress: Float,
     modifier: Modifier = Modifier,
-    title: String = "Budget Summary"
+    title: String = "Budget Summary",
+    onClick: (() -> Unit)? = null
 ) {
     Card(
+        onClick = { onClick?.invoke() },
+        enabled = onClick != null,
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(
