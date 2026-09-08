@@ -107,7 +107,9 @@ class TripOverviewViewModel(
             
             // Fetch analytics data to provide high-fidelity stats
             val budgetSummary = runCatching { budgetRemoteDataSource.getBudgetSummary(tripId) }.getOrNull()
-            val itineraryDays = runCatching { itineraryRemoteDataSource.getItineraryDays(tripId) }.getOrNull() ?: emptyList()
+            val itineraryDays = runCatching { 
+                itineraryRemoteDataSource.getItineraryDays(tripId) 
+            }.getOrNull() ?: emptyList()
             
             var totalTasks = 0
             var completedTasks = 0
