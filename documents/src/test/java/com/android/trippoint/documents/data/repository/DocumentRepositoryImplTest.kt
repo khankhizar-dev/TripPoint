@@ -1,114 +1,92 @@
 package com.android.trippoint.documents.data.repository
 
+import com.android.trippoint.core.network.DocumentRemoteDataSource
+import com.android.trippoint.core.network.DocumentDto
 import com.android.trippoint.documents.domain.model.DocumentType
+import io.mockk.coEvery
+import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
+import java.io.File
 
 class DocumentRepositoryImplTest {
 
+    private val remoteDataSource: DocumentRemoteDataSource = mockk()
     private lateinit var repository: DocumentRepositoryImpl
+
+    private val dummyDto = DocumentDto(
+        id = "d1",
+        tripId = "t1",
+        uploadedBy = "u1",
+        name = "Passport",
+        originalFileName = "pass.pdf",
+        mimeType = "application/pdf",
+        fileSize = 1024,
+        category = "PASSPORT_VISA",
+        source = "DEVICE",
+        status = "ACTIVE",
+        createdAt = "now",
+        updatedAt = "now"
+    )
 
     @Before
     fun setUp() {
-        repository = DocumentRepositoryImpl()
+        repository = DocumentRepositoryImpl(remoteDataSource)
     }
 
     @Test
-    fun `getDocuments with no filters returns all documents`() = runTest {
-        val result = repository.getDocuments()
-        assertTrue(result.isSuccess)
-        assertEquals(4, result.getOrThrow().size)
-    }
+    fun `getDocuments returns mapped domain data`() = runTest {
+        coEvery { remoteDataSource.getDocuments("t1", any()) } returns listOf(dummyDto)
 
-    @Test
-    fun `getDocuments with type filter returns filtered documents`() = runTest {
-        val result = repository.getDocuments(type = DocumentType.PASSPORT_VISA)
-        assertTrue(result.isSuccess)
-        assertEquals(2, result.getOrThrow().size)
-        assertTrue(result.getOrThrow().all { it.type == DocumentType.PASSPORT_VISA })
-    }
-
-    @Test
-    fun `getDocuments with favorite filter returns favorite documents`() = runTest {
-        val result = repository.getDocuments(isFavorite = true)
+        val result = repository.getDocuments("t1")
+        
         assertTrue(result.isSuccess)
         assertEquals(1, result.getOrThrow().size)
-        assertTrue(result.getOrThrow().all { it.isFavorite })
+        assertEquals("Passport", result.getOrThrow().first().title)
     }
 
     @Test
-    fun `getDocuments with recent filter returns sorted documents`() = runTest {
-        val result = repository.getDocuments(isRecent = true)
-        assertTrue(result.isSuccess)
-        val docs = result.getOrThrow()
-        assertEquals(4, docs.size)
-        // Check if sorted by updatedAt descending (mock implementation uses updatedAt)
-        assertEquals("d4", docs[0].id)
-    }
+    fun `getDocument returns mapped domain data`() = runTest {
+        coEvery { remoteDataSource.getDocument("t1", "d1") } returns dummyDto
 
-    @Test
-    fun `getDocument with valid id returns document`() = runTest {
-        val result = repository.getDocument("d1")
-        assertTrue(result.isSuccess)
-        assertEquals("Personal Passport", result.getOrThrow().title)
-    }
-
-    @Test
-    fun `getDocument with invalid id returns failure`() = runTest {
-        val result = repository.getDocument("invalid")
-        assertTrue(result.isFailure)
-        assertEquals("Document not found", result.exceptionOrNull()?.message)
-    }
-
-    @Test
-    fun `uploadDocument adds and returns new document`() = runTest {
-        val result = repository.uploadDocument("New Doc", DocumentType.INSURANCE, "url", "2025-01-01")
-        assertTrue(result.isSuccess)
-        val newDoc = result.getOrThrow()
-        assertEquals("New Doc", newDoc.title)
-        assertEquals(DocumentType.INSURANCE, newDoc.type)
+        val result = repository.getDocument("t1", "d1")
         
-        // Verify it was added
-        val allDocs = repository.getDocuments().getOrThrow()
-        assertEquals(5, allDocs.size)
-        assertTrue(allDocs.any { it.id == newDoc.id })
-    }
-
-    @Test
-    fun `deleteDocument removes document`() = runTest {
-        val result = repository.deleteDocument("d1")
         assertTrue(result.isSuccess)
-        assertTrue(result.getOrThrow())
-        
-        // Verify it was removed
-        val getResult = repository.getDocument("d1")
-        assertTrue(getResult.isFailure)
+        assertEquals("Passport", result.getOrThrow().title)
     }
 
     @Test
-    fun `toggleFavorite updates favorite status`() = runTest {
-        // d1 is favorite=true initially
-        val result = repository.toggleFavorite("d1")
+    fun `uploadDocument returns success`() = runTest {
+        val file = File("path")
+        coEvery { 
+            remoteDataSource.uploadDocument(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) 
+        } returns dummyDto
+
+        val result = repository.uploadDocument("t1", "Name", DocumentType.PASSPORT_VISA, "DEVICE", file)
+        
         assertTrue(result.isSuccess)
-        assertEquals(false, result.getOrThrow())
-        
-        // Verify update
-        val doc = repository.getDocument("d1").getOrThrow()
-        assertEquals(false, doc.isFavorite)
-        
-        // Toggle back
-        val result2 = repository.toggleFavorite("d1")
-        assertTrue(result2.isSuccess)
-        assertEquals(true, result2.getOrThrow())
+        assertEquals("Passport", result.getOrThrow().title)
     }
 
     @Test
-    fun `toggleFavorite with invalid id returns failure`() = runTest {
-        val result = repository.toggleFavorite("invalid")
-        assertTrue(result.isFailure)
-        assertEquals("Document not found", result.exceptionOrNull()?.message)
+    fun `trashDocument returns success`() = runTest {
+        coEvery { remoteDataSource.trashDocument("t1", "d1") } returns dummyDto
+
+        val result = repository.trashDocument("t1", "d1")
+        
+        assertTrue(result.isSuccess)
+    }
+
+    @Test
+    fun `toggleFavorite returns success`() = runTest {
+        coEvery { remoteDataSource.favoriteDocument("t1", "d1", true) } returns dummyDto.copy(favorite = true)
+
+        val result = repository.toggleFavorite("t1", "d1", true)
+        
+        assertTrue(result.isSuccess)
+        assertEquals(true, result.getOrThrow().isFavorite)
     }
 }

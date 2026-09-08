@@ -18,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import com.android.trippoint.core.designsystem.R as designR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DocumentDetailsViewModelTest {
@@ -53,9 +54,9 @@ class DocumentDetailsViewModelTest {
 
     @Test
     fun `LoadDocument success updates state`() = runTest {
-        coEvery { repository.getDocument("d1") } returns Result.success(mockDoc)
+        coEvery { repository.getDocument("t1", "d1") } returns Result.success(mockDoc)
 
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("d1"))
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("t1", "d1"))
         
         runCurrent()
         val state = viewModel.uiState.value
@@ -66,9 +67,9 @@ class DocumentDetailsViewModelTest {
 
     @Test
     fun `LoadDocument failure updates error state`() = runTest {
-        coEvery { repository.getDocument("d1") } returns Result.failure(Exception("Not found"))
+        coEvery { repository.getDocument("t1", "d1") } returns Result.failure(Exception("Not found"))
 
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("d1"))
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("t1", "d1"))
         
         runCurrent()
         assertEquals(false, viewModel.uiState.value.isLoading)
@@ -77,10 +78,12 @@ class DocumentDetailsViewModelTest {
 
     @Test
     fun `FavoriteClicked toggles favorite status`() = runTest {
-        coEvery { repository.getDocument("d1") } returns Result.success(mockDoc)
-        coEvery { repository.toggleFavorite("d1") } returns Result.success(true)
+        coEvery { repository.getDocument("t1", "d1") } returns Result.success(mockDoc)
+        coEvery { 
+            repository.toggleFavorite("t1", "d1", true) 
+        } returns Result.success(mockDoc.copy(isFavorite = true))
 
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("d1"))
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("t1", "d1"))
         runCurrent()
 
         viewModel.effect.test {
@@ -88,16 +91,19 @@ class DocumentDetailsViewModelTest {
             runCurrent()
             
             assertEquals(true, viewModel.uiState.value.document?.isFavorite)
-            assertEquals(DocumentDetailsContract.Effect.ShowMessage("Added to favorites"), awaitItem())
+            val expectedEffect = DocumentDetailsContract.Effect.ShowMessageResId(
+                designR.string.documents_added_favorites
+            )
+            assertEquals(expectedEffect, awaitItem())
         }
     }
 
     @Test
-    fun `DeleteClicked deletes and navigates back`() = runTest {
-        coEvery { repository.getDocument("d1") } returns Result.success(mockDoc)
-        coEvery { repository.deleteDocument("d1") } returns Result.success(true)
+    fun `DeleteClicked trashes and navigates back`() = runTest {
+        coEvery { repository.getDocument("t1", "d1") } returns Result.success(mockDoc)
+        coEvery { repository.trashDocument("t1", "d1") } returns Result.success(mockDoc)
 
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("d1"))
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument("t1", "d1"))
         runCurrent()
 
         viewModel.effect.test {

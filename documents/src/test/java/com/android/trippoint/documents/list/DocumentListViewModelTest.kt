@@ -45,7 +45,7 @@ class DocumentListViewModelTest {
             id = "d2",
             userId = "u1",
             title = "Flight Ticket",
-            type = DocumentType.TICKET_BOARDING,
+            type = DocumentType.TICKETS_BOARDING,
             fileUrl = "url2",
             expiryDate = null,
             referenceNumber = "REF2",
@@ -59,8 +59,7 @@ class DocumentListViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments(any(), any()) } returns Result.success(mockDocuments)
         viewModel = DocumentListViewModel(repository)
     }
 
@@ -79,56 +78,24 @@ class DocumentListViewModelTest {
     }
 
     @Test
-    fun `LoadDocuments success but recent fails updates state with empty recent`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        coEvery { repository.getDocuments(isRecent = true) } returns Result.failure(Exception("Recent error"))
-
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
-        
-        runCurrent()
-        val state = viewModel.uiState.value
-        assertEquals(false, state.isLoading)
-        assertEquals(mockDocuments, state.documents)
-        assertEquals(emptyList<Document>(), state.recentDocuments)
-        assertNull(state.error)
-    }
-
-    @Test
-    fun `ToggleFavorite failure does not reload documents`() = runTest {
-        coEvery { repository.toggleFavorite("d1") } returns Result.failure(Exception("Error"))
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        
-        viewModel.onIntent(DocumentListContract.Intent.ToggleFavorite("d1"))
-        
-        runCurrent()
-        // Verify repository calls
-        io.mockk.coVerify { repository.toggleFavorite("d1") }
-        // getDocuments should only be called once during init
-        // (if it was called, but in this setup it's not called automatically)
-        // Actually, in my setUp I didn't trigger LoadDocuments.
-        io.mockk.coVerify(exactly = 0) { repository.getDocuments() }
-    }
-
-    @Test
     fun `LoadDocuments success updates state`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
 
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         
         runCurrent()
         val state = viewModel.uiState.value
         assertEquals(false, state.isLoading)
         assertEquals(mockDocuments, state.documents)
-        assertEquals(mockDocuments, state.recentDocuments)
+        assertEquals(2, state.recentDocuments.size)
         assertNull(state.error)
     }
 
     @Test
     fun `LoadDocuments failure updates error state`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.failure(Exception("Network error"))
+        coEvery { repository.getDocuments("t1", any()) } returns Result.failure(Exception("Network error"))
 
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         
         runCurrent()
         assertEquals(false, viewModel.uiState.value.isLoading)
@@ -137,8 +104,8 @@ class DocumentListViewModelTest {
 
     @Test
     fun `SearchQueryChanged filters documents`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         runCurrent()
         
         viewModel.onIntent(DocumentListContract.Intent.SearchQueryChanged("Pass"))
@@ -151,8 +118,8 @@ class DocumentListViewModelTest {
 
     @Test
     fun `TabSelected to Favorites filters documents`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         runCurrent()
         
         viewModel.onIntent(DocumentListContract.Intent.TabSelected(2)) // Favorites
@@ -166,8 +133,8 @@ class DocumentListViewModelTest {
 
     @Test
     fun `Search and Tab combined filtering`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         runCurrent()
         
         viewModel.onIntent(DocumentListContract.Intent.TabSelected(2)) // Favorites
@@ -179,15 +146,19 @@ class DocumentListViewModelTest {
 
     @Test
     fun `ToggleFavorite success reloads documents`() = runTest {
-        coEvery { repository.toggleFavorite("d1") } returns Result.success(value = true)
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        val toggledDoc = mockDocuments[0].copy(isFavorite = false)
+        coEvery { repository.toggleFavorite("t1", "d1", false) } returns Result.success(toggledDoc)
         
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
+        runCurrent()
+
         viewModel.onIntent(DocumentListContract.Intent.ToggleFavorite("d1"))
         
         runCurrent()
         // Verify repository calls
-        io.mockk.coVerify { repository.toggleFavorite("d1") }
-        io.mockk.coVerify(atLeast = 1) { repository.getDocuments() }
+        io.mockk.coVerify { repository.toggleFavorite("t1", "d1", false) }
+        io.mockk.coVerify(atLeast = 1) { repository.getDocuments("t1", any()) }
     }
 
     @Test
@@ -224,9 +195,8 @@ class DocumentListViewModelTest {
 
     @Test
     fun `DocumentLongClicked toggles selection and enables selection mode`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         runCurrent()
 
         // Toggle on
@@ -247,9 +217,8 @@ class DocumentListViewModelTest {
 
     @Test
     fun `ClearSelection clears selection and disables selection mode`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
-        coEvery { repository.getDocuments(isRecent = true) } returns Result.success(mockDocuments)
-        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments)
+        coEvery { repository.getDocuments("t1", any()) } returns Result.success(mockDocuments)
+        viewModel.onIntent(DocumentListContract.Intent.LoadDocuments("t1"))
         runCurrent()
 
         // Select two
