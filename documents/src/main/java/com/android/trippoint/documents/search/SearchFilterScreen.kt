@@ -101,7 +101,14 @@ fun SearchFilterScreen(
 
             FilterSection(
                 title = stringResource(id = designR.string.documents_filter_category),
-                items = DocumentType.values().map { it.name.replace("_", " & ") },
+                items = listOf(
+                    stringResource(id = designR.string.documents_type_passport_visa),
+                    stringResource(id = designR.string.documents_type_tickets_boarding),
+                    stringResource(id = designR.string.documents_type_id_proofs),
+                    stringResource(id = designR.string.documents_type_hotel_vouchers),
+                    stringResource(id = designR.string.documents_type_insurance),
+                    stringResource(id = designR.string.documents_type_other)
+                ),
                 selectedIndex = uiState.selectedCategory?.ordinal ?: -1,
                 onItemSelected = { 
                     onIntent(SearchFilterContract.Intent.CategorySelected(DocumentType.values()[it])) 
@@ -140,7 +147,7 @@ fun SearchFilterScreen(
                 value = uiState.issuedBy,
                 onValueChange = { onIntent(SearchFilterContract.Intent.IssuerChanged(it)) },
                 label = stringResource(id = designR.string.documents_filter_issued_by),
-                placeholder = "e.g. Govt. of India"
+                placeholder = stringResource(id = designR.string.documents_default_issuer)
             )
 
             Spacer(modifier = Modifier.height(48.dp))

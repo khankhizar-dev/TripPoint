@@ -19,11 +19,13 @@ class DocumentDetailsContract {
         val tripId: String = "",
         val document: Document? = null,
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val errorResId: Int? = null
     ) : UiState
 
     sealed class Effect : UiEffect {
         object NavigateBack : Effect()
         data class ShowMessage(val message: String) : Effect()
+        data class ShowMessageResId(val resId: Int) : Effect()
     }
 }

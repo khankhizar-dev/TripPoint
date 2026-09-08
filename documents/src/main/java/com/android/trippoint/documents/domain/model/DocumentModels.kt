@@ -27,7 +27,7 @@ enum class DocumentType {
 
 data class CategoryInfo(
     val type: DocumentType,
-    val name: String,
+    val nameResId: Int,
     val count: Int,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 )

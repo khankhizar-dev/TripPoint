@@ -1,6 +1,7 @@
 package com.android.trippoint.documents.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -60,6 +61,7 @@ fun DocumentDetailsRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     LaunchedEffect(tripId, documentId) {
         viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument(tripId, documentId))
@@ -71,6 +73,10 @@ fun DocumentDetailsRoute(
                 DocumentDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 is DocumentDetailsContract.Effect.ShowMessage -> {
                     snackbarHostState.showSnackbar(effect.message)
+                }
+                is DocumentDetailsContract.Effect.ShowMessageResId -> {
+                    val message = context.resources.getString(effect.resId)
+                    snackbarHostState.showSnackbar(message)
                 }
             }
         }
@@ -110,18 +116,21 @@ fun DocumentDetailsScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LoadingIndicator()
             }
-        } else if (uiState.error != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
-            }
         } else {
-            uiState.document?.let { document ->
-                DocumentDetailsContent(document, innerPadding)
+            val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+            if (errorMessage != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TripPointAlert(message = errorMessage, variant = AlertVariant.Error)
+                }
+            } else {
+                uiState.document?.let { document ->
+                    DocumentDetailsContent(document, innerPadding)
+                }
             }
         }
     }

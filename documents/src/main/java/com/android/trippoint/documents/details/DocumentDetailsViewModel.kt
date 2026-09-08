@@ -3,6 +3,7 @@ package com.android.trippoint.documents.details
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.launch
 
 class DocumentDetailsViewModel(
@@ -19,10 +20,10 @@ class DocumentDetailsViewModel(
             is DocumentDetailsContract.Intent.LoadDocument -> loadDocument(intent.tripId, intent.id)
             DocumentDetailsContract.Intent.BackClicked -> sendEffect(DocumentDetailsContract.Effect.NavigateBack)
             DocumentDetailsContract.Intent.ShareClicked -> {
-                sendEffect(DocumentDetailsContract.Effect.ShowMessage("Share functionality coming soon"))
+                sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(designR.string.documents_share_coming_soon))
             }
             DocumentDetailsContract.Intent.DownloadClicked -> {
-                sendEffect(DocumentDetailsContract.Effect.ShowMessage("Download functionality coming soon"))
+                sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(designR.string.documents_download_coming_soon))
             }
             DocumentDetailsContract.Intent.FavoriteClicked -> toggleFavorite()
             DocumentDetailsContract.Intent.DeleteClicked -> trashDocument()
@@ -49,8 +50,9 @@ class DocumentDetailsViewModel(
             if (result.isSuccess) {
                 val updatedDoc = result.getOrThrow()
                 setState { copy(document = updatedDoc) }
-                sendEffect(DocumentDetailsContract.Effect.ShowMessage(
-                    if (updatedDoc.isFavorite) "Added to favorites" else "Removed from favorites"
+                sendEffect(DocumentDetailsContract.Effect.ShowMessageResId(
+                    if (updatedDoc.isFavorite) designR.string.documents_added_favorites 
+                    else designR.string.documents_removed_favorites
                 ))
             }
         }

@@ -3,6 +3,7 @@ package com.android.trippoint.documents.add
 import androidx.lifecycle.viewModelScope
 import com.android.trippoint.core.common.BaseViewModel
 import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.launch
 import java.io.File
 
@@ -31,12 +32,12 @@ class AddDocumentViewModel(
     private fun saveDocument() {
         val state = uiState.value
         if (state.title.isBlank() || state.fileUrl == null) {
-            setState { copy(error = "Title and file are required") }
+            setState { copy(errorResId = designR.string.documents_error_title_file_required) }
             return
         }
 
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { copy(isLoading = true, error = null, errorResId = null) }
             val file = File(state.fileUrl)
             val result = repository.uploadDocument(
                 tripId = state.tripId,

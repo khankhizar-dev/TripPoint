@@ -270,6 +270,17 @@
     <string name="documents_fav_added">Added to favorites</string>
     <string name="documents_fav_removed">Removed from favorites</string>
     <string name="documents_default_issuer">Govt. of India</string>
+    <string name="documents_share_coming_soon">Share functionality coming soon</string>
+    <string name="documents_download_coming_soon">Download functionality coming soon</string>
+    <string name="documents_added_favorites">Added to favorites</string>
+    <string name="documents_removed_favorites">Removed from favorites</string>
+    <string name="documents_cloud_coming_soon">Cloud Import coming soon</string>
+    <string name="documents_title_label">Document Title</string>
+    <string name="documents_title_placeholder">e.g. My Passport</string>
+    <string name="documents_type_label">Document Type</string>
+    <string name="documents_expiry_placeholder">YYYY-MM-DD</string>
+    <string name="documents_ref_placeholder">e.g. A1234567</string>
+    <string name="documents_error_title_file_required">Title and file are required</string>
 
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>
@@ -301,6 +312,10 @@
     <string name="documents_empty_desc">Keep your important travel documents safe and accessible offline.</string>
     <string name="documents_add_title">Add Document</string>
     <string name="documents_upload_label">Click to upload file</string>
+    <string name="documents_take_photo_title">Take Photo</string>
+    <string name="documents_take_photo_desc">Capture document using camera</string>
+    <string name="documents_import_cloud_title">Import from Cloud</string>
+    <string name="documents_import_cloud_desc">Google Drive, Dropbox etc.</string>
     <string name="documents_expiry_label">Expiry Date</string>
     <string name="documents_ref_label">Reference Number</string>
     <string name="documents_save_button">Store Document</string>

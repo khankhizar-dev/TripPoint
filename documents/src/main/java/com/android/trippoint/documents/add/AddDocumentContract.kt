@@ -25,7 +25,8 @@ class AddDocumentContract {
         val referenceNumber: String = "",
         val fileUrl: String? = null,
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val errorResId: Int? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

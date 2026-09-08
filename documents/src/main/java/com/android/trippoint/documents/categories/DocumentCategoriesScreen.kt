@@ -94,7 +94,7 @@ fun DocumentCategoriesScreen(
             ) {
                 items(uiState.categories) { category ->
                     CategoryCard(
-                        title = category.name,
+                        title = stringResource(id = category.nameResId),
                         count = stringResource(id = designR.string.documents_count_suffix, category.count),
                         icon = category.icon,
                         onClick = { onIntent(DocumentCategoriesContract.Intent.CategoryClicked(category.type)) }
