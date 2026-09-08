@@ -61,7 +61,6 @@ class BudgetRepositoryImplTest {
         id = "m1",
         tripId = "t1",
         userId = "u1",
-        userName = "Member Name",
         role = "MEMBER",
         status = "ACCEPTED",
         invitedAt = "2024-01-01",
@@ -128,7 +127,7 @@ class BudgetRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         val member = result.getOrNull()?.first()
-        assertEquals("Member Name", member?.userName)
+        assertEquals("u1", member?.userId)
     }
 
     @Test

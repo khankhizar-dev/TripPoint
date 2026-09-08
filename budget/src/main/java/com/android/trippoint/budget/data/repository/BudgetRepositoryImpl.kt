@@ -239,7 +239,7 @@ class BudgetRepositoryImpl(
             id = id,
             tripId = tripId,
             userId = userId,
-            userName = userName, // Mapped from real API field
+            userName = null, // Backend field removed
             role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,

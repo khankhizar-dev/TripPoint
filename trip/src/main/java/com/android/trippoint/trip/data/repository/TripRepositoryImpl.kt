@@ -160,11 +160,11 @@ class TripRepositoryImpl(
             startDate = startDate,
             endDate = endDate,
             status = try { TripStatus.valueOf(status) } catch (_: Exception) { TripStatus.DRAFT },
-            imageUrl = imageUrl ?: "",
+            imageUrl = "", // Removed from API for now
             progress = progress,
             travelersCount = travelers,
-            tasksCount = tasksCount,
-            completedTasksCount = completedTasksCount,
+            tasksCount = 0, // Fallback since API field is undefined
+            completedTasksCount = 0, // Fallback since API field is undefined
             createdAt = createdAt,
             updatedAt = updatedAt
         )
@@ -175,7 +175,7 @@ class TripRepositoryImpl(
             id = id,
             tripId = tripId,
             userId = userId,
-            userName = userName, // Mapped from real API field
+            userName = null, // Backend field removed
             role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,
