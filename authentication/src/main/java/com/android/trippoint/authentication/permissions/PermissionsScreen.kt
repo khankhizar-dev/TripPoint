@@ -1,5 +1,9 @@
 package com.android.trippoint.authentication.permissions
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -61,12 +65,31 @@ fun PermissionsRoute(
     )
     val uiState by viewModel.uiState.collectAsState()
 
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { _ -> 
+        viewModel.onIntent(PermissionsContract.Intent.PermissionHandled)
+    }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
                 is PermissionsContract.Effect.NavigateToHome -> onNavigateToHome()
                 is PermissionsContract.Effect.RequestPermission -> {
-                    // Trigger system permission dialog here in a real app
+                    val permission = when (effect.permission) {
+                        PermissionsContract.Step.NOTIFICATIONS -> {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                Manifest.permission.POST_NOTIFICATIONS
+                            } else null
+                        }
+                        PermissionsContract.Step.LOCATION -> Manifest.permission.ACCESS_FINE_LOCATION
+                        PermissionsContract.Step.CALENDAR -> Manifest.permission.READ_CALENDAR
+                    }
+                    if (permission != null) {
+                        permissionLauncher.launch(permission)
+                    } else {
+                        viewModel.onIntent(PermissionsContract.Intent.PermissionHandled)
+                    }
                 }
             }
         }

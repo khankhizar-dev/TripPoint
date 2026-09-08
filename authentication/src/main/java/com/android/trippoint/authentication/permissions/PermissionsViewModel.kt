@@ -13,8 +13,8 @@ class PermissionsViewModel(
         when (intent) {
             PermissionsContract.Intent.AllowClicked -> {
                 sendEffect(PermissionsContract.Effect.RequestPermission(uiState.value.currentStep))
-                handleNext()
             }
+            PermissionsContract.Intent.PermissionHandled -> handleNext()
             PermissionsContract.Intent.DenyClicked -> handleNext()
             PermissionsContract.Intent.ExploreClicked -> {
                 authRepository.setPermissionsRequested(true)
