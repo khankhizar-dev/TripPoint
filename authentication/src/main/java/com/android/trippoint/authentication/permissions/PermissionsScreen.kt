@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -107,8 +108,8 @@ fun PermissionsScreen(
 
     Surface(
         modifier = Modifier
-            .padding(24.dp)
-            .fillMaxWidth()
+            .padding(16.dp)
+            .widthIn(max = 400.dp)
             .wrapContentHeight(),
         shape = RoundedCornerShape(28.dp),
         color = MaterialTheme.colorScheme.surface,

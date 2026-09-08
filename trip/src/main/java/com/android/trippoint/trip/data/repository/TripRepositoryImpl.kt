@@ -163,6 +163,8 @@ class TripRepositoryImpl(
             imageUrl = imageUrl ?: "",
             progress = progress,
             travelersCount = travelers,
+            tasksCount = tasksCount,
+            completedTasksCount = completedTasksCount,
             createdAt = createdAt,
             updatedAt = updatedAt
         )

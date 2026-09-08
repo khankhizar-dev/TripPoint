@@ -8,6 +8,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.dialog
 import com.android.trippoint.authentication.forgotpassword.ForgotPasswordRoute
 import com.android.trippoint.authentication.forgotpassword.ResetPasswordRoute
 import com.android.trippoint.authentication.login.LoginRoute
@@ -175,9 +176,10 @@ private fun NavGraphBuilder.addSplashDestination(navController: NavHostControlle
                 }
             },
             onNavigateToPermissions = {
-                navController.navigate(Screen.Permissions.route) {
+                navController.navigate(Screen.Home.route) {
                     popUpTo(Screen.Splash.route) { inclusive = true }
                 }
+                navController.navigate(Screen.Permissions.route)
             },
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {
@@ -306,16 +308,17 @@ private fun NavGraphBuilder.addProfileSetupDestination(navController: NavHostCon
     composable(Screen.ProfileSetup.route) {
         ProfileSetupRoute(
             onNavigateToHome = {
-                navController.navigate(Screen.Permissions.route) {
+                navController.navigate(Screen.Home.route) {
                     popUpTo(0) { inclusive = true }
                 }
+                navController.navigate(Screen.Permissions.route)
             }
         )
     }
 }
 
 private fun NavGraphBuilder.addPermissionsDestination(navController: NavHostController) {
-    composable(Screen.Permissions.route) {
+    dialog(Screen.Permissions.route) {
         PermissionsRoute(
             onNavigateToHome = {
                 navController.navigate(Screen.Home.route) {

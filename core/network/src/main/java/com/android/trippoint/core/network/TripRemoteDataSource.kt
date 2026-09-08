@@ -12,7 +12,8 @@ class TripRemoteDataSource(
         val query = """
             mutation CreateTrip(${'$'}input: CreateTripInput!) {
               createTrip(input: ${'$'}input) {
-                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl 
+                tasksCount completedTasksCount createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -26,7 +27,8 @@ class TripRemoteDataSource(
         val query = """
             query GetTrips(${'$'}filter: TripFilterInput) {
               trips(filter: ${'$'}filter) {
-                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl 
+                tasksCount completedTasksCount createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -41,7 +43,8 @@ class TripRemoteDataSource(
         val query = """
             query GetTrip(${'$'}id: ID!) {
               trip(id: ${'$'}id) {
-                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl 
+                tasksCount completedTasksCount createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -185,6 +188,8 @@ data class TripDto(
     val progress: Float,
     val travelers: Int,
     val imageUrl: String? = null,
+    val tasksCount: Int = 0,
+    val completedTasksCount: Int = 0,
     val createdAt: String,
     val updatedAt: String
 )
