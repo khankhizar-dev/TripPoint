@@ -39,7 +39,9 @@ class TripOverviewViewModel(
                 }
             }
             TripOverviewContract.Intent.AddExpenseClicked -> {
-                // Handle action
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddExpense(it))
+                }
             }
             TripOverviewContract.Intent.AddNoteClicked -> {
                 uiState.value.trip?.id?.let {

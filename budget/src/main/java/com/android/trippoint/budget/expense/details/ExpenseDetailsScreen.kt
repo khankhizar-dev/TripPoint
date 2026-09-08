@@ -127,6 +127,12 @@ fun ExpenseDetailsScreen(
                         Text(text = expense.date, style = MaterialTheme.typography.bodyLarge)
                     }
                     
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    TripPointInfoCard(title = "Paid By") {
+                        Text(text = uiState.paidByName, style = MaterialTheme.typography.bodyLarge)
+                    }
+                    
                     if (expense.location != null) {
                         Spacer(modifier = Modifier.height(16.dp))
                         TripPointInfoCard(title = "Location") {

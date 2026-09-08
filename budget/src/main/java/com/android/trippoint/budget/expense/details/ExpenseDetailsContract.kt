@@ -16,6 +16,7 @@ class ExpenseDetailsContract {
     data class State(
         val tripId: String = "",
         val expense: Expense? = null,
+        val paidByName: String = "",
         val isLoading: Boolean = false,
         val error: String? = null
     ) : UiState

@@ -88,6 +88,7 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddExpense -> onNavigateToBudgets(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }

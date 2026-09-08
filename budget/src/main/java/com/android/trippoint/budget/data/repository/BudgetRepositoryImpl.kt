@@ -235,10 +235,17 @@ class BudgetRepositoryImpl(
     }
 
     private fun TripMemberDto.toDomain(): TripMember {
+        val mockName = when (userId) {
+            "u1" -> "Khizar"
+            "u2" -> "Rohit"
+            "u3" -> "Rameez"
+            else -> "User ${userId.take(4)}"
+        }
         return TripMember(
             id = id,
             tripId = tripId,
             userId = userId,
+            userName = mockName,
             role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,

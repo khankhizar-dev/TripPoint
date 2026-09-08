@@ -28,6 +28,7 @@ class ExpenseListViewModelTest {
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
+        coEvery { repository.getTripMembers(any()) } returns Result.success(emptyList())
         viewModel = ExpenseListViewModel(repository)
     }
 
@@ -68,8 +69,9 @@ class ExpenseListViewModelTest {
         viewModel.onIntent(ExpenseListContract.Intent.LoadExpenses("t1", "b1"))
         
         runCurrent()
-        assertEquals(false, viewModel.uiState.value.isLoading)
-        assertEquals("Network error", viewModel.uiState.value.error)
+        val state = viewModel.uiState.value
+        assertEquals(false, state.isLoading)
+        assertEquals("Network error", state.error)
     }
 
     @Test

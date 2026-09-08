@@ -30,8 +30,22 @@ class ExpenseDetailsViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true, tripId = tripId) }
             val result = repository.getExpense(tripId, expenseId)
+            val membersResult = repository.getTripMembers(tripId)
+            
             if (result.isSuccess) {
-                setState { copy(isLoading = false, expense = result.getOrNull(), error = null) }
+                val expense = result.getOrNull()
+                val members = membersResult.getOrDefault(emptyList())
+                val paidByName = members.find { it.userId == expense?.paidBy }?.userName 
+                    ?: expense?.paidBy?.take(8) ?: "Unknown"
+                
+                setState { 
+                    copy(
+                        isLoading = false, 
+                        expense = expense, 
+                        paidByName = paidByName,
+                        error = null
+                    ) 
+                }
             } else {
                 setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
             }
