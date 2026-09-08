@@ -130,6 +130,9 @@ sealed class Screen(val route: String) {
     object BudgetOverview : Screen("budget_overview/{budgetId}?tripId={tripId}") {
         fun createRoute(tripId: String, budgetId: String) = "budget_overview/$budgetId?tripId=$tripId"
     }
+    object BudgetSettlements : Screen("budget_settlements/{tripId}") {
+        fun createRoute(tripId: String) = "budget_settlements/$tripId"
+    }
     object CreateBudget : Screen("create_budget?tripId={tripId}") {
         fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
             "create_budget?tripId=$tripId"
@@ -137,11 +140,14 @@ sealed class Screen(val route: String) {
             "create_budget"
         }
     }
-    object AddExpense : Screen("add_expense/{budgetId}") {
-        fun createRoute(budgetId: String) = "add_expense/$budgetId"
+    object AddExpense : Screen("add_expense/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "add_expense/$budgetId?tripId=$tripId"
     }
-    object ExpenseList : Screen("expense_list/{budgetId}") {
-        fun createRoute(budgetId: String) = "expense_list/$budgetId"
+    object ExpenseDetails : Screen("expense_details/{expenseId}?tripId={tripId}") {
+        fun createRoute(tripId: String, expenseId: String) = "expense_details/$expenseId?tripId=$tripId"
+    }
+    object ExpenseList : Screen("expense_list/{budgetId}?tripId={tripId}") {
+        fun createRoute(tripId: String, budgetId: String) = "expense_list/$budgetId?tripId=$tripId"
     }
     object SpendingTrends : Screen("spending_trends/{budgetId}?tripId={tripId}") {
         fun createRoute(tripId: String, budgetId: String) = "spending_trends/$budgetId?tripId=$tripId"

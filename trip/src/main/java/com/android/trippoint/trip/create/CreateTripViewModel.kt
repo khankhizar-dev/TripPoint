@@ -29,8 +29,8 @@ class CreateTripViewModel(
             val result = repository.createTrip(
                 name = uiState.value.name,
                 destination = uiState.value.destination,
-                startDate = uiState.value.startDate,
-                endDate = uiState.value.endDate
+                startDate = "${uiState.value.startDate}T00:00:00",
+                endDate = "${uiState.value.endDate}T23:59:59"
             )
             
             if (result.isSuccess) {

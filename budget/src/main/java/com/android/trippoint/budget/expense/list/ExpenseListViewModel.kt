@@ -12,7 +12,7 @@ class ExpenseListViewModel(
 ) {
     override fun onIntent(intent: ExpenseListContract.Intent) {
         when (intent) {
-            is ExpenseListContract.Intent.LoadExpenses -> loadExpenses(intent.budgetId)
+            is ExpenseListContract.Intent.LoadExpenses -> loadExpenses(intent.tripId, intent.budgetId)
             ExpenseListContract.Intent.AddExpenseClicked -> {
                 sendEffect(ExpenseListContract.Effect.NavigateToAddExpense(uiState.value.budgetId))
             }
@@ -20,12 +20,18 @@ class ExpenseListViewModel(
         }
     }
 
-    private fun loadExpenses(budgetId: String) {
+    private fun loadExpenses(tripId: String, budgetId: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true, budgetId = budgetId) }
-            val result = repository.getExpenses(budgetId)
+            setState { copy(isLoading = true, tripId = tripId, budgetId = budgetId) }
+            val result = repository.getExpenses(tripId)
             if (result.isSuccess) {
-                setState { copy(isLoading = false, expenses = result.getOrDefault(emptyList()), error = null) }
+                setState { 
+                    copy(
+                        isLoading = false, 
+                        expenses = result.getOrDefault(emptyList()), 
+                        error = null
+                    ) 
+                }
             } else {
                 setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
             }

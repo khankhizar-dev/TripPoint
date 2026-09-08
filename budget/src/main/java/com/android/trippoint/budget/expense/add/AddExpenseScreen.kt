@@ -44,14 +44,15 @@ import java.util.Locale
 
 @Composable
 fun AddExpenseRoute(
+    tripId: String,
     budgetId: String,
     viewModel: AddExpenseViewModel,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(budgetId) {
-        viewModel.onIntent(AddExpenseContract.Intent.LoadBudgetId(budgetId))
+    LaunchedEffect(tripId, budgetId) {
+        viewModel.onIntent(AddExpenseContract.Intent.LoadIds(tripId, budgetId))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -149,6 +150,25 @@ fun AddExpenseScreen(
                 label = stringResource(id = designR.string.budget_description_label),
                 placeholder = "e.g. Starbucks Coffee"
             )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            if (uiState.members.isNotEmpty()) {
+                TripPointDropdown(
+                    value = uiState.paidBy,
+                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+                    label = "Paid By",
+                    options = uiState.members.map { it.userId }, // Ideally should show names
+                    modifier = Modifier.fillMaxWidth()
+                )
+            } else {
+                TripPointTextField(
+                    value = uiState.paidBy,
+                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+                    label = "Paid By (User ID)",
+                    placeholder = "Enter user UUID"
+                )
+            }
 
             Spacer(modifier = Modifier.height(32.dp))
 

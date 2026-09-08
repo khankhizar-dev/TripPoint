@@ -59,14 +59,14 @@ class CreateBookingViewModel(
             val startAt = if (uiState.value.time.isNotBlank()) {
                 "${uiState.value.date}T${uiState.value.time}:00"
             } else {
-                uiState.value.date
+                "${uiState.value.date}T00:00:00"
             }
             
             val endAt = if (uiState.value.endDate.isNotBlank()) {
                 if (uiState.value.endTime.isNotBlank()) {
                     "${uiState.value.endDate}T${uiState.value.endTime}:00"
                 } else {
-                    uiState.value.endDate
+                    "${uiState.value.endDate}T23:59:59"
                 }
             } else {
                 null

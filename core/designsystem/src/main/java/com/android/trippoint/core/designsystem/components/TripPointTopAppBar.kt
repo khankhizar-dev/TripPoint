@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 
 /**
  * Top Navigation Bar with theme switching support (Section 24.5).
@@ -29,9 +30,9 @@ enum class TopAppBarNavIcon {
 @Composable
 fun TripPointTopAppBar(
     title: String,
+    onNavClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier,
     navIcon: TopAppBarNavIcon = TopAppBarNavIcon.Back,
-    onNavClick: (() -> Unit)? = null,
     isDark: Boolean = false,
     containerColor: Color? = null,
     contentColor: Color? = null,
@@ -70,6 +71,7 @@ fun TripPointTopAppBar(
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
                 color = finalContentColor
             )
         },

@@ -30,7 +30,7 @@ class ReceiptScannerViewModel : BaseViewModel<
             val mockScannedData = ReceiptScannerContract.ScannedReceipt(
                 amount = 42.50,
                 currency = "USD",
-                date = "2026-09-01",
+                date = "2026-09-01T12:00:00",
                 category = "Food",
                 merchant = "Starlight Cafe"
             )

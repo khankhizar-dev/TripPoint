@@ -26,6 +26,7 @@ interface AuthRepository {
     // Persistence operations (often part of domain if logic depends on them)
     fun getAuthToken(): String?
     fun getRefreshToken(): String?
+    fun getUserId(): String?
     fun isOnboardingCompleted(): Boolean
     fun setOnboardingCompleted(completed: Boolean)
     fun isProfileSetupCompleted(): Boolean

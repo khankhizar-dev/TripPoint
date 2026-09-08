@@ -14,8 +14,9 @@ import androidx.navigation.compose.rememberNavController
 import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.core.network.TripRemoteDataSource
-import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.core.network.BookingRemoteDataSource
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
@@ -76,7 +77,19 @@ class MainActivity : ComponentActivity() {
                 }
 
                 val budgetRepository = remember {
-                    BudgetRepositoryImpl()
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    BudgetRepositoryImpl(
+                        BudgetRemoteDataSource(api),
+                        TripRemoteDataSource(api),
+                        preferencesManager
+                    )
                 }
 
                 val documentRepository = remember {

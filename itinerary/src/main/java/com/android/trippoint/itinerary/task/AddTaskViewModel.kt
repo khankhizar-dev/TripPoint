@@ -58,7 +58,7 @@ class AddTaskViewModel(
                     title = state.name,
                     description = "Task | Priority: ${state.priority}",
                     type = "ACTIVITY",
-                    startTime = state.time.ifEmpty { "00:00" },
+                    startTime = "${state.date}T${state.time.ifEmpty { "00:00" }}:00",
                     endTime = null,
                     location = "",
                     latitude = null,

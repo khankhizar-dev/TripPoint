@@ -126,6 +126,9 @@ private fun BudgetListContent(
                     totalBudget = "${budget.currency} ${budget.totalAmount}",
                     spentSoFar = "${budget.currency} ${budget.spentAmount}",
                     progress = budget.progress,
+                    onClick = { 
+                        onIntent(BudgetListContract.Intent.BudgetClicked(budget.tripId, budget.id)) 
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
             }

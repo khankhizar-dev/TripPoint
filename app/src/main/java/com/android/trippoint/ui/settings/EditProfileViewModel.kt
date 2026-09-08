@@ -65,7 +65,7 @@ class EditProfileViewModel(
                 lastName = lastName,
                 username = null,
                 phoneNumber = currentState.phone,
-                dateOfBirth = currentState.dob,
+                dateOfBirth = if (currentState.dob.isNotBlank()) "${currentState.dob}T00:00:00" else null,
                 nationality = currentState.nationality,
                 profilePhotoUrl = currentState.profilePhotoUri,
                 country = null

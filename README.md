@@ -7,9 +7,9 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 - **UI**: Jetpack Compose with Material 3
 - **Architecture**: MVI (Model-View-Intent) & Clean Architecture
 - **Dependency Injection**: Hilt (Planned)
-- **Networking**: Retrofit & GraphQL (Standardized via `GraphQlRequest`)
-- **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto`)
-- **Navigation**: Navigation Compose
+- **Networking**: Retrofit & GraphQL (100% migrated for Budget & Expenses)
+- **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto` for secure UUID & Token storage)
+- **Navigation**: Navigation Compose (Modularized & Multi-module aware)
 - **Design System**: Centralized design system in `:core:designsystem`
 
 ## ⚙️ CI/CD & Quality
@@ -97,7 +97,8 @@ The project follows a multi-module architecture to promote scalability and maint
 
 - **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
 - **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
-- **Testing**: Maintain high logic coverage (current `:trip`, `:itinerary`, and `:booking` modules at 100%).
+- **Data Formats**: Use **ISO 8601 LocalDateTime** (`yyyy-MM-ddTHH:mm:ss`) for all API date-time fields to ensure backend compatibility.
+- **Testing**: Maintain high logic coverage (current `:trip`, `:itinerary`, `:booking`, `:budget`, and `:documents` modules at 100%).
 - **Linting**: Ensure all code is **Detekt** and **Ktlint** compliant before committing.
 
 ---
