@@ -35,11 +35,14 @@ class BudgetOverviewViewModel(
                 val summary = summaryResult.getOrThrow()
                 val overview = overviewResult.getOrThrow()
                 
+                val categorySum = summary.categoryBreakdown.sumOf { it.amount }
+                val spentAmount = if (summary.spentAmount > 0) summary.spentAmount else categorySum
+
                 val budget = Budget(
                     id = summary.budget.id,
                     tripId = summary.budget.tripId,
                     totalAmount = summary.budget.totalAmount,
-                    spentAmount = summary.spentAmount,
+                    spentAmount = spentAmount,
                     currency = summary.budget.currency,
                     title = "Budget",
                     categories = overview.categoryBreakdown.map { 

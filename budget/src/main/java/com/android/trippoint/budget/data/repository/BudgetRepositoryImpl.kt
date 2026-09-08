@@ -235,11 +235,12 @@ class BudgetRepositoryImpl(
     }
 
     private fun TripMemberDto.toDomain(): TripMember {
+        val name = user?.fullName ?: "${user?.firstName ?: ""} ${user?.lastName ?: ""}".trim()
         return TripMember(
             id = id,
             tripId = tripId,
             userId = userId,
-            userName = null, // Backend field removed
+            userName = name.ifBlank { null },
             role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,

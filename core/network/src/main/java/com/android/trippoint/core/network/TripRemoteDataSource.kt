@@ -106,6 +106,7 @@ class TripRemoteDataSource(
             query GetTripMembers(${'$'}tripId: ID!) {
               tripMembers(tripId: ${'$'}tripId) {
                 id tripId userId role status invitedAt joinedAt
+                user { firstName lastName fullName username }
               }
             }
         """.trimIndent()
@@ -192,10 +193,12 @@ data class TripMemberDto(
     val id: String,
     val tripId: String,
     val userId: String,
+    val userName: String? = null,
     val role: String,
     val status: String,
     val invitedAt: String,
-    val joinedAt: String?
+    val joinedAt: String?,
+    val user: User? = null
 )
 
 data class CreateTripInput(

@@ -108,7 +108,7 @@ class TripOverviewViewModel(
                 val travelers = members.map { member ->
                     Traveler(
                         id = member.userId,
-                        name = "User ${member.userId}", // Need a way to get user names
+                        name = member.userName ?: "User ${member.userId.take(4)}",
                         photoUrl = "",
                         role = member.role,
                         status = member.status

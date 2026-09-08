@@ -76,7 +76,6 @@ fun TripOverviewRoute(
     onNavigateToAddTask: (String) -> Unit,
     onNavigateToAddNote: (String) -> Unit,
     onNavigateToAddBooking: (String) -> Unit,
-    onNavigateToAddExpense: (String) -> Unit,
     onNavigateToBudgets: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -101,7 +100,10 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
-                is TripOverviewContract.Effect.NavigateToAddExpense -> onNavigateToAddExpense(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddExpense -> {
+                    // Navigate directly to budgets list for that trip
+                    onNavigateToBudgets(effect.tripId)
+                }
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }
