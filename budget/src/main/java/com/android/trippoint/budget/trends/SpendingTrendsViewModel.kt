@@ -24,18 +24,21 @@ class SpendingTrendsViewModel(
     private fun loadTrends(tripId: String, budgetId: String) {
         viewModelScope.launch {
             setState { copy(isLoading = true, tripId = tripId, budgetId = budgetId) }
-            // Mock trend data based on selected period
-            val mockData = when (uiState.value.periods.getOrNull(uiState.value.selectedPeriodIndex)) {
-                "Daily" -> listOf(
-                    "Mon" to 120f, "Tue" to 80f, "Wed" to 200f, "Thu" to 150f, 
-                    "Fri" to 300f, "Sat" to 450f, "Sun" to 100f
-                )
-                "Weekly" -> listOf(
-                    "Week 1" to 1200f, "Week 2" to 800f, "Week 3" to 2000f, "Week 4" to 1500f
-                )
-                else -> emptyList()
+            
+            // Use real API for Daily trends
+            val result = repository.getDailyExpenseReport(
+                tripId = tripId,
+                fromDate = "2024-01-01T00:00:00", // Should ideally be calculated
+                toDate = "2026-12-31T23:59:59"
+            )
+            
+            if (result.isSuccess) {
+                val report = result.getOrThrow()
+                val trendData = report.map { it.date.takeLast(5) to it.amount.toFloat() }
+                setState { copy(isLoading = false, trendData = trendData, error = null) }
+            } else {
+                setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
             }
-            setState { copy(isLoading = false, trendData = mockData) }
         }
     }
 }

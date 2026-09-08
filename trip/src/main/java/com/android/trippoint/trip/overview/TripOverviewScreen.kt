@@ -37,6 +37,7 @@ import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +53,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import coil.compose.AsyncImage
 import com.android.trippoint.core.common.model.Traveler
 import com.android.trippoint.core.common.model.Trip
@@ -61,6 +65,7 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 
+@Suppress("LongParameterList")
 @Composable
 fun TripOverviewRoute(
     tripId: String,
@@ -71,12 +76,20 @@ fun TripOverviewRoute(
     onNavigateToAddTask: (String) -> Unit,
     onNavigateToAddNote: (String) -> Unit,
     onNavigateToAddBooking: (String) -> Unit,
+    onNavigateToAddExpense: (String) -> Unit,
     onNavigateToBudgets: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(tripId) {
-        viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails(tripId))
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails(tripId))
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -88,7 +101,7 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
-                is TripOverviewContract.Effect.NavigateToAddExpense -> onNavigateToBudgets(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddExpense -> onNavigateToAddExpense(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }

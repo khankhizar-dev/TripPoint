@@ -27,6 +27,7 @@ class TripRepositoryImplTest {
         status = "UPCOMING",
         progress = 0.5f,
         travelers = 2,
+        imageUrl = "http://test.com/image.jpg",
         createdAt = "2024-08-28T12:00:00",
         updatedAt = "2024-08-28T12:00:00"
     )
@@ -35,6 +36,7 @@ class TripRepositoryImplTest {
         id = "m1",
         tripId = "1",
         userId = "u1",
+        userName = "Real User Name",
         role = "OWNER",
         status = "ACCEPTED",
         invitedAt = "2024-08-28T12:00:00",
@@ -56,6 +58,7 @@ class TripRepositoryImplTest {
         val trip = result.getOrNull()
         assertEquals("Test Trip", trip?.title)
         assertEquals(TripStatus.UPCOMING, trip?.status)
+        assertEquals("http://test.com/image.jpg", trip?.imageUrl)
     }
 
     @Test
@@ -126,8 +129,9 @@ class TripRepositoryImplTest {
         val result = repository.getTripMembers("1")
 
         assertTrue(result.isSuccess)
-        assertEquals(1, result.getOrNull()?.size)
-        assertEquals("OWNER", result.getOrNull()?.first()?.role?.name)
+        val member = result.getOrNull()?.first()
+        assertEquals("OWNER", member?.role?.name)
+        assertEquals("Real User Name", member?.userName)
     }
 
     @Test

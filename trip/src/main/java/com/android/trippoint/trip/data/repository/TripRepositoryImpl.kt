@@ -159,8 +159,8 @@ class TripRepositoryImpl(
             location = destination,
             startDate = startDate,
             endDate = endDate,
-            status = try { TripStatus.valueOf(status) } catch (e: Exception) { TripStatus.DRAFT },
-            imageUrl = "", // Backend doesn't return this yet
+            status = try { TripStatus.valueOf(status) } catch (_: Exception) { TripStatus.DRAFT },
+            imageUrl = imageUrl ?: "",
             progress = progress,
             travelersCount = travelers,
             createdAt = createdAt,

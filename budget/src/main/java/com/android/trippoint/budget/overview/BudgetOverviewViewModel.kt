@@ -27,21 +27,28 @@ class BudgetOverviewViewModel(
         viewModelScope.launch {
             setState { copy(isLoading = true, tripId = tripId, budgetId = budgetId) }
             
-            // Try fetching summary first (better for overview)
             val summaryResult = repository.getBudgetSummary(tripId)
+            val overviewResult = repository.getBudgetOverview(tripId)
             val expensesResult = repository.getExpenses(tripId)
             
-            if (summaryResult.isSuccess) {
+            if (summaryResult.isSuccess && overviewResult.isSuccess) {
                 val summary = summaryResult.getOrThrow()
+                val overview = overviewResult.getOrThrow()
+                
                 val budget = Budget(
                     id = summary.budget.id,
                     tripId = summary.budget.tripId,
                     totalAmount = summary.budget.totalAmount,
                     spentAmount = summary.spentAmount,
                     currency = summary.budget.currency,
-                    title = "Trip Budget",
-                    categories = summary.categoryBreakdown.map { 
-                        BudgetCategory(it.category, it.category, 0.0, it.amount)
+                    title = "Budget",
+                    categories = overview.categoryBreakdown.map { 
+                        BudgetCategory(
+                            id = it.category,
+                            name = it.category,
+                            spentAmount = it.amount,
+                            allocatedAmount = summary.budget.totalAmount // Fallback
+                        )
                     },
                     createdAt = summary.budget.createdAt,
                     updatedAt = summary.budget.updatedAt
@@ -56,7 +63,7 @@ class BudgetOverviewViewModel(
                     ) 
                 }
             } else {
-                // If summary fails, try fetching budget directly
+                // If combined fails, try individual budget fetch
                 val budgetResult = repository.getBudget(tripId)
                 if (budgetResult.isSuccess) {
                     setState { 

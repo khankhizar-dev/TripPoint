@@ -381,6 +381,7 @@ private fun NavGraphBuilder.tripNavGraph(navController: NavHostController, tripR
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
             onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
+            onNavigateToAddExpense = { id -> navController.navigate(Screen.Budgets.createRoute(id)) },
             onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) }
         )
     }

@@ -12,7 +12,7 @@ class TripRemoteDataSource(
         val query = """
             mutation CreateTrip(${'$'}input: CreateTripInput!) {
               createTrip(input: ${'$'}input) {
-                id ownerId name destination startDate endDate status progress travelers createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -26,7 +26,7 @@ class TripRemoteDataSource(
         val query = """
             query GetTrips(${'$'}filter: TripFilterInput) {
               trips(filter: ${'$'}filter) {
-                id ownerId name destination startDate endDate status progress travelers createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -41,7 +41,7 @@ class TripRemoteDataSource(
         val query = """
             query GetTrip(${'$'}id: ID!) {
               trip(id: ${'$'}id) {
-                id ownerId name destination startDate endDate status progress travelers createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -55,7 +55,7 @@ class TripRemoteDataSource(
         val query = """
             mutation UpdateTrip(${'$'}id: ID!, ${'$'}input: UpdateTripInput!) {
               updateTrip(id: ${'$'}id, input: ${'$'}input) {
-                id ownerId name destination startDate endDate status progress travelers createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -80,7 +80,7 @@ class TripRemoteDataSource(
         val query = """
             mutation RestoreTrip(${'$'}id: ID!) {
               restoreTrip(id: ${'$'}id) {
-                id ownerId name destination startDate endDate status progress travelers createdAt updatedAt
+                id ownerId name destination startDate endDate status progress travelers imageUrl createdAt updatedAt
               }
             }
         """.trimIndent()
@@ -184,6 +184,7 @@ data class TripDto(
     val status: String,
     val progress: Float,
     val travelers: Int,
+    val imageUrl: String? = null,
     val createdAt: String,
     val updatedAt: String
 )
