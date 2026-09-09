@@ -40,6 +40,7 @@ The project follows a multi-module architecture to promote scalability and maint
 - **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
 - **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
 - **`:budget`**: **The Finance Center**. Tracks trip expenses, manages budgets, and provides category-wise breakdown of spending.
+- **`:checklist`**: **The Plan Executor**. Smart, customizable checklists with AI suggestions to ensure you never miss a thing.
 
 ## 🛠 Features
 
@@ -94,6 +95,15 @@ The project follows a multi-module architecture to promote scalability and maint
 - [x] **Categories Grid**: Visual organization with real-time document counts per type.
 - [x] **Batch Management**: Long-press selection mode for bulk actions.
 - [x] **Granular Discovery**: Search and filter by category, expiry date, or issuer.
+
+### Smart Checklist Management
+- [x] **My Checklists**: High-fidelity list view with real-time progress tracking, search, and status tabs.
+- [x] **Premium Templates**: Grid of trip-specific templates (Weekend, Family, Business, Adventure) with immersive background imagery.
+- [x] **Sectional Organization**: Checklists are divided into logical sections like "Packing List" and "Pre-trip Tasks" for better clarity.
+- [x] **High-Fidelity Items**: Detailed item rows with category grouping, essential tagging, and notes.
+- [x] **Progress Dashboard**: 160dp circular completion indicator with sectional status breakdown.
+- [x] **AI Packing Assistant**: Intelligent suggestions based on destination and month, with bulk-add and regeneration capabilities.
+- [x] **Smart Reminders**: Integrated item-level reminders with scheduled notifications.
 
 ## 📖 Development Guidelines
 
