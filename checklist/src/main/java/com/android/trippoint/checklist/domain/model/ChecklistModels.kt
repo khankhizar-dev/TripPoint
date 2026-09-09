@@ -4,10 +4,12 @@ data class Checklist(
     val id: String,
     val tripId: String,
     val title: String,
+    val description: String?,
     val dateRange: String,
     val totalItems: Int,
     val completedItems: Int,
     val status: ChecklistStatus = ChecklistStatus.ACTIVE,
+    val sections: List<ChecklistSection> = emptyList(),
     val createdAt: String,
     val updatedAt: String
 ) {
@@ -25,6 +27,7 @@ data class ChecklistSection(
     val id: String,
     val checklistId: String,
     val title: String,
+    val position: Int,
     val totalItems: Int,
     val completedItems: Int,
     val items: List<ChecklistItem> = emptyList()
@@ -35,8 +38,18 @@ data class ChecklistItem(
     val sectionId: String,
     val name: String,
     val isCompleted: Boolean = false,
-    val category: String? = null,
+    val category: ChecklistItemCategory = ChecklistItemCategory.OTHER,
     val isEssential: Boolean = false,
-    val reminderAt: String? = null,
+    val dueDate: String? = null,
+    val position: Int = 0,
     val notes: String? = null
 )
+
+enum class ChecklistItemCategory {
+    CLOTHING,
+    DOCUMENTS,
+    ELECTRONICS,
+    HEALTH,
+    TOILETRIES,
+    OTHER
+}

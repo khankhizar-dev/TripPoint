@@ -36,22 +36,25 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChecklistProgressRoute(
+    tripId: String,
     checklistId: String,
     viewModel: ChecklistProgressViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToCompleted: (String) -> Unit
+    onNavigateToCompleted: (String, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(checklistId) {
-        viewModel.onIntent(ChecklistProgressContract.Intent.LoadProgress(checklistId))
+    LaunchedEffect(tripId, checklistId) {
+        viewModel.onIntent(ChecklistProgressContract.Intent.LoadProgress(tripId, checklistId))
     }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ChecklistProgressContract.Effect.NavigateBack -> onNavigateBack()
-                is ChecklistProgressContract.Effect.NavigateToCompleted -> onNavigateToCompleted(effect.checklistId)
+                is ChecklistProgressContract.Effect.NavigateToCompleted -> {
+                    onNavigateToCompleted(effect.tripId, effect.checklistId)
+                }
             }
         }
     }

@@ -8,12 +8,13 @@ import com.android.trippoint.core.common.UiState
 
 class ChecklistProgressContract {
     sealed class Intent : UiIntent {
-        data class LoadProgress(val checklistId: String) : Intent()
+        data class LoadProgress(val tripId: String, val checklistId: String) : Intent()
         object ViewCompletedClicked : Intent()
         object BackClicked : Intent()
     }
 
     data class State(
+        val tripId: String = "",
         val checklist: Checklist? = null,
         val sections: List<ChecklistSection> = emptyList(),
         val isLoading: Boolean = false,
@@ -22,6 +23,6 @@ class ChecklistProgressContract {
 
     sealed class Effect : UiEffect {
         object NavigateBack : Effect()
-        data class NavigateToCompleted(val checklistId: String) : Effect()
+        data class NavigateToCompleted(val tripId: String, val checklistId: String) : Effect()
     }
 }

@@ -40,23 +40,24 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChecklistListRoute(
+    tripId: String,
     viewModel: ChecklistListViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToDetails: (String) -> Unit,
-    onNavigateToCreate: () -> Unit
+    onNavigateToDetails: (String, String) -> Unit,
+    onNavigateToCreate: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.onIntent(ChecklistListContract.Intent.LoadChecklists)
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(ChecklistListContract.Intent.LoadChecklists(tripId))
     }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ChecklistListContract.Effect.NavigateBack -> onNavigateBack()
-                is ChecklistListContract.Effect.NavigateToDetails -> onNavigateToDetails(effect.id)
-                ChecklistListContract.Effect.NavigateToCreate -> onNavigateToCreate()
+                is ChecklistListContract.Effect.NavigateToDetails -> onNavigateToDetails(effect.tripId, effect.id)
+                is ChecklistListContract.Effect.NavigateToCreate -> onNavigateToCreate(effect.tripId)
                 is ChecklistListContract.Effect.ShowError -> { /* Handle */ }
             }
         }
@@ -123,10 +124,10 @@ private fun ChecklistStates(
         uiState.error != null -> {
             ErrorView(
                 title = stringResource(id = designR.string.checklist_error_title),
-                description = uiState.error ?: stringResource(id = designR.string.checklist_error_desc),
+                description = uiState.error!!,
                 icon = Icons.Default.Error,
                 actionText = stringResource(id = designR.string.core_designsystem_retry),
-                onActionClick = { onIntent(ChecklistListContract.Intent.LoadChecklists) }
+                onActionClick = { onIntent(ChecklistListContract.Intent.LoadChecklists(uiState.tripId)) }
             )
         }
         uiState.checklists.isEmpty() -> {

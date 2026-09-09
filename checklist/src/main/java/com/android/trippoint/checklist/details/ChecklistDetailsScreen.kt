@@ -52,21 +52,23 @@ import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointCircularProgress
 import com.android.trippoint.core.designsystem.R as designR
 
+@Suppress("LongParameterList")
 @Composable
 fun ChecklistDetailsRoute(
+    tripId: String,
     id: String,
     viewModel: ChecklistDetailsViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToSection: (String) -> Unit,
+    onNavigateToSection: (String, String, String) -> Unit,
     onNavigateToProgress: (String) -> Unit,
     onNavigateToAddSection: () -> Unit,
-    onNavigateToAddItem: () -> Unit,
+    onNavigateToAddItem: (String, String) -> Unit,
     onNavigateToAiSuggest: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(id) {
-        viewModel.onIntent(ChecklistDetailsContract.Intent.LoadChecklist(id))
+    LaunchedEffect(tripId, id) {
+        viewModel.onIntent(ChecklistDetailsContract.Intent.LoadChecklist(tripId, id))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -74,13 +76,15 @@ fun ChecklistDetailsRoute(
             when (effect) {
                 ChecklistDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 is ChecklistDetailsContract.Effect.NavigateToSectionDetails -> {
-                    onNavigateToSection(effect.id)
+                    onNavigateToSection(effect.tripId, effect.checklistId, effect.id)
                 }
                 is ChecklistDetailsContract.Effect.NavigateToProgress -> {
                     onNavigateToProgress(effect.checklistId)
                 }
                 ChecklistDetailsContract.Effect.NavigateToAddSection -> onNavigateToAddSection()
-                ChecklistDetailsContract.Effect.NavigateToAddItem -> onNavigateToAddItem()
+                is ChecklistDetailsContract.Effect.NavigateToAddItem -> {
+                    onNavigateToAddItem(effect.tripId, effect.checklistId)
+                }
                 ChecklistDetailsContract.Effect.NavigateToAiSuggest -> onNavigateToAiSuggest()
             }
         }

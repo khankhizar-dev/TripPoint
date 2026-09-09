@@ -1,14 +1,13 @@
 package com.android.trippoint.checklist.progress
 
 import androidx.lifecycle.viewModelScope
-import com.android.trippoint.checklist.domain.model.Checklist
-import com.android.trippoint.checklist.domain.model.ChecklistSection
-import com.android.trippoint.checklist.domain.model.ChecklistStatus
+import com.android.trippoint.checklist.domain.repository.ChecklistRepository
 import com.android.trippoint.core.common.BaseViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class ChecklistProgressViewModel : BaseViewModel<
+class ChecklistProgressViewModel(
+    private val repository: ChecklistRepository
+) : BaseViewModel<
     ChecklistProgressContract.State,
     ChecklistProgressContract.Intent,
     ChecklistProgressContract.Effect
@@ -17,35 +16,33 @@ class ChecklistProgressViewModel : BaseViewModel<
 ) {
     override fun onIntent(intent: ChecklistProgressContract.Intent) {
         when (intent) {
-            is ChecklistProgressContract.Intent.LoadProgress -> loadProgress(intent.checklistId)
+            is ChecklistProgressContract.Intent.LoadProgress -> loadProgress(intent.tripId, intent.checklistId)
             ChecklistProgressContract.Intent.ViewCompletedClicked -> {
                 uiState.value.checklist?.id?.let {
-                    sendEffect(ChecklistProgressContract.Effect.NavigateToCompleted(it))
+                    sendEffect(ChecklistProgressContract.Effect.NavigateToCompleted(uiState.value.tripId, it))
                 }
             }
             ChecklistProgressContract.Intent.BackClicked -> sendEffect(ChecklistProgressContract.Effect.NavigateBack)
         }
     }
 
-    private fun loadProgress(id: String) {
+    private fun loadProgress(tripId: String, id: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            delay(500) // Simulation
+            setState { copy(isLoading = true, tripId = tripId) }
+            val result = repository.getChecklist(tripId, id)
             
-            val mockChecklist = Checklist(
-                id = id, tripId = "t1", title = "Thailand Trip", 
-                dateRange = "24 May - 2 Jun", totalItems = 55, completedItems = 33,
-                status = ChecklistStatus.ACTIVE, createdAt = "now", updatedAt = "now"
-            )
-            
-            val mockSections = listOf(
-                ChecklistSection("s1", id, "Pre-trip Checklist", 20, 12),
-                ChecklistSection("s2", id, "Packing List", 35, 18),
-                ChecklistSection("s3", id, "Visa & Documents", 10, 5),
-                ChecklistSection("s4", id, "On-Trip Tasks", 12, 4)
-            )
-            
-            setState { copy(isLoading = false, checklist = mockChecklist, sections = mockSections) }
+            if (result.isSuccess) {
+                val checklist = result.getOrThrow()
+                setState { 
+                    copy(
+                        isLoading = false, 
+                        checklist = checklist, 
+                        sections = checklist.sections 
+                    ) 
+                }
+            } else {
+                setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
+            }
         }
     }
 }

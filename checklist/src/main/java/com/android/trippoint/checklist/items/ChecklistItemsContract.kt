@@ -8,7 +8,7 @@ import com.android.trippoint.core.common.UiState
 
 class ChecklistItemsContract {
     sealed class Intent : UiIntent {
-        data class LoadSection(val checklistId: String, val sectionId: String) : Intent()
+        data class LoadSection(val tripId: String, val checklistId: String, val sectionId: String) : Intent()
         data class ItemToggled(val itemId: String) : Intent()
         data class SearchQueryChanged(val query: String) : Intent()
         object AddItemClicked : Intent()
@@ -26,7 +26,7 @@ class ChecklistItemsContract {
 
     sealed class Effect : UiEffect {
         object NavigateBack : Effect()
-        data class NavigateToAddItem(val checklistId: String, val sectionId: String) : Effect()
+        data class NavigateToAddItem(val tripId: String, val checklistId: String, val sectionId: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }

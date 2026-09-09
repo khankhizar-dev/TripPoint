@@ -42,16 +42,17 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChecklistItemsRoute(
+    tripId: String,
     checklistId: String,
     sectionId: String,
     viewModel: ChecklistItemsViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToAddItem: (String, String) -> Unit
+    onNavigateToAddItem: (String, String, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(checklistId, sectionId) {
-        viewModel.onIntent(ChecklistItemsContract.Intent.LoadSection(checklistId, sectionId))
+    LaunchedEffect(tripId, checklistId, sectionId) {
+        viewModel.onIntent(ChecklistItemsContract.Intent.LoadSection(tripId, checklistId, sectionId))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -59,7 +60,7 @@ fun ChecklistItemsRoute(
             when (effect) {
                 ChecklistItemsContract.Effect.NavigateBack -> onNavigateBack()
                 is ChecklistItemsContract.Effect.NavigateToAddItem -> {
-                    onNavigateToAddItem(effect.checklistId, effect.sectionId)
+                    onNavigateToAddItem(effect.tripId, effect.checklistId, effect.sectionId)
                 }
                 is ChecklistItemsContract.Effect.ShowError -> { /* Handle */ }
             }
@@ -163,7 +164,7 @@ private fun ChecklistItemsList(
     uiState: ChecklistItemsContract.State,
     onIntent: (ChecklistItemsContract.Intent) -> Unit
 ) {
-    val groupedItems = uiState.filteredItems.groupBy { it.category ?: "Others" }
+    val groupedItems = uiState.filteredItems.groupBy { it.category }
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -172,7 +173,7 @@ private fun ChecklistItemsList(
         groupedItems.forEach { (category, items) ->
             item {
                 Text(
-                    text = category,
+                    text = category.name,
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp)
