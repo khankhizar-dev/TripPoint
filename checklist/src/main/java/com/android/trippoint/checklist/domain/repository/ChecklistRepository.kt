@@ -5,6 +5,7 @@ import com.android.trippoint.checklist.domain.model.ChecklistItem
 import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
 import com.android.trippoint.checklist.domain.model.ChecklistSection
 import com.android.trippoint.checklist.domain.model.ChecklistStatus
+import com.android.trippoint.checklist.domain.model.ChecklistTemplate
 
 interface ChecklistRepository {
     suspend fun getChecklists(tripId: String): Result<List<Checklist>>
@@ -57,4 +58,31 @@ interface ChecklistRepository {
         isCompleted: Boolean? = null,
         dueDate: String? = null
     ): Result<ChecklistItem>
+
+    suspend fun deleteItem(tripId: String, checklistId: String, sectionId: String, itemId: String): Result<Boolean>
+    
+    suspend fun getTemplates(): Result<List<ChecklistTemplate>>
+    suspend fun getTemplate(templateId: String): Result<ChecklistTemplate>
+    suspend fun createTemplate(name: String, description: String?): Result<ChecklistTemplate>
+    suspend fun updateTemplate(
+        templateId: String, 
+        name: String?, 
+        description: String?, 
+        status: String?
+    ): Result<ChecklistTemplate>
+    suspend fun archiveTemplate(templateId: String): Result<ChecklistTemplate>
+    
+    suspend fun saveAsTemplate(
+        tripId: String, 
+        checklistId: String, 
+        name: String, 
+        description: String?
+    ): Result<ChecklistTemplate>
+    
+    suspend fun createFromTemplate(
+        tripId: String, 
+        templateId: String, 
+        name: String?, 
+        description: String?
+    ): Result<Checklist>
 }

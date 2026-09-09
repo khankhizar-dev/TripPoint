@@ -53,3 +53,37 @@ enum class ChecklistItemCategory {
     TOILETRIES,
     OTHER
 }
+
+data class ChecklistTemplate(
+    val id: String,
+    val name: String,
+    val description: String?,
+    val type: TemplateType,
+    val status: String,
+    val sections: List<TemplateSection> = emptyList(),
+    val createdAt: String,
+    val updatedAt: String
+)
+
+enum class TemplateType {
+    SYSTEM,
+    USER,
+    TRIP
+}
+
+data class TemplateSection(
+    val id: String,
+    val templateId: String,
+    val title: String,
+    val position: Int,
+    val items: List<TemplateItem> = emptyList()
+)
+
+data class TemplateItem(
+    val id: String,
+    val sectionId: String,
+    val name: String,
+    val category: ChecklistItemCategory,
+    val isEssential: Boolean,
+    val position: Int
+)

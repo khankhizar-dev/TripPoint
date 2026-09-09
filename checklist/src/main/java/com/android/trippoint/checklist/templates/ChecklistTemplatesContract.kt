@@ -19,7 +19,7 @@ class ChecklistTemplatesContract {
 
     data class Template(
         val id: String,
-        val titleResId: Int,
+        val title: String,
         val itemCount: Int,
         val imageUrl: String
     )

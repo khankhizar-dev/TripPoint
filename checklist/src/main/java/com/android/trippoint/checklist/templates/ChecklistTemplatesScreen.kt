@@ -135,7 +135,7 @@ private fun TemplateCard(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = stringResource(id = template.titleResId),
+                    text = template.title,
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
