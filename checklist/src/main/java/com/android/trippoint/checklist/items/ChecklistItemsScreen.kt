@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -33,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.checklist.domain.model.ChecklistItem
+import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
 import com.android.trippoint.core.designsystem.components.TripPointTextField
@@ -86,41 +88,55 @@ fun ChecklistItemsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onIntent(ChecklistItemsContract.Intent.AddItemClicked) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Item")
+            if (!uiState.isLoading && uiState.error == null) {
+                FloatingActionButton(
+                    onClick = { onIntent(ChecklistItemsContract.Intent.AddItemClicked) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add Item")
+                }
             }
         }
     ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingIndicator()
+        when {
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LoadingIndicator()
+                }
             }
-        } else {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-            ) {
-                SectionProgressHeader(uiState)
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                TripPointTextField(
-                    value = uiState.searchQuery,
-                    onValueChange = { onIntent(ChecklistItemsContract.Intent.SearchQueryChanged(it)) },
-                    label = "",
-                    placeholder = "Search items",
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                    modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+            uiState.error != null -> {
+                ErrorView(
+                    title = stringResource(id = designR.string.checklist_error_title),
+                    description = uiState.error,
+                    icon = Icons.Default.Error,
+                    actionText = stringResource(id = designR.string.core_designsystem_retry),
+                    onActionClick = { onIntent(ChecklistItemsContract.Intent.RetryClicked) }
                 )
-                
-                Spacer(modifier = Modifier.height(24.dp))
-                
-                ChecklistItemsList(uiState, onIntent)
+            }
+            else -> {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                ) {
+                    SectionProgressHeader(uiState)
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    TripPointTextField(
+                        value = uiState.searchQuery,
+                        onValueChange = { onIntent(ChecklistItemsContract.Intent.SearchQueryChanged(it)) },
+                        label = "",
+                        placeholder = "Search items",
+                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                        modifier = Modifier.padding(horizontal = 24.dp).fillMaxWidth()
+                    )
+                    
+                    Spacer(modifier = Modifier.height(24.dp))
+                    
+                    ChecklistItemsList(uiState, onIntent)
+                }
             }
         }
     }

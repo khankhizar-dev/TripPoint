@@ -325,7 +325,10 @@ class ChecklistRemoteDataSource(
     }
 
     // 17. Update Template
-    suspend fun updateChecklistTemplate(templateId: String, input: UpdateChecklistTemplateInput): ChecklistTemplateDto? {
+    suspend fun updateChecklistTemplate(
+        templateId: String, 
+        input: UpdateChecklistTemplateInput
+    ): ChecklistTemplateDto? {
         val query = """
             mutation UpdateChecklistTemplate(${'$'}templateId: ID!, ${'$'}input: UpdateChecklistTemplateInput!) {
                 updateChecklistTemplate(templateId: ${'$'}templateId, input: ${'$'}input) {
@@ -357,7 +360,10 @@ class ChecklistRemoteDataSource(
     }
 
     // 19. Create Template Section
-    suspend fun createChecklistTemplateSection(templateId: String, input: CreateChecklistTemplateSectionInput): ChecklistTemplateSectionDto? {
+    suspend fun createChecklistTemplateSection(
+        templateId: String, 
+        input: CreateChecklistTemplateSectionInput
+    ): ChecklistTemplateSectionDto? {
         val query = """
             mutation CreateChecklistTemplateSection(${'$'}templateId: ID!, ${'$'}input: CreateChecklistTemplateSectionInput!) {
                 createChecklistTemplateSection(templateId: ${'$'}templateId, input: ${'$'}input) {
@@ -373,7 +379,11 @@ class ChecklistRemoteDataSource(
     }
 
     // 20. Update Template Section
-    suspend fun updateChecklistTemplateSection(templateId: String, sectionId: String, input: UpdateChecklistTemplateSectionInput): ChecklistTemplateSectionDto? {
+    suspend fun updateChecklistTemplateSection(
+        templateId: String, 
+        sectionId: String, 
+        input: UpdateChecklistTemplateSectionInput
+    ): ChecklistTemplateSectionDto? {
         val query = """
             mutation UpdateChecklistTemplateSection(${'$'}templateId: ID!, ${'$'}sectionId: ID!, ${'$'}input: UpdateChecklistTemplateSectionInput!) {
                 updateChecklistTemplateSection(templateId: ${'$'}templateId, sectionId: ${'$'}sectionId, input: ${'$'}input) {
@@ -381,7 +391,11 @@ class ChecklistRemoteDataSource(
                 }
             }
         """.trimIndent()
-        val variables = mapOf("templateId" to templateId, "sectionId" to sectionId, "input" to input)
+        val variables = mapOf(
+            "templateId" to templateId, 
+            "sectionId" to sectionId, 
+            "input" to input
+        )
         val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("updateChecklistTemplateSection") ?: return null
@@ -402,7 +416,11 @@ class ChecklistRemoteDataSource(
     }
 
     // 22. Add Template Item
-    suspend fun addChecklistTemplateItem(templateId: String, sectionId: String, input: CreateChecklistTemplateItemInput): ChecklistTemplateItemDto? {
+    suspend fun addChecklistTemplateItem(
+        templateId: String, 
+        sectionId: String, 
+        input: CreateChecklistTemplateItemInput
+    ): ChecklistTemplateItemDto? {
         val query = """
             mutation AddChecklistTemplateItem(${'$'}templateId: ID!, ${'$'}sectionId: ID!, ${'$'}input: CreateChecklistTemplateItemInput!) {
                 addChecklistTemplateItem(templateId: ${'$'}templateId, sectionId: ${'$'}sectionId, input: ${'$'}input) {
@@ -418,7 +436,12 @@ class ChecklistRemoteDataSource(
     }
 
     // 23. Update Template Item
-    suspend fun updateChecklistTemplateItem(templateId: String, sectionId: String, itemId: String, input: UpdateChecklistTemplateItemInput): ChecklistTemplateItemDto? {
+    suspend fun updateChecklistTemplateItem(
+        templateId: String, 
+        sectionId: String, 
+        itemId: String, 
+        input: UpdateChecklistTemplateItemInput
+    ): ChecklistTemplateItemDto? {
         val query = """
             mutation UpdateChecklistTemplateItem(${'$'}templateId: ID!, ${'$'}sectionId: ID!, ${'$'}itemId: ID!, ${'$'}input: UpdateChecklistTemplateItemInput!) {
                 updateChecklistTemplateItem(templateId: ${'$'}templateId, sectionId: ${'$'}sectionId, itemId: ${'$'}itemId, input: ${'$'}input) {
@@ -426,7 +449,12 @@ class ChecklistRemoteDataSource(
                 }
             }
         """.trimIndent()
-        val variables = mapOf("templateId" to templateId, "sectionId" to sectionId, "itemId" to itemId, "input" to input)
+        val variables = mapOf(
+            "templateId" to templateId, 
+            "sectionId" to sectionId, 
+            "itemId" to itemId, 
+            "input" to input
+        )
         val request = GraphQlRequest(query = query, variables = variables)
         val response = api.postGraphQl(request)
         val data = response.body()?.data?.get("updateChecklistTemplateItem") ?: return null
@@ -447,7 +475,11 @@ class ChecklistRemoteDataSource(
     }
 
     // 25. Save Existing Checklist as Template
-    suspend fun saveChecklistAsTemplate(tripId: String, checklistId: String, input: SaveChecklistAsTemplateInput): ChecklistTemplateDto? {
+    suspend fun saveChecklistAsTemplate(
+        tripId: String, 
+        checklistId: String, 
+        input: SaveChecklistAsTemplateInput
+    ): ChecklistTemplateDto? {
         val query = """
             mutation SaveChecklistAsTemplate(${'$'}tripId: ID!, ${'$'}checklistId: ID!, ${'$'}input: SaveChecklistAsTemplateInput!) {
                 saveChecklistAsTemplate(tripId: ${'$'}tripId, checklistId: ${'$'}checklistId, input: ${'$'}input) {
@@ -470,7 +502,11 @@ class ChecklistRemoteDataSource(
     }
 
     // 26. Create Checklist From Template
-    suspend fun createChecklistFromTemplate(tripId: String, templateId: String, input: CreateChecklistFromTemplateInput? = null): ChecklistDto? {
+    suspend fun createChecklistFromTemplate(
+        tripId: String, 
+        templateId: String, 
+        input: CreateChecklistFromTemplateInput? = null
+    ): ChecklistDto? {
         val query = """
             mutation CreateChecklistFromTemplate(${'$'}tripId: ID!, ${'$'}templateId: ID!, ${'$'}input: CreateChecklistFromTemplateInput) {
                 createChecklistFromTemplate(tripId: ${'$'}tripId, templateId: ${'$'}templateId, input: ${'$'}input) {

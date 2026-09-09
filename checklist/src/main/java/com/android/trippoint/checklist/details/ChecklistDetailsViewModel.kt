@@ -21,33 +21,37 @@ class ChecklistDetailsViewModel(
             is ChecklistDetailsContract.Intent.SectionClicked -> {
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToSectionDetails(
                     uiState.value.tripId, 
-                    uiState.value.checklist?.id ?: "", 
+                    uiState.value.id, 
                     intent.id
                 ))
             }
+            is ChecklistDetailsContract.Intent.AddSection -> addSection(intent.name)
             ChecklistDetailsContract.Intent.AddSectionClicked -> {
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAddSection)
             }
             ChecklistDetailsContract.Intent.AddItemClicked -> {
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAddItem(
                     uiState.value.tripId,
-                    uiState.value.checklist?.id ?: ""
+                    uiState.value.id
                 ))
             }
             ChecklistDetailsContract.Intent.AiSuggestClicked -> {
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAiSuggest)
             }
             ChecklistDetailsContract.Intent.ProgressClicked -> {
-                uiState.value.checklist?.id?.let {
-                    sendEffect(ChecklistDetailsContract.Effect.NavigateToProgress(it))
-                }
+                val state = uiState.value
+                sendEffect(ChecklistDetailsContract.Effect.NavigateToProgress(state.tripId, state.id))
+            }
+            ChecklistDetailsContract.Intent.RetryClicked -> {
+                val state = uiState.value
+                loadChecklist(state.tripId, state.id)
             }
         }
     }
 
     private fun loadChecklist(tripId: String, id: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true, tripId = tripId) }
+            setState { copy(isLoading = true, tripId = tripId, id = id, error = null) }
             val result = repository.getChecklist(tripId, id)
             
             if (result.isSuccess) {
@@ -61,6 +65,25 @@ class ChecklistDetailsViewModel(
                 }
             } else {
                 setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
+            }
+        }
+    }
+
+    private fun addSection(name: String) {
+        viewModelScope.launch {
+            val state = uiState.value
+            
+            val result = repository.createSection(
+                tripId = state.tripId,
+                checklistId = state.id,
+                name = name,
+                position = state.sections.size
+            )
+            
+            if (result.isSuccess) {
+                loadChecklist(state.tripId, state.id)
+            } else {
+                setState { copy(error = result.exceptionOrNull()?.message) }
             }
         }
     }

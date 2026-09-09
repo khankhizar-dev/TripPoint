@@ -16,9 +16,6 @@ class ChecklistItemsViewModel(
     ChecklistItemsContract.State()
 ) {
     private var allItems = emptyList<ChecklistItem>()
-    private var tripId: String = ""
-    private var checklistId: String = ""
-    private var sectionId: String = ""
 
     override fun onIntent(intent: ChecklistItemsContract.Intent) {
         when (intent) {
@@ -31,20 +28,33 @@ class ChecklistItemsViewModel(
                 filterItems()
             }
             ChecklistItemsContract.Intent.AddItemClicked -> {
-                sendEffect(ChecklistItemsContract.Effect.NavigateToAddItem(tripId, checklistId, sectionId))
+                val state = uiState.value
+                val effect = ChecklistItemsContract.Effect.NavigateToAddItem(
+                    state.tripId, state.checklistId, state.sectionId
+                )
+                sendEffect(effect)
             }
             ChecklistItemsContract.Intent.BackClicked -> {
                 sendEffect(ChecklistItemsContract.Effect.NavigateBack)
+            }
+            ChecklistItemsContract.Intent.RetryClicked -> {
+                val state = uiState.value
+                loadSection(state.tripId, state.checklistId, state.sectionId)
             }
         }
     }
 
     private fun loadSection(tripId: String, checklistId: String, sectionId: String) {
-        this.tripId = tripId
-        this.checklistId = checklistId
-        this.sectionId = sectionId
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
+            setState { 
+                copy(
+                    isLoading = true, 
+                    tripId = tripId, 
+                    checklistId = checklistId, 
+                    sectionId = sectionId,
+                    error = null
+                ) 
+            }
             val result = repository.getChecklist(tripId, checklistId)
             
             if (result.isSuccess) {
@@ -70,14 +80,15 @@ class ChecklistItemsViewModel(
     }
 
     private fun toggleItem(itemId: String) {
+        val state = uiState.value
         val item = allItems.find { it.id == itemId } ?: return
         val newCompleted = !item.isCompleted
         
         viewModelScope.launch {
             val result = repository.updateItem(
-                tripId = tripId,
-                checklistId = checklistId,
-                sectionId = sectionId,
+                tripId = state.tripId,
+                checklistId = state.checklistId,
+                sectionId = state.sectionId,
                 itemId = itemId,
                 isCompleted = newCompleted
             )

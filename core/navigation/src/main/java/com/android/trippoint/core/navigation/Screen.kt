@@ -237,7 +237,9 @@ sealed class Screen(val route: String) {
     object ChecklistProgress : Screen("checklist_progress/{tripId}/{checklistId}") {
         fun createRoute(tripId: String, checklistId: String) = "checklist_progress/$tripId/$checklistId"
     }
-    object ChecklistTemplates : Screen("checklist_templates")
+    object ChecklistTemplates : Screen("checklist_templates/{tripId}") {
+        fun createRoute(tripId: String) = "checklist_templates/$tripId"
+    }
     object ChecklistAiSuggest : Screen("checklist_ai_suggest/{tripId}") {
         fun createRoute(tripId: String) = "checklist_ai_suggest/$tripId"
     }

@@ -106,7 +106,7 @@ fun AddChecklistItemScreen(
                 value = uiState.category.name,
                 onValueChange = { onIntent(AddChecklistItemContract.Intent.CategoryChanged(it)) },
                 label = stringResource(id = designR.string.checklist_item_category_label),
-                options = ChecklistItemCategory.values().map { it.name }
+                options = ChecklistItemCategory.entries.map { it.name }
             )
 
             Spacer(modifier = Modifier.height(24.dp))

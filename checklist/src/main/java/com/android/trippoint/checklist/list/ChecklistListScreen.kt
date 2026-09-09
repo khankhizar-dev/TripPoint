@@ -124,7 +124,7 @@ private fun ChecklistStates(
         uiState.error != null -> {
             ErrorView(
                 title = stringResource(id = designR.string.checklist_error_title),
-                description = uiState.error!!,
+                description = uiState.error,
                 icon = Icons.Default.Error,
                 actionText = stringResource(id = designR.string.core_designsystem_retry),
                 onActionClick = { onIntent(ChecklistListContract.Intent.LoadChecklists(uiState.tripId)) }

@@ -1522,7 +1522,7 @@ private fun NavGraphBuilder.checklistNavGraph(
     addChecklistItemsDestination(navController, checklistRepository)
     addAddChecklistItemDestination(navController, checklistRepository)
     addChecklistProgressDestination(navController, checklistRepository)
-    addChecklistTemplatesDestination(navController)
+    addChecklistTemplatesDestination(navController, checklistRepository)
     addAiSuggestDestination(navController)
 }
 
@@ -1557,7 +1557,7 @@ private fun NavGraphBuilder.addChecklistListDestination(
                 val route = Screen.ChecklistDetails.createRoute(id) + "?tripId=$tId"
                 navController.navigate(route) 
             },
-            onNavigateToCreate = { navController.navigate(Screen.ChecklistTemplates.route) }
+            onNavigateToCreate = { tId -> navController.navigate(Screen.ChecklistTemplates.createRoute(tId)) }
         )
     }
 }
@@ -1597,8 +1597,9 @@ private fun NavGraphBuilder.addChecklistDetailsDestination(
             },
             onNavigateToAddSection = { /* TODO */ },
             onNavigateToAddItem = { tId, cId -> 
-                val route = Screen.AddChecklistItem.createRoute(cId, "s1") + "?tripId=$tId"
-                navController.navigate(route)
+                // Navigation logic will be handled inside the screen or we can default to a specific flow
+                // For now, we go to the first section or show a picker in a real app.
+                // Let's assume the screen itself will trigger NavigateToAddItem with a valid sectionId from its effect.
             },
             onNavigateToAiSuggest = { 
                 navController.navigate(Screen.ChecklistAiSuggest.createRoute(tripId)) 
@@ -1712,14 +1713,34 @@ private fun NavGraphBuilder.addChecklistProgressDestination(
     }
 }
 
-private fun NavGraphBuilder.addChecklistTemplatesDestination(navController: NavHostController) {
-    composable(Screen.ChecklistTemplates.route) {
-        val viewModel: ChecklistTemplatesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+private fun NavGraphBuilder.addChecklistTemplatesDestination(
+    navController: NavHostController,
+    checklistRepository: ChecklistRepository
+) {
+    composable(
+        route = Screen.ChecklistTemplates.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: ChecklistTemplatesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ChecklistTemplatesViewModel(checklistRepository) as T
+                }
+            }
+        )
         ChecklistTemplatesRoute(
+            tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToCreate = { templateId ->
-                navController.navigate(Screen.ChecklistDetails.createRoute("new_$templateId"))
+            onNavigateToDetails = { tId, id -> 
+                val route = Screen.ChecklistDetails.createRoute(id) + "?tripId=$tId"
+                navController.navigate(route) {
+                    popUpTo(Screen.ChecklistTemplates.route) { inclusive = true }
+                }
             }
         )
     }

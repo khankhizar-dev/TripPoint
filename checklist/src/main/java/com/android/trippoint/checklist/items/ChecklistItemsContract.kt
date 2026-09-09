@@ -13,9 +13,13 @@ class ChecklistItemsContract {
         data class SearchQueryChanged(val query: String) : Intent()
         object AddItemClicked : Intent()
         object BackClicked : Intent()
+        object RetryClicked : Intent()
     }
 
     data class State(
+        val tripId: String = "",
+        val checklistId: String = "",
+        val sectionId: String = "",
         val section: ChecklistSection? = null,
         val items: List<ChecklistItem> = emptyList(),
         val filteredItems: List<ChecklistItem> = emptyList(),
