@@ -66,6 +66,8 @@ import com.android.trippoint.budget.trends.SpendingTrendsRoute
 import com.android.trippoint.budget.trends.SpendingTrendsViewModel
 import com.android.trippoint.checklist.add_item.AddChecklistItemRoute
 import com.android.trippoint.checklist.add_item.AddChecklistItemViewModel
+import com.android.trippoint.checklist.ai_suggest.AiSuggestRoute
+import com.android.trippoint.checklist.ai_suggest.AiSuggestViewModel
 import com.android.trippoint.checklist.details.ChecklistDetailsRoute
 import com.android.trippoint.checklist.details.ChecklistDetailsViewModel
 import com.android.trippoint.checklist.items.ChecklistItemsRoute
@@ -1558,7 +1560,9 @@ private fun NavGraphBuilder.addChecklistDetailsDestination(navController: NavHos
             onNavigateToAddItem = { 
                 navController.navigate(Screen.AddChecklistItem.createRoute(checklistId, "s1"))
             },
-            onNavigateToAiSuggest = { /* TODO */ }
+            onNavigateToAiSuggest = { 
+                navController.navigate(Screen.ChecklistAiSuggest.createRoute("t1")) 
+            }
         )
     }
 }
@@ -1633,6 +1637,20 @@ private fun NavGraphBuilder.addChecklistTemplatesDestination(navController: NavH
             onNavigateToCreate = { templateId ->
                 navController.navigate(Screen.ChecklistDetails.createRoute("new_$templateId"))
             }
+        )
+    }
+    composable(
+        route = Screen.ChecklistAiSuggest.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: AiSuggestViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        AiSuggestRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
         )
     }
 }

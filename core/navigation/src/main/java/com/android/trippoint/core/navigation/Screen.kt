@@ -238,4 +238,7 @@ sealed class Screen(val route: String) {
         fun createRoute(checklistId: String) = "checklist_progress/$checklistId"
     }
     object ChecklistTemplates : Screen("checklist_templates")
+    object ChecklistAiSuggest : Screen("checklist_ai_suggest/{tripId}") {
+        fun createRoute(tripId: String) = "checklist_ai_suggest/$tripId"
+    }
 }

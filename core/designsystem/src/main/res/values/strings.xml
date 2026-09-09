@@ -322,6 +322,11 @@
     <string name="checklist_template_adventure">Adventure Trip</string>
     <string name="checklist_template_beach">Beach Holiday</string>
     <string name="checklist_template_items_count">%1$d Items</string>
+    <string name="checklist_ai_suggest_title">AI Packing Assistant</string>
+    <string name="checklist_ai_suggest_subtitle">Based on your trip to %1$s in %2$s</string>
+    <string name="checklist_ai_suggest_intro">We suggest you add:</string>
+    <string name="checklist_ai_add_all">Add All Items</string>
+    <string name="checklist_ai_regenerate">Regenerate</string>
 
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>
