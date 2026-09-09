@@ -74,6 +74,7 @@ fun TripOverviewRoute(
     onNavigateBack: () -> Unit,
     onNavigateToTimeline: (String) -> Unit,
     onNavigateToBookings: (String) -> Unit,
+    onNavigateToChecklists: (String) -> Unit,
     onNavigateToAddTask: (String) -> Unit,
     onNavigateToAddNote: (String) -> Unit,
     onNavigateToAddBooking: (String) -> Unit,
@@ -98,6 +99,7 @@ fun TripOverviewRoute(
                 TripOverviewContract.Effect.NavigateBack -> onNavigateBack()
                 is TripOverviewContract.Effect.NavigateToTimeline -> onNavigateToTimeline(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToBookings -> onNavigateToBookings(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToChecklists -> onNavigateToChecklists(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)

@@ -45,6 +45,7 @@ dependencies {
     implementation(project(":booking"))
     implementation(project(":budget"))
     implementation(project(":documents"))
+    implementation(project(":checklist"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
