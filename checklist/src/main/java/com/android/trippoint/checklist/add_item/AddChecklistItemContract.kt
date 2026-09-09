@@ -1,12 +1,13 @@
 package com.android.trippoint.checklist.add_item
 
+import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState
 
 class AddChecklistItemContract {
     sealed class Intent : UiIntent {
-        data class LoadIds(val checklistId: String, val sectionId: String) : Intent()
+        data class LoadIds(val tripId: String, val checklistId: String, val sectionId: String) : Intent()
         data class NameChanged(val value: String) : Intent()
         data class CategoryChanged(val value: String) : Intent()
         data class NotesChanged(val value: String) : Intent()
@@ -18,10 +19,11 @@ class AddChecklistItemContract {
     }
 
     data class State(
+        val tripId: String = "",
         val checklistId: String = "",
         val sectionId: String = "",
         val name: String = "",
-        val category: String = "Others",
+        val category: ChecklistItemCategory = ChecklistItemCategory.OTHER,
         val notes: String = "",
         val isEssential: Boolean = false,
         val remindMe: Boolean = false,

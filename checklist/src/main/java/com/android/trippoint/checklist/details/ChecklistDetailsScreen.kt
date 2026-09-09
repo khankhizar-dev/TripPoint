@@ -13,14 +13,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -37,6 +41,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,26 +54,31 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.checklist.domain.model.ChecklistSection
+import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointCircularProgress
+import com.android.trippoint.core.designsystem.components.TripPointEmptyState
+import com.android.trippoint.core.designsystem.components.TripPointTextField
 import com.android.trippoint.core.designsystem.R as designR
 
+@Suppress("LongParameterList")
 @Composable
 fun ChecklistDetailsRoute(
+    tripId: String,
     id: String,
     viewModel: ChecklistDetailsViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToSection: (String) -> Unit,
-    onNavigateToProgress: (String) -> Unit,
+    onNavigateToSection: (String, String, String) -> Unit,
+    onNavigateToProgress: (String, String) -> Unit,
     onNavigateToAddSection: () -> Unit,
-    onNavigateToAddItem: () -> Unit,
+    onNavigateToAddItem: (String, String, String) -> Unit,
     onNavigateToAiSuggest: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(id) {
-        viewModel.onIntent(ChecklistDetailsContract.Intent.LoadChecklist(id))
+    LaunchedEffect(tripId, id) {
+        viewModel.onIntent(ChecklistDetailsContract.Intent.LoadChecklist(tripId, id))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -74,13 +86,15 @@ fun ChecklistDetailsRoute(
             when (effect) {
                 ChecklistDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 is ChecklistDetailsContract.Effect.NavigateToSectionDetails -> {
-                    onNavigateToSection(effect.id)
+                    onNavigateToSection(effect.tripId, effect.checklistId, effect.id)
                 }
                 is ChecklistDetailsContract.Effect.NavigateToProgress -> {
-                    onNavigateToProgress(effect.checklistId)
+                    onNavigateToProgress(effect.tripId, effect.checklistId)
                 }
                 ChecklistDetailsContract.Effect.NavigateToAddSection -> onNavigateToAddSection()
-                ChecklistDetailsContract.Effect.NavigateToAddItem -> onNavigateToAddItem()
+                is ChecklistDetailsContract.Effect.NavigateToAddItem -> {
+                    onNavigateToAddItem(effect.tripId, effect.checklistId, effect.sectionId)
+                }
                 ChecklistDetailsContract.Effect.NavigateToAiSuggest -> onNavigateToAiSuggest()
             }
         }
@@ -100,6 +114,7 @@ fun ChecklistDetailsScreen(
 ) {
     val checklist = uiState.checklist
     val isCompleted = checklist?.progress == 1f && uiState.sections.isNotEmpty()
+    var showAddSectionDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -134,7 +149,7 @@ fun ChecklistDetailsScreen(
             )
         },
         floatingActionButton = {
-            if (!isCompleted && !uiState.isLoading) {
+            if (!isCompleted && !uiState.isLoading && uiState.sections.isNotEmpty()) {
                 FloatingActionButton(
                     onClick = { onIntent(ChecklistDetailsContract.Intent.AddItemClicked) },
                     containerColor = MaterialTheme.colorScheme.primary,
@@ -154,6 +169,15 @@ fun ChecklistDetailsScreen(
                     LoadingIndicator()
                 }
             }
+            uiState.error != null -> {
+                ErrorView(
+                    title = stringResource(id = designR.string.checklist_error_title),
+                    description = uiState.error,
+                    icon = Icons.Default.Error,
+                    actionText = stringResource(id = designR.string.core_designsystem_retry),
+                    onActionClick = { onIntent(ChecklistDetailsContract.Intent.RetryClicked) }
+                )
+            }
             isCompleted -> {
                 ChecklistCompletedState(
                     onViewSummary = { onIntent(ChecklistDetailsContract.Intent.ProgressClicked) },
@@ -161,10 +185,52 @@ fun ChecklistDetailsScreen(
                 )
             }
             else -> {
-                ChecklistDetailsContent(uiState, onIntent, innerPadding)
+                ChecklistDetailsContent(uiState, onIntent, innerPadding) {
+                    showAddSectionDialog = true
+                }
             }
         }
+
+        if (showAddSectionDialog) {
+            AddSectionDialog(
+                onDismiss = { showAddSectionDialog = false },
+                onConfirm = { name ->
+                    onIntent(ChecklistDetailsContract.Intent.AddSection(name))
+                    showAddSectionDialog = false
+                }
+            )
+        }
     }
+}
+
+@Composable
+private fun AddSectionDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var name by remember { mutableStateOf("") }
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Add New Section") },
+        text = {
+            TripPointTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = "Section Name",
+                placeholder = "e.g. Toiletries"
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = { if (name.isNotBlank()) onConfirm(name) }) {
+                Text(text = "Add")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(text = "Cancel")
+            }
+        }
+    )
 }
 
 @Composable
@@ -185,7 +251,8 @@ private fun ChecklistCompletedState(onViewSummary: () -> Unit, modifier: Modifie
 private fun ChecklistDetailsContent(
     uiState: ChecklistDetailsContract.State,
     onIntent: (ChecklistDetailsContract.Intent) -> Unit,
-    innerPadding: PaddingValues
+    innerPadding: PaddingValues,
+    onAddSectionClick: () -> Unit
 ) {
     val checklist = uiState.checklist ?: return
     
@@ -201,23 +268,42 @@ private fun ChecklistDetailsContent(
             Spacer(modifier = Modifier.height(24.dp))
         }
         
-        items(uiState.sections) { section ->
-            ChecklistSectionItem(section) {
-                onIntent(ChecklistDetailsContract.Intent.SectionClicked(section.id))
+        if (uiState.sections.isEmpty()) {
+            item {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 48.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TripPointEmptyState(
+                        title = "No sections yet",
+                        subtitle = "Add your first section to start adding items.",
+                        imageResId = designR.drawable.illustration_empty_trip,
+                        actionText = "Add Section",
+                        onActionClick = onAddSectionClick
+                    )
+                }
             }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-        
-        item {
-            TextButton(
-                onClick = { onIntent(ChecklistDetailsContract.Intent.AddSectionClicked) },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            ) {
-                Icon(Icons.Default.Add, contentDescription = null)
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(text = stringResource(id = designR.string.checklist_add_section))
+        } else {
+            items(uiState.sections) { section ->
+                ChecklistSectionItem(section) {
+                    onIntent(ChecklistDetailsContract.Intent.SectionClicked(section.id))
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+            
+            item {
+                TextButton(
+                    onClick = onAddSectionClick,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = null)
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(text = stringResource(id = designR.string.checklist_add_section))
+                }
             }
         }
     }
@@ -313,11 +399,24 @@ private fun ChecklistSectionItem(
                 )
             }
             
-            TripPointCircularProgress(
-                progress = if (section.totalItems > 0) section.completedItems.toFloat() / section.totalItems else 0f,
-                showPercentage = false,
-                modifier = Modifier.size(40.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val progress = if (section.totalItems > 0) {
+                    section.completedItems.toFloat() / section.totalItems 
+                } else 0f
+                TripPointCircularProgress(
+                    progress = progress,
+                    showPercentage = false,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
 }

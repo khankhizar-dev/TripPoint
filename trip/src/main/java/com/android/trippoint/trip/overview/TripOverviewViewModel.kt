@@ -37,7 +37,7 @@ class TripOverviewViewModel(
             }
             TripOverviewContract.Intent.AddTaskClicked -> {
                 uiState.value.trip?.id?.let {
-                    sendEffect(TripOverviewContract.Effect.NavigateToChecklists(it))
+                    sendEffect(TripOverviewContract.Effect.NavigateToAddTask(it))
                 }
             }
             TripOverviewContract.Intent.AddExpenseClicked -> {

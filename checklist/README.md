@@ -20,6 +20,16 @@ This module follows the **MVI (Model-View-Intent)** pattern and is built with **
 - **Domain Layer**: Pure Kotlin models and repository interfaces.
 - **Data Layer**: Repository implementations fetching data from GraphQL and local sources.
 
+## 🎨 States & Variants (Section 06)
+
+The module implements high-fidelity state handling to ensure a smooth user experience:
+
+- **Empty State**: Branded view shown when no checklists exist, guiding users to create their first one.
+- **Loading State**: Shimmer-ready loading indicators for data fetching.
+- **Completed State**: Full-screen celebration view triggered when a checklist reaches 100% completion.
+- **Offline State**: Informative view informing users that changes will sync once they're back online.
+- **Error State**: Graceful error handling with retry capabilities for network or processing failures.
+
 ## 🎨 UI & Design
 
 - **Design System**: Leverages premium components from `:core:designsystem` like `TripPointCircularProgress` and `TripPointInteractiveCard`.

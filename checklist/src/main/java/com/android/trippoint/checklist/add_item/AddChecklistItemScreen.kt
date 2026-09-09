@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
 import com.android.trippoint.core.designsystem.components.AlertVariant
 import com.android.trippoint.core.designsystem.components.TripPointAlert
 import com.android.trippoint.core.designsystem.components.TripPointButton
@@ -36,6 +37,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AddChecklistItemRoute(
+    tripId: String,
     checklistId: String,
     sectionId: String,
     viewModel: AddChecklistItemViewModel,
@@ -43,8 +45,8 @@ fun AddChecklistItemRoute(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(checklistId, sectionId) {
-        viewModel.onIntent(AddChecklistItemContract.Intent.LoadIds(checklistId, sectionId))
+    LaunchedEffect(tripId, checklistId, sectionId) {
+        viewModel.onIntent(AddChecklistItemContract.Intent.LoadIds(tripId, checklistId, sectionId))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -101,10 +103,10 @@ fun AddChecklistItemScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             TripPointDropdown(
-                value = uiState.category,
+                value = uiState.category.name,
                 onValueChange = { onIntent(AddChecklistItemContract.Intent.CategoryChanged(it)) },
                 label = stringResource(id = designR.string.checklist_item_category_label),
-                options = listOf("Clothing", "Electronics", "Essentials", "Documents", "Others")
+                options = ChecklistItemCategory.entries.map { it.name }
             )
 
             Spacer(modifier = Modifier.height(24.dp))

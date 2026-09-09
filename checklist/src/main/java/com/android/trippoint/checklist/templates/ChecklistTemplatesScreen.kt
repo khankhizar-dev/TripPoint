@@ -13,6 +13,8 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
+import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import com.android.trippoint.core.designsystem.R as designR
@@ -37,23 +40,25 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChecklistTemplatesRoute(
+    tripId: String,
     viewModel: ChecklistTemplatesViewModel,
     onNavigateBack: () -> Unit,
-    onNavigateToCreate: (String) -> Unit
+    onNavigateToDetails: (String, String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.onIntent(ChecklistTemplatesContract.Intent.LoadTemplates)
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(ChecklistTemplatesContract.Intent.LoadTemplates(tripId))
     }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->
             when (effect) {
                 ChecklistTemplatesContract.Effect.NavigateBack -> onNavigateBack()
-                is ChecklistTemplatesContract.Effect.NavigateToCreate -> {
-                    onNavigateToCreate(effect.templateId)
+                is ChecklistTemplatesContract.Effect.NavigateToDetails -> {
+                    onNavigateToDetails(effect.tripId, effect.checklistId)
                 }
+                is ChecklistTemplatesContract.Effect.ShowError -> { /* Handle */ }
             }
         }
     }
@@ -77,23 +82,35 @@ fun ChecklistTemplatesScreen(
             )
         }
     ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingIndicator()
+        when {
+            uiState.isLoading || uiState.isCreating -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LoadingIndicator()
+                }
             }
-        } else {
-            LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding),
-                contentPadding = PaddingValues(24.dp),
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                items(uiState.templates) { template ->
-                    TemplateCard(template) {
-                        onIntent(ChecklistTemplatesContract.Intent.TemplateClicked(template.id))
+            uiState.error != null -> {
+                ErrorView(
+                    title = stringResource(id = designR.string.checklist_error_title),
+                    description = uiState.error,
+                    icon = Icons.Default.Error,
+                    actionText = stringResource(id = designR.string.core_designsystem_retry),
+                    onActionClick = { onIntent(ChecklistTemplatesContract.Intent.LoadTemplates(uiState.tripId)) }
+                )
+            }
+            else -> {
+                LazyVerticalGrid(
+                    columns = GridCells.Fixed(2),
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding),
+                    contentPadding = PaddingValues(24.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    items(uiState.templates) { template ->
+                        TemplateCard(template) {
+                            onIntent(ChecklistTemplatesContract.Intent.TemplateClicked(template.id, template.title))
+                        }
                     }
                 }
             }
@@ -135,7 +152,7 @@ private fun TemplateCard(
                     .padding(16.dp)
             ) {
                 Text(
-                    text = stringResource(id = template.titleResId),
+                    text = template.title,
                     style = MaterialTheme.typography.titleMedium,
                     color = Color.White,
                     fontWeight = FontWeight.Bold
