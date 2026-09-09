@@ -23,7 +23,7 @@ class TripOverviewViewModel(
                 when (intent.tabIndex) {
                     1 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
                     2 -> sendEffect(TripOverviewContract.Effect.NavigateToBookings(tripId))
-                    3 -> sendEffect(TripOverviewContract.Effect.NavigateToTimeline(tripId))
+                    3 -> sendEffect(TripOverviewContract.Effect.NavigateToChecklists(tripId))
                     4 -> sendEffect(TripOverviewContract.Effect.NavigateToBudgets(tripId))
                 }
             }
@@ -37,7 +37,7 @@ class TripOverviewViewModel(
             }
             TripOverviewContract.Intent.AddTaskClicked -> {
                 uiState.value.trip?.id?.let {
-                    sendEffect(TripOverviewContract.Effect.NavigateToAddTask(it))
+                    sendEffect(TripOverviewContract.Effect.NavigateToChecklists(it))
                 }
             }
             TripOverviewContract.Intent.AddExpenseClicked -> {

@@ -283,6 +283,22 @@
     <string name="documents_error_title_file_required">Title and file are required</string>
     <string name="error_camera_permission_denied">Camera permission is required to take photos. Please enable it in settings.</string>
 
+    <!-- Checklist -->
+    <string name="checklist_list_title">My Checklists</string>
+    <string name="checklist_tab_all">All</string>
+    <string name="checklist_tab_active">Active</string>
+    <string name="checklist_tab_completed">Completed</string>
+    <string name="checklist_search_placeholder">Search checklists</string>
+    <string name="checklist_new_button">New Checklist</string>
+    <string name="checklist_details_title_default">Checklist</string>
+    <string name="checklist_add_section">Add Section</string>
+    <string name="checklist_add_item">Add Item</string>
+    <string name="checklist_ai_suggest">AI Suggest</string>
+    <string name="checklist_section_pre_trip">Pre-trip Checklist</string>
+    <string name="checklist_section_packing">Packing List</string>
+    <string name="checklist_section_visa">Visa &amp; Documents</string>
+    <string name="checklist_section_on_trip">On-Trip Tasks</string>
+
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>
     <string name="error_invalid_amount">Enter a valid amount</string>

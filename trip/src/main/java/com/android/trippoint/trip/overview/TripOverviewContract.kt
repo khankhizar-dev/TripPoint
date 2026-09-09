@@ -32,6 +32,7 @@ class TripOverviewContract {
         object NavigateBack : Effect()
         data class NavigateToTimeline(val tripId: String) : Effect()
         data class NavigateToBookings(val tripId: String) : Effect()
+        data class NavigateToChecklists(val tripId: String) : Effect()
         data class NavigateToAddTask(val tripId: String) : Effect()
         data class NavigateToAddNote(val tripId: String) : Effect()
         data class NavigateToAddBooking(val tripId: String) : Effect()

@@ -218,4 +218,10 @@ sealed class Screen(val route: String) {
             "document_search"
         }
     }
+    object Checklists : Screen("checklists?tripId={tripId}") {
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "checklists?tripId=$tripId" else "checklists"
+    }
+    object ChecklistDetails : Screen("checklist_details/{checklistId}") {
+        fun createRoute(id: String) = "checklist_details/$id"
+    }
 }

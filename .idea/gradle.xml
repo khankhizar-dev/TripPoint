@@ -13,6 +13,7 @@
             <option value="$PROJECT_DIR$/authentication" />
             <option value="$PROJECT_DIR$/booking" />
             <option value="$PROJECT_DIR$/budget" />
+            <option value="$PROJECT_DIR$/checklist" />
             <option value="$PROJECT_DIR$/core" />
             <option value="$PROJECT_DIR$/core/common" />
             <option value="$PROJECT_DIR$/core/database" />

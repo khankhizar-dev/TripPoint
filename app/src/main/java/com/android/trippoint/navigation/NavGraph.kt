@@ -64,6 +64,10 @@ import com.android.trippoint.budget.settlement.SettlementRoute
 import com.android.trippoint.budget.settlement.SettlementViewModel
 import com.android.trippoint.budget.trends.SpendingTrendsRoute
 import com.android.trippoint.budget.trends.SpendingTrendsViewModel
+import com.android.trippoint.checklist.details.ChecklistDetailsRoute
+import com.android.trippoint.checklist.details.ChecklistDetailsViewModel
+import com.android.trippoint.checklist.list.ChecklistListRoute
+import com.android.trippoint.checklist.list.ChecklistListViewModel
 import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.navigation.Screen
 import com.android.trippoint.documents.add.AddDocumentRoute
@@ -144,6 +148,7 @@ fun AppNavGraph(
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
         documentsNavGraph(navController, documentRepository)
+        checklistNavGraph(navController)
     }
 }
 
@@ -393,6 +398,7 @@ private fun NavGraphBuilder.tripNavGraph(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToTimeline = { id -> navController.navigate(Screen.TripDays.createRoute(id)) },
             onNavigateToBookings = { id -> navController.navigate(Screen.Bookings.createRoute(id)) },
+            onNavigateToChecklists = { id -> navController.navigate(Screen.Checklists.createRoute(id)) },
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
             onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
@@ -1493,6 +1499,45 @@ private fun NavGraphBuilder.addAddDocumentDestination(
             tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
+        )
+    }
+}
+
+private fun NavGraphBuilder.checklistNavGraph(navController: NavHostController) {
+    composable(
+        route = Screen.Checklists.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") {
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val viewModel: ChecklistListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ChecklistListRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetails = { id -> navController.navigate(Screen.ChecklistDetails.createRoute(id)) },
+            onNavigateToCreate = { /* TODO */ }
+        )
+    }
+    composable(
+        route = Screen.ChecklistDetails.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("checklistId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val checklistId = backStackEntry.arguments?.getString("checklistId") ?: ""
+        val viewModel: ChecklistDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ChecklistDetailsRoute(
+            id = checklistId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToSection = { /* TODO */ },
+            onNavigateToAddSection = { /* TODO */ },
+            onNavigateToAddItem = { /* TODO */ },
+            onNavigateToAiSuggest = { /* TODO */ }
         )
     }
 }
