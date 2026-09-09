@@ -224,4 +224,10 @@ sealed class Screen(val route: String) {
     object ChecklistDetails : Screen("checklist_details/{checklistId}") {
         fun createRoute(id: String) = "checklist_details/$id"
     }
+    object ChecklistItems : Screen("checklist_items/{checklistId}/{sectionId}") {
+        fun createRoute(checklistId: String, sectionId: String) = "checklist_items/$checklistId/$sectionId"
+    }
+    object AddChecklistItem : Screen("add_checklist_item/{checklistId}/{sectionId}") {
+        fun createRoute(checklistId: String, sectionId: String) = "add_checklist_item/$checklistId/$sectionId"
+    }
 }

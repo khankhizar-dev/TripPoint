@@ -14,9 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Add
@@ -51,7 +49,6 @@ import com.android.trippoint.checklist.domain.model.ChecklistSection
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointCircularProgress
 import com.android.trippoint.core.designsystem.R as designR
-import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun ChecklistDetailsRoute(
@@ -99,7 +96,9 @@ fun ChecklistDetailsScreen(
         topBar = {
             TopAppBar(
                 title = { 
-                    Text(text = uiState.checklist?.title ?: stringResource(id = designR.string.checklist_details_title_default)) 
+                    val title = uiState.checklist?.title 
+                        ?: stringResource(id = designR.string.checklist_details_title_default)
+                    Text(text = title) 
                 },
                 navigationIcon = {
                     IconButton(onClick = { onIntent(ChecklistDetailsContract.Intent.BackClicked) }) {

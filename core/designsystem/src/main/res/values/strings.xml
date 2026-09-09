@@ -298,6 +298,20 @@
     <string name="checklist_section_packing">Packing List</string>
     <string name="checklist_section_visa">Visa &amp; Documents</string>
     <string name="checklist_section_on_trip">On-Trip Tasks</string>
+    <string name="checklist_items_checked_count">%1$d/%2$d items</string>
+    <string name="checklist_add_item_title">Add New Item</string>
+    <string name="checklist_item_name_label">Item Name</string>
+    <string name="checklist_item_name_placeholder">e.g. Travel Adapter</string>
+    <string name="checklist_item_category_label">Category</string>
+    <string name="checklist_item_notes_label">Notes (Optional)</string>
+    <string name="checklist_item_notes_placeholder">Universal adapter for Thailand sockets.</string>
+    <string name="checklist_item_essential_label">Essential</string>
+    <string name="checklist_item_remind_me_label">Remind Me</string>
+    <string name="checklist_item_save_button">Save Item</string>
+    <string name="checklist_category_clothing">Clothing</string>
+    <string name="checklist_category_electronics">Electronics</string>
+    <string name="checklist_category_essentials">Essentials</string>
+    <string name="checklist_category_documents">Documents</string>
 
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>

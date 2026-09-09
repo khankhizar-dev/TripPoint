@@ -64,8 +64,12 @@ import com.android.trippoint.budget.settlement.SettlementRoute
 import com.android.trippoint.budget.settlement.SettlementViewModel
 import com.android.trippoint.budget.trends.SpendingTrendsRoute
 import com.android.trippoint.budget.trends.SpendingTrendsViewModel
+import com.android.trippoint.checklist.add_item.AddChecklistItemRoute
+import com.android.trippoint.checklist.add_item.AddChecklistItemViewModel
 import com.android.trippoint.checklist.details.ChecklistDetailsRoute
 import com.android.trippoint.checklist.details.ChecklistDetailsViewModel
+import com.android.trippoint.checklist.items.ChecklistItemsRoute
+import com.android.trippoint.checklist.items.ChecklistItemsViewModel
 import com.android.trippoint.checklist.list.ChecklistListRoute
 import com.android.trippoint.checklist.list.ChecklistListViewModel
 import com.android.trippoint.core.database.preferences.PreferencesManager
@@ -1514,6 +1518,7 @@ private fun NavGraphBuilder.checklistNavGraph(navController: NavHostController) 
             }
         )
     ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: ChecklistListViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         ChecklistListRoute(
             viewModel = viewModel,
@@ -1534,10 +1539,52 @@ private fun NavGraphBuilder.checklistNavGraph(navController: NavHostController) 
             id = checklistId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToSection = { /* TODO */ },
+            onNavigateToSection = { sectionId -> 
+                navController.navigate(Screen.ChecklistItems.createRoute(checklistId, sectionId)) 
+            },
             onNavigateToAddSection = { /* TODO */ },
-            onNavigateToAddItem = { /* TODO */ },
+            onNavigateToAddItem = { 
+                // Navigate to add with a default section (e.g., s1) or logic to pick one
+                navController.navigate(Screen.AddChecklistItem.createRoute(checklistId, "s1"))
+            },
             onNavigateToAiSuggest = { /* TODO */ }
+        )
+    }
+    composable(
+        route = Screen.ChecklistItems.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("checklistId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("sectionId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val checklistId = backStackEntry.arguments?.getString("checklistId") ?: ""
+        val sectionId = backStackEntry.arguments?.getString("sectionId") ?: ""
+        val viewModel: ChecklistItemsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        ChecklistItemsRoute(
+            checklistId = checklistId,
+            sectionId = sectionId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToAddItem = { cId, sId -> 
+                navController.navigate(Screen.AddChecklistItem.createRoute(cId, sId)) 
+            }
+        )
+    }
+    composable(
+        route = Screen.AddChecklistItem.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("checklistId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("sectionId") { type = androidx.navigation.NavType.StringType }
+        )
+    ) { backStackEntry ->
+        val checklistId = backStackEntry.arguments?.getString("checklistId") ?: ""
+        val sectionId = backStackEntry.arguments?.getString("sectionId") ?: ""
+        val viewModel: AddChecklistItemViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+        AddChecklistItemRoute(
+            checklistId = checklistId,
+            sectionId = sectionId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
         )
     }
 }
