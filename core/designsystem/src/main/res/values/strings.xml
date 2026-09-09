@@ -298,6 +298,15 @@
     <string name="checklist_section_packing">Packing List</string>
     <string name="checklist_section_visa">Visa &amp; Documents</string>
     <string name="checklist_section_on_trip">On-Trip Tasks</string>
+    <string name="checklist_empty_title">No checklists yet</string>
+    <string name="checklist_empty_desc">Create your first checklist to get started.</string>
+    <string name="checklist_completed_title">All items completed!</string>
+    <string name="checklist_completed_desc">Great job, you\'re all set.</string>
+    <string name="checklist_view_summary">View Summary</string>
+    <string name="checklist_offline_title">You\'re offline</string>
+    <string name="checklist_offline_desc">Changes will sync when you\'re back.</string>
+    <string name="checklist_error_title">Something went wrong</string>
+    <string name="checklist_error_desc">Please try again.</string>
     <string name="checklist_items_checked_count">%1$d/%2$d items</string>
     <string name="checklist_add_item_title">Add New Item</string>
     <string name="checklist_item_name_label">Item Name</string>

@@ -78,6 +78,7 @@ import com.android.trippoint.checklist.progress.ChecklistProgressRoute
 import com.android.trippoint.checklist.progress.ChecklistProgressViewModel
 import com.android.trippoint.checklist.templates.ChecklistTemplatesRoute
 import com.android.trippoint.checklist.templates.ChecklistTemplatesViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.navigation.Screen
 import com.android.trippoint.documents.add.AddDocumentRoute
 import com.android.trippoint.documents.add.AddDocumentViewModel
@@ -143,6 +144,7 @@ fun AppNavGraph(
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
     getTripOverviewUseCase: GetTripOverviewUseCase,
+    preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -151,7 +153,7 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         authNavGraph(navController)
-        tripNavGraph(navController, tripRepository, getTripOverviewUseCase)
+        tripNavGraph(navController, tripRepository, getTripOverviewUseCase, preferencesManager)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
@@ -362,7 +364,8 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
 private fun NavGraphBuilder.tripNavGraph(
     navController: NavHostController, 
     tripRepository: TripRepository,
-    getTripOverviewUseCase: GetTripOverviewUseCase
+    getTripOverviewUseCase: GetTripOverviewUseCase,
+    preferencesManager: PreferencesManager
 ) {
     composable(Screen.Home.route) {
         HomeRoute(
@@ -1514,6 +1517,7 @@ private fun NavGraphBuilder.checklistNavGraph(navController: NavHostController) 
     addAddChecklistItemDestination(navController)
     addChecklistProgressDestination(navController)
     addChecklistTemplatesDestination(navController)
+    addAiSuggestDestination(navController)
 }
 
 private fun NavGraphBuilder.addChecklistListDestination(navController: NavHostController) {
@@ -1639,6 +1643,9 @@ private fun NavGraphBuilder.addChecklistTemplatesDestination(navController: NavH
             }
         )
     }
+}
+
+private fun NavGraphBuilder.addAiSuggestDestination(navController: NavHostController) {
     composable(
         route = Screen.ChecklistAiSuggest.route,
         arguments = listOf(

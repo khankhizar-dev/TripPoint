@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -27,8 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.checklist.domain.model.Checklist
+import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointBudgetCard
+import com.android.trippoint.core.designsystem.components.TripPointEmptyState
 import com.android.trippoint.core.designsystem.components.TripPointTabs
 import com.android.trippoint.core.designsystem.components.TripPointTextField
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
@@ -78,12 +81,17 @@ fun ChecklistListScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onIntent(ChecklistListContract.Intent.CreateChecklistClicked) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(id = designR.string.checklist_new_button))
+            if (!uiState.isLoading && uiState.error == null) {
+                FloatingActionButton(
+                    onClick = { onIntent(ChecklistListContract.Intent.CreateChecklistClicked) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(id = designR.string.checklist_new_button)
+                    )
+                }
             }
         }
     ) { innerPadding ->
@@ -92,16 +100,45 @@ fun ChecklistListScreen(
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            ChecklistSearchAndTabs(uiState, onIntent)
+            if (!uiState.isLoading && uiState.error == null && uiState.checklists.isNotEmpty()) {
+                ChecklistSearchAndTabs(uiState, onIntent)
+            }
             
-            if (uiState.isLoading) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    LoadingIndicator()
-                }
-            } else {
-                ChecklistLazyList(uiState, onIntent)
+            ChecklistStates(uiState, onIntent)
+        }
+    }
+}
+
+@Composable
+private fun ChecklistStates(
+    uiState: ChecklistListContract.State,
+    onIntent: (ChecklistListContract.Intent) -> Unit
+) {
+    when {
+        uiState.isLoading -> {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                LoadingIndicator()
             }
         }
+        uiState.error != null -> {
+            ErrorView(
+                title = stringResource(id = designR.string.checklist_error_title),
+                description = uiState.error ?: stringResource(id = designR.string.checklist_error_desc),
+                icon = Icons.Default.Error,
+                actionText = stringResource(id = designR.string.core_designsystem_retry),
+                onActionClick = { onIntent(ChecklistListContract.Intent.LoadChecklists) }
+            )
+        }
+        uiState.checklists.isEmpty() -> {
+            TripPointEmptyState(
+                title = stringResource(id = designR.string.checklist_empty_title),
+                subtitle = stringResource(id = designR.string.checklist_empty_desc),
+                imageResId = designR.drawable.illustration_empty_trip,
+                actionText = stringResource(id = designR.string.checklist_new_button),
+                onActionClick = { onIntent(ChecklistListContract.Intent.CreateChecklistClicked) }
+            )
+        }
+        else -> ChecklistLazyList(uiState, onIntent)
     }
 }
 

@@ -47,6 +47,7 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.checklist.domain.model.ChecklistSection
+import com.android.trippoint.core.designsystem.components.FullscreenStatusView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointCircularProgress
 import com.android.trippoint.core.designsystem.R as designR
@@ -97,11 +98,14 @@ fun ChecklistDetailsScreen(
     uiState: ChecklistDetailsContract.State,
     onIntent: (ChecklistDetailsContract.Intent) -> Unit
 ) {
+    val checklist = uiState.checklist
+    val isCompleted = checklist?.progress == 1f && uiState.sections.isNotEmpty()
+
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
-                    val title = uiState.checklist?.title 
+                    val title = checklist?.title 
                         ?: stringResource(id = designR.string.checklist_details_title_default)
                     Text(text = title) 
                 },
@@ -130,22 +134,50 @@ fun ChecklistDetailsScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = { onIntent(ChecklistDetailsContract.Intent.AddItemClicked) },
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ) {
-                Icon(Icons.Default.Add, contentDescription = stringResource(id = designR.string.checklist_add_item))
+            if (!isCompleted && !uiState.isLoading) {
+                FloatingActionButton(
+                    onClick = { onIntent(ChecklistDetailsContract.Intent.AddItemClicked) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ) {
+                    Icon(
+                        Icons.Default.Add,
+                        contentDescription = stringResource(id = designR.string.checklist_add_item)
+                    )
+                }
             }
         }
     ) { innerPadding ->
-        if (uiState.isLoading) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                LoadingIndicator()
+        when {
+            uiState.isLoading -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    LoadingIndicator()
+                }
             }
-        } else {
-            ChecklistDetailsContent(uiState, onIntent, innerPadding)
+            isCompleted -> {
+                ChecklistCompletedState(
+                    onViewSummary = { onIntent(ChecklistDetailsContract.Intent.ProgressClicked) },
+                    modifier = Modifier.padding(innerPadding)
+                )
+            }
+            else -> {
+                ChecklistDetailsContent(uiState, onIntent, innerPadding)
+            }
         }
+    }
+}
+
+@Composable
+private fun ChecklistCompletedState(onViewSummary: () -> Unit, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        FullscreenStatusView(
+            title = stringResource(id = designR.string.checklist_completed_title),
+            subtitle = stringResource(id = designR.string.checklist_completed_desc),
+            imageResId = designR.drawable.illustration_success,
+            actionText = stringResource(id = designR.string.checklist_view_summary),
+            onActionClick = onViewSummary,
+            includeBackground = false
+        )
     }
 }
 
