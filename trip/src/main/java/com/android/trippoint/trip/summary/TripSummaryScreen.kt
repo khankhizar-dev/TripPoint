@@ -111,7 +111,10 @@ fun TripSummaryScreen(
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Text(text = trip.title, style = MaterialTheme.typography.displayLarge)
-                Text(text = "${trip.startDate} - ${trip.endDate}", style = MaterialTheme.typography.bodyMedium)
+                Text(
+                    text = stringResource(id = designR.string.create_trip_date_range, trip.startDate, trip.endDate),
+                    style = MaterialTheme.typography.bodyMedium
+                )
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -119,7 +122,10 @@ fun TripSummaryScreen(
 
                 Spacer(modifier = Modifier.height(24.dp))
 
-                Text(text = "Travelers", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    text = stringResource(id = designR.string.trip_overview_travelers), 
+                    style = MaterialTheme.typography.titleMedium
+                )
                 Spacer(modifier = Modifier.height(12.dp))
                 Row {
                     trip.travelers.forEach { traveler ->
@@ -152,12 +158,12 @@ fun TripSummaryScreen(
 private fun SummaryStats(trip: Trip) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         StatCard(
-            label = "Budget",
+            label = stringResource(id = designR.string.trip_overview_budget_label),
             value = trip.budget,
             modifier = Modifier.weight(1f)
         )
         StatCard(
-            label = "Tasks",
+            label = stringResource(id = designR.string.trip_overview_tasks_label),
             value = "${trip.completedTasksCount} / ${trip.tasksCount}",
             modifier = Modifier.weight(1f)
         )

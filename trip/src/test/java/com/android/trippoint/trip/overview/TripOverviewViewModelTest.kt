@@ -3,9 +3,9 @@ package com.android.trippoint.trip.overview
 import app.cash.turbine.test
 import com.android.trippoint.core.common.model.Trip
 import com.android.trippoint.core.common.model.TripStatus
-import com.android.trippoint.core.network.BudgetRemoteDataSource
-import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.trip.domain.repository.TripRepository
+import com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase
+import com.android.trippoint.trip.domain.usecase.TripOverviewData
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -26,8 +26,7 @@ class TripOverviewViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
     private val repository: TripRepository = mockk()
-    private val budgetRemoteDataSource: BudgetRemoteDataSource = mockk()
-    private val itineraryRemoteDataSource: ItineraryRemoteDataSource = mockk()
+    private val getTripOverviewUseCase: GetTripOverviewUseCase = mockk()
     private lateinit var viewModel: TripOverviewViewModel
 
     private val dummyTrip = Trip(
@@ -36,12 +35,17 @@ class TripOverviewViewModelTest {
         status = TripStatus.UPCOMING, imageUrl = "", progress = 0.5f
     )
 
+    private val dummyOverviewData = TripOverviewData(
+        trip = dummyTrip,
+        budgetSummary = "INR 1000",
+        totalTasks = 5,
+        completedTasks = 2
+    )
+
     @Before
     fun setUp() {
         Dispatchers.setMain(testDispatcher)
-        coEvery { budgetRemoteDataSource.getBudgetSummary(any()) } returns null
-        coEvery { itineraryRemoteDataSource.getItineraryDays(any()) } returns emptyList()
-        viewModel = TripOverviewViewModel(repository, budgetRemoteDataSource, itineraryRemoteDataSource)
+        viewModel = TripOverviewViewModel(repository, getTripOverviewUseCase)
     }
 
     @After
@@ -59,8 +63,7 @@ class TripOverviewViewModelTest {
 
     @Test
     fun `LoadTripDetails success updates state`() = runTest {
-        coEvery { repository.getTrip("1") } returns Result.success(dummyTrip)
-        coEvery { repository.getTripMembers("1") } returns Result.success(emptyList())
+        coEvery { getTripOverviewUseCase("1") } returns Result.success(dummyOverviewData)
 
         viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails("1"))
         runCurrent()
@@ -68,13 +71,14 @@ class TripOverviewViewModelTest {
         val state = viewModel.uiState.value
         assertEquals(false, state.isLoading)
         assertEquals("1", state.trip?.id)
+        assertEquals("INR 1000", state.trip?.budget)
+        assertEquals(5, state.trip?.tasksCount)
         assertNull(state.error)
     }
 
     @Test
     fun `TabSelected intent updates tab and sends effect`() = runTest {
-        coEvery { repository.getTrip("1") } returns Result.success(dummyTrip)
-        coEvery { repository.getTripMembers("1") } returns Result.success(emptyList())
+        coEvery { getTripOverviewUseCase("1") } returns Result.success(dummyOverviewData)
         viewModel.onIntent(TripOverviewContract.Intent.LoadTripDetails("1"))
         runCurrent()
 

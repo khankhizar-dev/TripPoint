@@ -101,11 +101,11 @@ fun InvitePeopleScreen(
             TripPointTextField(
                 value = uiState.manualInput,
                 onValueChange = { onIntent(InvitePeopleContract.Intent.ManualInputChanged(it)) },
-                label = "Invite via Email or Phone",
-                placeholder = "friend@example.com",
+                label = stringResource(id = designR.string.invite_people_manual_label),
+                placeholder = stringResource(id = designR.string.invite_people_manual_placeholder),
                 trailingIcon = {
                     TextButton(onClick = { onIntent(InvitePeopleContract.Intent.ManualInviteClicked) }) {
-                        Text("Invite")
+                        Text(stringResource(id = designR.string.invite_people_button))
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
@@ -113,7 +113,10 @@ fun InvitePeopleScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
             
-            Text(text = "Search from Contacts", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(id = designR.string.invite_people_contacts_title), 
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(16.dp))
             
             TripPointTextField(
@@ -208,7 +211,10 @@ private fun PersonItem(
                 }
             )
         ) {
-            Text(text = if (person.isInvited) "Invited" else stringResource(id = designR.string.invite_people_button))
+            Text(
+                text = if (person.isInvited) stringResource(id = designR.string.invite_people_invited) 
+                       else stringResource(id = designR.string.invite_people_button)
+            )
         }
     }
 }

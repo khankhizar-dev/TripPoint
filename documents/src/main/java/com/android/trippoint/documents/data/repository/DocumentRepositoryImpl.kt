@@ -3,126 +3,127 @@ package com.android.trippoint.documents.data.repository
 import com.android.trippoint.documents.domain.model.Document
 import com.android.trippoint.documents.domain.model.DocumentType
 import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.core.network.DocumentRemoteDataSource
+import com.android.trippoint.core.network.DocumentDto
+import com.android.trippoint.core.network.DocumentFilterInput
+import com.android.trippoint.core.network.UpdateDocumentInput
+import java.io.File
 
-class DocumentRepositoryImpl : DocumentRepository {
-    
-    private val mockDocuments = mutableListOf(
-        Document(
-            id = "d1",
-            userId = "u1",
-            title = "Personal Passport",
-            type = DocumentType.PASSPORT_VISA,
-            fileUrl = "https://example.com/passport.pdf",
-            fileSize = "1.2 MB",
-            fileExtension = "pdf",
-            expiryDate = "2030-12-31",
-            referenceNumber = "A1234567",
-            notes = "Stored in safe",
-            isFavorite = true,
-            createdAt = "2024-01-01",
-            updatedAt = "2024-01-01"
-        ),
-        Document(
-            id = "d2",
-            userId = "u1",
-            title = "Thailand Visa",
-            type = DocumentType.PASSPORT_VISA,
-            fileUrl = "https://example.com/visa.pdf",
-            fileSize = "0.8 MB",
-            fileExtension = "pdf",
-            expiryDate = "2024-11-01",
-            referenceNumber = "V9876543",
-            notes = "Single entry",
-            createdAt = "2024-02-01",
-            updatedAt = "2024-02-01"
-        ),
-        Document(
-            id = "d3",
-            userId = "u1",
-            title = "Flight Ticket - Bali",
-            type = DocumentType.TICKET_BOARDING,
-            fileUrl = "https://example.com/ticket.pdf",
-            fileSize = "1.5 MB",
-            fileExtension = "pdf",
-            expiryDate = null,
-            referenceNumber = "PNR123",
-            notes = null,
-            createdAt = "2024-05-10",
-            updatedAt = "2024-05-10"
-        ),
-        Document(
-            id = "d4",
-            userId = "u1",
-            title = "Hotel Voucher",
-            type = DocumentType.HOTEL_VOUCHERS,
-            fileUrl = "https://example.com/hotel.pdf",
-            fileSize = "0.5 MB",
-            fileExtension = "pdf",
-            expiryDate = null,
-            referenceNumber = "HTL999",
-            notes = null,
-            createdAt = "2024-05-11",
-            updatedAt = "2024-05-11"
-        )
-    )
+class DocumentRepositoryImpl(
+    private val remoteDataSource: DocumentRemoteDataSource
+) : DocumentRepository {
 
-    override suspend fun getDocuments(
-        type: DocumentType?,
-        isFavorite: Boolean?,
-        isShared: Boolean?,
-        isRecent: Boolean?
-    ): Result<List<Document>> {
-        var filtered = mockDocuments.toList()
-        if (type != null) filtered = filtered.filter { it.type == type }
-        if (isFavorite != null) filtered = filtered.filter { it.isFavorite == isFavorite }
-        // shared and recent logic would be more complex, but for mock:
-        if (isRecent == true) filtered = filtered.sortedByDescending { it.updatedAt }.take(5)
-        
-        return Result.success(filtered)
+    override suspend fun getDocuments(tripId: String, filter: DocumentFilterInput?): Result<List<Document>> {
+        return try {
+            val dtos = remoteDataSource.getDocuments(tripId, filter)
+            Result.success(dtos.map { it.toDomain() })
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
-    override suspend fun getDocument(id: String): Result<Document> {
-        val doc = mockDocuments.find { it.id == id }
-        return if (doc != null) Result.success(doc)
-        else Result.failure(Exception("Document not found"))
+    override suspend fun getDocument(tripId: String, documentId: String): Result<Document> {
+        return try {
+            val dto = remoteDataSource.getDocument(tripId, documentId)
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Document not found"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
     }
 
     override suspend fun uploadDocument(
-        title: String, 
-        type: DocumentType, 
-        fileUrl: String, 
+        tripId: String,
+        name: String,
+        category: DocumentType,
+        source: String,
+        file: File,
+        description: String?,
+        documentNumber: String?,
+        issuedBy: String?,
+        issuedDate: String?,
         expiryDate: String?
     ): Result<Document> {
-        val newDoc = Document(
-            id = "d${mockDocuments.size + 1}",
-            userId = "u1",
-            title = title,
-            type = type,
-            fileUrl = fileUrl,
-            fileSize = "0.0 MB",
-            fileExtension = "pdf",
-            expiryDate = expiryDate,
-            referenceNumber = null,
-            notes = null,
-            createdAt = "2024-09-06",
-            updatedAt = "2024-09-06"
-        )
-        mockDocuments.add(newDoc)
-        return Result.success(newDoc)
-    }
-
-    override suspend fun deleteDocument(id: String): Result<Boolean> {
-        mockDocuments.removeIf { it.id == id }
-        return Result.success(true)
-    }
-
-    override suspend fun toggleFavorite(id: String): Result<Boolean> {
-        val index = mockDocuments.indexOfFirst { it.id == id }
-        if (index != -1) {
-            val doc = mockDocuments[index]
-            mockDocuments[index] = doc.copy(isFavorite = !doc.isFavorite)
-            return Result.success(mockDocuments[index].isFavorite)
+        return try {
+            val dto = remoteDataSource.uploadDocument(
+                tripId, name, category.name, source, file,
+                description, documentNumber, issuedBy, issuedDate, expiryDate
+            )
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Upload failed"))
+        } catch (e: Exception) {
+            Result.failure(e)
         }
-        return Result.failure(Exception("Document not found"))
+    }
+
+    override suspend fun updateDocument(
+        tripId: String,
+        documentId: String,
+        input: UpdateDocumentInput
+    ): Result<Document> {
+        return try {
+            val dto = remoteDataSource.updateDocument(tripId, documentId, input)
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Update failed"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun toggleFavorite(tripId: String, documentId: String, favorite: Boolean): Result<Document> {
+        return try {
+            val dto = remoteDataSource.favoriteDocument(tripId, documentId, favorite)
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Favorite toggle failed"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun trashDocument(tripId: String, documentId: String): Result<Document> {
+        return try {
+            val dto = remoteDataSource.trashDocument(tripId, documentId)
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Trash failed"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun restoreDocument(tripId: String, documentId: String): Result<Document> {
+        return try {
+            val dto = remoteDataSource.restoreDocument(tripId, documentId)
+            if (dto != null) Result.success(dto.toDomain())
+            else Result.failure(Exception("Restore failed"))
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun permanentlyDeleteDocument(tripId: String, documentId: String): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.permanentlyDeleteDocument(tripId, documentId)
+            Result.success(success)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private fun DocumentDto.toDomain(): Document {
+        return Document(
+            id = id,
+            userId = uploadedBy,
+            title = name,
+            type = try { DocumentType.valueOf(category) } catch (_: Exception) { DocumentType.OTHER },
+            fileUrl = null, // Backend should provide a way to construct this or a separate download call
+            fileSize = "${fileSize / 1024} KB",
+            fileExtension = mimeType.substringAfterLast("/"),
+            expiryDate = expiryDate,
+            referenceNumber = documentNumber,
+            notes = description,
+            isFavorite = favorite,
+            createdAt = createdAt,
+            updatedAt = updatedAt
+        )
     }
 }

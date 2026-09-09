@@ -11,7 +11,7 @@ class BudgetOverviewContract {
         data class LoadBudget(val tripId: String, val budgetId: String) : Intent()
         object BackClicked : Intent()
         object AddExpenseClicked : Intent()
-        data class CategoryClicked(val categoryId: String) : Intent()
+        data class CategoryClicked(val category: String) : Intent()
     }
 
     data class State(
@@ -20,7 +20,8 @@ class BudgetOverviewContract {
         val budget: Budget? = null,
         val expenses: List<Expense> = emptyList(),
         val isLoading: Boolean = false,
-        val error: String? = null
+        val error: String? = null,
+        val errorResId: Int? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

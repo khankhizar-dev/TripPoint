@@ -1,5 +1,7 @@
 package com.android.trippoint.documents.add
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,10 +31,15 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun AddDocumentRoute(
+    tripId: String,
     viewModel: AddDocumentViewModel,
     onNavigateBack: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    LaunchedEffect(tripId) {
+        viewModel.onIntent(AddDocumentContract.Intent.LoadTripId(tripId))
+    }
 
     LaunchedEffect(viewModel.effect) {
         viewModel.effect.collectLatest { effect ->
@@ -54,6 +61,15 @@ fun AddDocumentScreen(
     uiState: AddDocumentContract.State,
     onIntent: (AddDocumentContract.Intent) -> Unit
 ) {
+    // Using OpenDocument for better access to system roots
+    val documentPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri: android.net.Uri? ->
+        uri?.let {
+            onIntent(AddDocumentContract.Intent.FileSelected(it.toString()))
+        }
+    }
+
     Scaffold(
         topBar = {
             TripPointTopAppBar(
@@ -69,13 +85,14 @@ fun AddDocumentScreen(
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (uiState.error != null) {
-                TripPointAlert(message = uiState.error!!, variant = AlertVariant.Error)
+            val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+            if (errorMessage != null) {
+                TripPointAlert(message = errorMessage, variant = AlertVariant.Error)
                 Spacer(modifier = Modifier.height(16.dp))
             }
 
             TripPointFileUpload(
-                onUploadClick = { onIntent(AddDocumentContract.Intent.FileSelected("mock_url")) },
+                onUploadClick = { documentPickerLauncher.launch(arrayOf("*/*")) },
                 label = uiState.fileUrl ?: stringResource(id = designR.string.documents_upload_label)
             )
 
@@ -84,8 +101,8 @@ fun AddDocumentScreen(
             TripPointTextField(
                 value = uiState.title,
                 onValueChange = { onIntent(AddDocumentContract.Intent.TitleChanged(it)) },
-                label = "Document Title",
-                placeholder = "e.g. My Passport"
+                label = stringResource(id = designR.string.documents_title_label),
+                placeholder = stringResource(id = designR.string.documents_title_placeholder)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -93,7 +110,7 @@ fun AddDocumentScreen(
             TripPointDropdown(
                 value = uiState.type.name,
                 onValueChange = { onIntent(AddDocumentContract.Intent.TypeChanged(DocumentType.valueOf(it))) },
-                label = "Document Type",
+                label = stringResource(id = designR.string.documents_type_label),
                 options = DocumentType.values().map { it.name }
             )
 
@@ -103,7 +120,7 @@ fun AddDocumentScreen(
                 value = uiState.expiryDate,
                 onValueChange = { onIntent(AddDocumentContract.Intent.ExpiryChanged(it)) },
                 label = stringResource(id = designR.string.documents_expiry_label),
-                placeholder = "YYYY-MM-DD"
+                placeholder = stringResource(id = designR.string.documents_expiry_placeholder)
             )
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -112,7 +129,7 @@ fun AddDocumentScreen(
                 value = uiState.referenceNumber,
                 onValueChange = { onIntent(AddDocumentContract.Intent.RefChanged(it)) },
                 label = stringResource(id = designR.string.documents_ref_label),
-                placeholder = "e.g. A1234567"
+                placeholder = stringResource(id = designR.string.documents_ref_placeholder)
             )
 
             Spacer(modifier = Modifier.height(32.dp))

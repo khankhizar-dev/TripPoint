@@ -44,7 +44,7 @@ class DocumentCategoriesViewModelTest {
             id = "d2",
             userId = "u1",
             title = "Ticket",
-            type = DocumentType.TICKET_BOARDING,
+            type = DocumentType.TICKETS_BOARDING,
             fileUrl = "url2",
             expiryDate = null,
             referenceNumber = "REF2",
@@ -75,25 +75,25 @@ class DocumentCategoriesViewModelTest {
 
     @Test
     fun `LoadCategories success updates state with correct counts`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.success(mockDocuments)
+        coEvery { repository.getDocuments("t1") } returns Result.success(mockDocuments)
 
-        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories)
+        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories("t1"))
         
         runCurrent()
         val state = viewModel.uiState.value
         assertEquals(false, state.isLoading)
         assertEquals(6, state.categories.size)
         assertEquals(1, state.categories.find { it.type == DocumentType.PASSPORT_VISA }?.count)
-        assertEquals(1, state.categories.find { it.type == DocumentType.TICKET_BOARDING }?.count)
-        assertEquals(0, state.categories.find { it.type == DocumentType.ID_PROOFS }?.count)
+        assertEquals(1, state.categories.find { it.type == DocumentType.TICKETS_BOARDING }?.count)
+        assertEquals(0, state.categories.find { it.type == DocumentType.ID_PROOF }?.count)
         assertNull(state.error)
     }
 
     @Test
     fun `LoadCategories failure updates error state`() = runTest {
-        coEvery { repository.getDocuments() } returns Result.failure(Exception("Error loading"))
+        coEvery { repository.getDocuments("t1") } returns Result.failure(Exception("Error loading"))
 
-        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories)
+        viewModel.onIntent(DocumentCategoriesContract.Intent.LoadCategories("t1"))
         
         runCurrent()
         assertEquals(false, viewModel.uiState.value.isLoading)

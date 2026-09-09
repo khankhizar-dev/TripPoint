@@ -18,16 +18,16 @@ data class Document(
 
 enum class DocumentType {
     PASSPORT_VISA,
-    TICKET_BOARDING,
-    ID_PROOFS,
-    HOTEL_VOUCHERS,
+    TICKETS_BOARDING,
+    ID_PROOF,
+    HOTEL_VOUCHER,
     INSURANCE,
     OTHER
 }
 
 data class CategoryInfo(
     val type: DocumentType,
-    val name: String,
+    val nameResId: Int,
     val count: Int,
     val icon: androidx.compose.ui.graphics.vector.ImageVector
 )

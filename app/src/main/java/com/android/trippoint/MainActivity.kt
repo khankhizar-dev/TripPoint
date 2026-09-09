@@ -22,10 +22,12 @@ import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
 import com.android.trippoint.booking.data.repository.BookingRepositoryImpl
 import com.android.trippoint.budget.data.repository.BudgetRepositoryImpl
+import com.android.trippoint.core.network.DocumentRemoteDataSource
 import com.android.trippoint.documents.data.repository.DocumentRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
 
 class MainActivity : ComponentActivity() {
+    @Suppress("LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
@@ -92,8 +94,32 @@ class MainActivity : ComponentActivity() {
                     )
                 }
 
+                val budgetStatsProvider = remember {
+                    com.android.trippoint.budget.data.provider.BudgetStatsProviderImpl(budgetRepository)
+                }
+                
+                val itineraryStatsProvider = remember {
+                    com.android.trippoint.itinerary.data.provider.ItineraryStatsProviderImpl(itineraryRepository)
+                }
+                
+                val getTripOverviewUseCase = remember {
+                    com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase(
+                        tripRepository,
+                        budgetStatsProvider,
+                        itineraryStatsProvider
+                    )
+                }
+
                 val documentRepository = remember {
-                    DocumentRepositoryImpl()
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    DocumentRepositoryImpl(DocumentRemoteDataSource(api))
                 }
 
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -104,6 +130,7 @@ class MainActivity : ComponentActivity() {
                         bookingRepository = bookingRepository,
                         budgetRepository = budgetRepository,
                         documentRepository = documentRepository,
+                        getTripOverviewUseCase = getTripOverviewUseCase,
                         preferencesManager = preferencesManager,
                         modifier = Modifier.padding(innerPadding)
                     )

@@ -27,9 +27,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.core.designsystem.components.TripPointButton
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
@@ -67,10 +69,10 @@ fun FilterSortScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(text = "Filter & Sort") },
+                title = { Text(text = stringResource(id = designR.string.filter_sort_title)) },
                 navigationIcon = {
                     IconButton(onClick = { onIntent(FilterSortContract.Intent.BackClicked) }) {
-                        Icon(imageVector = Icons.Default.Close, contentDescription = "Close")
+                        Icon(imageVector = Icons.Default.Close, contentDescription = null)
                     }
                 }
             )
@@ -82,7 +84,10 @@ fun FilterSortScreen(
                 .padding(innerPadding)
                 .padding(horizontal = 24.dp)
         ) {
-            Text(text = "Show", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(id = designR.string.filter_sort_show), 
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(16.dp))
             
             uiState.categories.forEach { category ->
@@ -104,7 +109,10 @@ fun FilterSortScreen(
             HorizontalDivider()
             Spacer(modifier = Modifier.height(24.dp))
 
-            Text(text = "Sort By", style = MaterialTheme.typography.titleMedium)
+            Text(
+                text = stringResource(id = designR.string.filter_sort_sort_by), 
+                style = MaterialTheme.typography.titleMedium
+            )
             Spacer(modifier = Modifier.height(16.dp))
 
             Column(modifier = Modifier.selectableGroup()) {
@@ -132,7 +140,7 @@ fun FilterSortScreen(
             Spacer(modifier = Modifier.weight(1f))
             
             TripPointButton(
-                text = "Apply",
+                text = stringResource(id = designR.string.filter_sort_apply),
                 onClick = { onIntent(FilterSortContract.Intent.ApplyClicked) },
                 modifier = Modifier.fillMaxWidth()
             )

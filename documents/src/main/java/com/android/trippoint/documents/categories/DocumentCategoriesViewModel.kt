@@ -6,6 +6,7 @@ import com.android.trippoint.core.designsystem.theme.TripPointIcons
 import com.android.trippoint.documents.domain.model.CategoryInfo
 import com.android.trippoint.documents.domain.model.DocumentType
 import com.android.trippoint.documents.domain.repository.DocumentRepository
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.launch
 
 class DocumentCategoriesViewModel(
@@ -19,7 +20,7 @@ class DocumentCategoriesViewModel(
 ) {
     override fun onIntent(intent: DocumentCategoriesContract.Intent) {
         when (intent) {
-            DocumentCategoriesContract.Intent.LoadCategories -> loadCategories()
+            is DocumentCategoriesContract.Intent.LoadCategories -> loadCategories(intent.tripId)
             is DocumentCategoriesContract.Intent.CategoryClicked -> {
                 sendEffect(DocumentCategoriesContract.Effect.NavigateToDocumentsByType(intent.type))
             }
@@ -27,46 +28,46 @@ class DocumentCategoriesViewModel(
         }
     }
 
-    private fun loadCategories() {
+    private fun loadCategories(tripId: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true) }
-            val result = repository.getDocuments()
+            setState { copy(isLoading = true, tripId = tripId) }
+            val result = repository.getDocuments(tripId)
             if (result.isSuccess) {
                 val docs = result.getOrDefault(emptyList())
                 val categories = listOf(
                     CategoryInfo(
                         DocumentType.PASSPORT_VISA,
-                        "Passport & Visa",
+                        designR.string.documents_type_passport_visa,
                         docs.count { it.type == DocumentType.PASSPORT_VISA },
                         TripPointIcons.Docs
                     ),
                     CategoryInfo(
-                        DocumentType.TICKET_BOARDING,
-                        "Tickets & Boarding",
-                        docs.count { it.type == DocumentType.TICKET_BOARDING },
+                        DocumentType.TICKETS_BOARDING,
+                        designR.string.documents_type_tickets_boarding,
+                        docs.count { it.type == DocumentType.TICKETS_BOARDING },
                         TripPointIcons.Flight
                     ),
                     CategoryInfo(
-                        DocumentType.ID_PROOFS,
-                        "ID Proofs",
-                        docs.count { it.type == DocumentType.ID_PROOFS },
+                        DocumentType.ID_PROOF,
+                        designR.string.documents_type_id_proofs,
+                        docs.count { it.type == DocumentType.ID_PROOF },
                         TripPointIcons.Profile
                     ),
                     CategoryInfo(
-                        DocumentType.HOTEL_VOUCHERS,
-                        "Hotel Vouchers",
-                        docs.count { it.type == DocumentType.HOTEL_VOUCHERS },
+                        DocumentType.HOTEL_VOUCHER,
+                        designR.string.documents_type_hotel_vouchers,
+                        docs.count { it.type == DocumentType.HOTEL_VOUCHER },
                         TripPointIcons.Hotel
                     ),
                     CategoryInfo(
                         DocumentType.INSURANCE,
-                        "Insurance",
+                        designR.string.documents_type_insurance,
                         docs.count { it.type == DocumentType.INSURANCE },
                         TripPointIcons.Lock
                     ),
                     CategoryInfo(
                         DocumentType.OTHER,
-                        "Other Documents",
+                        designR.string.documents_type_other,
                         docs.count { it.type == DocumentType.OTHER },
                         TripPointIcons.More
                     )

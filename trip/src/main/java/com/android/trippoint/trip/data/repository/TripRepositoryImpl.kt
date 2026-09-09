@@ -163,8 +163,6 @@ class TripRepositoryImpl(
             imageUrl = "", // Removed from API for now
             progress = progress,
             travelersCount = travelers,
-            tasksCount = 0, // Fallback since API field is undefined
-            completedTasksCount = 0, // Fallback since API field is undefined
             createdAt = createdAt,
             updatedAt = updatedAt
         )

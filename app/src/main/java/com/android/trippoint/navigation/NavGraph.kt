@@ -64,6 +64,7 @@ import com.android.trippoint.budget.settlement.SettlementRoute
 import com.android.trippoint.budget.settlement.SettlementViewModel
 import com.android.trippoint.budget.trends.SpendingTrendsRoute
 import com.android.trippoint.budget.trends.SpendingTrendsViewModel
+import com.android.trippoint.core.database.preferences.PreferencesManager
 import com.android.trippoint.core.navigation.Screen
 import com.android.trippoint.documents.add.AddDocumentRoute
 import com.android.trippoint.documents.add.AddDocumentViewModel
@@ -101,6 +102,7 @@ import com.android.trippoint.trip.create.CreateTripViewModel
 import com.android.trippoint.trip.details.AddDetailsRoute
 import com.android.trippoint.trip.details.AddDetailsViewModel
 import com.android.trippoint.trip.domain.repository.TripRepository
+import com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase
 import com.android.trippoint.trip.invite.InvitePeopleRoute
 import com.android.trippoint.trip.invite.InvitePeopleViewModel
 import com.android.trippoint.trip.overview.TripOverviewRoute
@@ -117,10 +119,6 @@ import com.android.trippoint.ui.settings.NotificationsRoute
 import com.android.trippoint.ui.settings.PreferencesRoute
 import com.android.trippoint.ui.settings.SecurityRoute
 import com.android.trippoint.ui.settings.SettingsRoute
-import com.android.trippoint.core.database.preferences.PreferencesManager
-import com.android.trippoint.core.network.BudgetRemoteDataSource
-import com.android.trippoint.core.network.ItineraryRemoteDataSource
-import com.android.trippoint.core.network.NetworkModule
 import com.android.trippoint.ui.settings.SupportRoute
 
 @Composable
@@ -131,6 +129,7 @@ fun AppNavGraph(
     bookingRepository: BookingRepository,
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
+    getTripOverviewUseCase: GetTripOverviewUseCase,
     preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
 ) {
@@ -140,7 +139,7 @@ fun AppNavGraph(
         modifier = modifier
     ) {
         authNavGraph(navController)
-        tripNavGraph(navController, tripRepository, preferencesManager)
+        tripNavGraph(navController, tripRepository, getTripOverviewUseCase, preferencesManager)
         itineraryNavGraph(navController, itineraryRepository)
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
@@ -350,6 +349,7 @@ private fun NavGraphBuilder.addSessionExpiredDestination(navController: NavHostC
 private fun NavGraphBuilder.tripNavGraph(
     navController: NavHostController, 
     tripRepository: TripRepository,
+    getTripOverviewUseCase: GetTripOverviewUseCase,
     preferencesManager: PreferencesManager
 ) {
     composable(Screen.Home.route) {
@@ -381,18 +381,9 @@ private fun NavGraphBuilder.tripNavGraph(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    val api = NetworkModule.provideTripPointApi(
-                        { preferencesManager.getAuthToken() },
-                        { preferencesManager.getRefreshToken() },
-                        { t, r -> 
-                            preferencesManager.setAuthToken(t)
-                            preferencesManager.setRefreshToken(r)
-                        }
-                    )
                     return TripOverviewViewModel(
                         tripRepository,
-                        BudgetRemoteDataSource(api),
-                        ItineraryRemoteDataSource(api)
+                        getTripOverviewUseCase
                     ) as T
                 }
             }
@@ -1283,7 +1274,30 @@ private fun NavGraphBuilder.documentsNavGraph(
     navController: NavHostController,
     documentRepository: DocumentRepository
 ) {
-    composable(Screen.Documents.route) {
+    addDocumentsListDestination(navController, documentRepository)
+    addDocumentScanDestination(navController)
+    addDocumentSearchDestination(navController)
+    addDocumentDetailsDestination(navController, documentRepository)
+    addDocumentUploadOptionsDestination(navController)
+    addDocumentCategoriesDestination(navController, documentRepository)
+    addAddDocumentDestination(navController, documentRepository)
+}
+
+private fun NavGraphBuilder.addDocumentsListDestination(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
+    composable(
+        route = Screen.Documents.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: DocumentListViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -1293,25 +1307,66 @@ private fun NavGraphBuilder.documentsNavGraph(
             }
         )
         DocumentListRoute(
+            tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToDetails = { id -> 
-                navController.navigate(Screen.DocumentDetails.createRoute(id)) 
+                navController.navigate(Screen.DocumentDetails.createRoute(id, tripId)) 
             },
-            onNavigateToCategories = { navController.navigate(Screen.DocumentCategories.route) },
-            onNavigateToAdd = { navController.navigate(Screen.DocumentUploadOptions.route) },
-            onNavigateToSearch = { navController.navigate(Screen.DocumentSearch.route) }
+            onNavigateToCategories = { 
+                navController.navigate(Screen.DocumentCategories.createRoute(tripId)) 
+            },
+            onNavigateToAdd = { 
+                navController.navigate(Screen.DocumentUploadOptions.createRoute(tripId)) 
+            },
+            onNavigateToSearch = { 
+                navController.navigate(Screen.DocumentSearch.createRoute(tripId)) 
+            }
         )
     }
-    composable(Screen.DocumentScan.route) {
-        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+}
+
+private fun NavGraphBuilder.addDocumentScanDestination(navController: NavHostController) {
+    composable(
+        route = Screen.DocumentScan.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: ScanDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ScanDocumentViewModel() as T
+                }
+            }
+        )
         ScanDocumentRoute(
+            tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onDocumentCaptured = { /* TODO */ }
         )
     }
-    composable(Screen.DocumentSearch.route) {
+}
+
+private fun NavGraphBuilder.addDocumentSearchDestination(navController: NavHostController) {
+    composable(
+        route = Screen.DocumentSearch.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: SearchFilterViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         SearchFilterRoute(
             viewModel = viewModel,
@@ -1319,13 +1374,25 @@ private fun NavGraphBuilder.documentsNavGraph(
             onFiltersApplied = { /* TODO */ }
         )
     }
+}
+
+private fun NavGraphBuilder.addDocumentDetailsDestination(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
     composable(
         route = Screen.DocumentDetails.route,
         arguments = listOf(
-            androidx.navigation.navArgument("documentId") { type = androidx.navigation.NavType.StringType }
+            androidx.navigation.navArgument("documentId") { type = androidx.navigation.NavType.StringType },
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
         )
     ) { backStackEntry ->
         val documentId = backStackEntry.arguments?.getString("documentId") ?: ""
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: DocumentDetailsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -1335,19 +1402,53 @@ private fun NavGraphBuilder.documentsNavGraph(
             }
         )
         DocumentDetailsRoute(
+            tripId = tripId,
             documentId = documentId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
         )
     }
-    composable(Screen.DocumentUploadOptions.route) {
+}
+
+private fun NavGraphBuilder.addDocumentUploadOptionsDestination(navController: NavHostController) {
+    composable(
+        route = Screen.DocumentUploadOptions.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         UploadOptionsRoute(
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToScan = { navController.navigate(Screen.DocumentScan.route) },
-            onNavigateToManual = { navController.navigate(Screen.AddDocument.route) }
+            onNavigateToScan = { 
+                navController.navigate(Screen.DocumentScan.createRoute(tripId)) 
+            },
+            onNavigateToManual = { 
+                navController.navigate(Screen.AddDocument.createRoute(tripId)) 
+            }
         )
     }
-    composable(Screen.DocumentCategories.route) {
+}
+
+private fun NavGraphBuilder.addDocumentCategoriesDestination(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
+    composable(
+        route = Screen.DocumentCategories.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: DocumentCategoriesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -1357,12 +1458,29 @@ private fun NavGraphBuilder.documentsNavGraph(
             }
         )
         DocumentCategoriesRoute(
+            tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
             onNavigateToDocumentsByType = { /* TODO: Pass type to list */ }
         )
     }
-    composable(Screen.AddDocument.route) {
+}
+
+private fun NavGraphBuilder.addAddDocumentDestination(
+    navController: NavHostController,
+    documentRepository: DocumentRepository
+) {
+    composable(
+        route = Screen.AddDocument.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("tripId") { 
+                type = androidx.navigation.NavType.StringType
+                nullable = true
+                defaultValue = null
+            }
+        )
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: AddDocumentViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
@@ -1372,6 +1490,7 @@ private fun NavGraphBuilder.documentsNavGraph(
             }
         )
         AddDocumentRoute(
+            tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
         )

@@ -9,6 +9,7 @@ class PermissionsContract {
         object AllowClicked : Intent()
         object DenyClicked : Intent()
         object ExploreClicked : Intent()
+        object PermissionHandled : Intent()
     }
 
     data class State(

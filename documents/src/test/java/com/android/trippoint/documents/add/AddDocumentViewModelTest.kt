@@ -18,6 +18,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
+import com.android.trippoint.core.designsystem.R as designR
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AddDocumentViewModelTest {
@@ -51,6 +52,9 @@ class AddDocumentViewModelTest {
 
     @Test
     fun `field change intents update state`() {
+        viewModel.onIntent(AddDocumentContract.Intent.LoadTripId("t1"))
+        assertEquals("t1", viewModel.uiState.value.tripId)
+
         viewModel.onIntent(AddDocumentContract.Intent.TitleChanged("My Passport"))
         assertEquals("My Passport", viewModel.uiState.value.title)
 
@@ -71,21 +75,26 @@ class AddDocumentViewModelTest {
     fun `SaveClicked with missing title shows error`() {
         viewModel.onIntent(AddDocumentContract.Intent.FileSelected("url"))
         viewModel.onIntent(AddDocumentContract.Intent.SaveClicked)
-        assertEquals("Title and file are required", viewModel.uiState.value.error)
+        val expected = designR.string.documents_error_title_file_required
+        assertEquals(expected, viewModel.uiState.value.errorResId)
     }
 
     @Test
     fun `SaveClicked with missing file shows error`() {
         viewModel.onIntent(AddDocumentContract.Intent.TitleChanged("Title"))
         viewModel.onIntent(AddDocumentContract.Intent.SaveClicked)
-        assertEquals("Title and file are required", viewModel.uiState.value.error)
+        val expected = designR.string.documents_error_title_file_required
+        assertEquals(expected, viewModel.uiState.value.errorResId)
     }
 
     @Test
     fun `SaveClicked success sends DocumentAdded effect`() = runTest {
         val mockDoc = mockk<Document>()
-        coEvery { repository.uploadDocument(any(), any(), any(), any()) } returns Result.success(mockDoc)
+        coEvery { 
+            repository.uploadDocument(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()) 
+        } returns Result.success(mockDoc)
 
+        viewModel.onIntent(AddDocumentContract.Intent.LoadTripId("t1"))
         viewModel.onIntent(AddDocumentContract.Intent.TitleChanged("Passport"))
         viewModel.onIntent(AddDocumentContract.Intent.FileSelected("url"))
         
@@ -101,9 +110,10 @@ class AddDocumentViewModelTest {
     @Test
     fun `SaveClicked failure updates error state`() = runTest {
         coEvery {
-            repository.uploadDocument(any(), any(), any(), any())
+            repository.uploadDocument(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
         } returns Result.failure(Exception("Upload failed"))
 
+        viewModel.onIntent(AddDocumentContract.Intent.LoadTripId("t1"))
         viewModel.onIntent(AddDocumentContract.Intent.TitleChanged("Passport"))
         viewModel.onIntent(AddDocumentContract.Intent.FileSelected("url"))
         

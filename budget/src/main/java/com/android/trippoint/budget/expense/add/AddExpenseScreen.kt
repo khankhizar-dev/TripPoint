@@ -22,11 +22,11 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -93,101 +93,140 @@ fun AddExpenseScreen(
             )
         }
     ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 24.dp)
-                .verticalScroll(rememberScrollState())
-        ) {
-            if (uiState.error != null) {
-                TripPointAlert(
-                    message = uiState.error!!,
-                    variant = AlertVariant.Error,
-                    modifier = Modifier.padding(top = 16.dp)
-                )
-            }
+        AddExpenseContent(
+            uiState = uiState,
+            onIntent = onIntent,
+            onShowDatePicker = { showDatePicker = true },
+            modifier = Modifier.padding(innerPadding)
+        )
+    }
+}
 
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TripPointTextField(
-                value = uiState.amount,
-                onValueChange = { onIntent(AddExpenseContract.Intent.AmountChanged(it)) },
-                label = stringResource(id = designR.string.budget_amount_label),
-                placeholder = "0.00"
+@Composable
+private fun AddExpenseContent(
+    uiState: AddExpenseContract.State,
+    onIntent: (AddExpenseContract.Intent) -> Unit,
+    onShowDatePicker: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(horizontal = 24.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+        if (errorMessage != null) {
+            TripPointAlert(
+                message = errorMessage,
+                variant = AlertVariant.Error,
+                modifier = Modifier.padding(top = 16.dp)
             )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TripPointDropdown(
-                value = uiState.category,
-                onValueChange = { onIntent(AddExpenseContract.Intent.CategoryChanged(it)) },
-                label = stringResource(id = designR.string.budget_category_label),
-                options = listOf("Food", "Transport", "Activities", "Accommodation", "Other")
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TripPointTextField(
-                value = uiState.date,
-                onValueChange = { },
-                label = stringResource(id = designR.string.budget_date_label),
-                placeholder = "YYYY-MM-DD",
-                readOnly = true,
-                trailingIcon = {
-                    IconButton(onClick = { showDatePicker = true }) {
-                        Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
-                    }
-                },
-                modifier = Modifier.fillMaxWidth().clickable { showDatePicker = true }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TripPointTextField(
-                value = uiState.description,
-                onValueChange = { onIntent(AddExpenseContract.Intent.DescriptionChanged(it)) },
-                label = stringResource(id = designR.string.budget_description_label),
-                placeholder = "e.g. Starbucks Coffee"
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            if (uiState.members.isNotEmpty()) {
-                TripPointDropdown(
-                    value = uiState.paidBy,
-                    onValueChange = { selected ->
-                        // Find the userId for the selected name/id
-                        val member = uiState.members.find { 
-                            (it.userName ?: it.userId) == selected 
-                        }
-                        onIntent(AddExpenseContract.Intent.PaidByChanged(member?.userId ?: selected))
-                    },
-                    label = "Paid By",
-                    options = uiState.members.map { it.userName ?: it.userId },
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                TripPointTextField(
-                    value = uiState.paidBy,
-                    onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
-                    label = "Paid By (User ID)",
-                    placeholder = "Enter user UUID"
-                )
-            }
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            TripPointButton(
-                text = stringResource(id = designR.string.budget_save_expense),
-                onClick = { onIntent(AddExpenseContract.Intent.SaveClicked) },
-                enabled = uiState.amount.isNotBlank() && uiState.date.isNotBlank(),
-                isLoading = uiState.isLoading,
-                modifier = Modifier.fillMaxWidth()
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExpenseFormFields(uiState, onIntent, onShowDatePicker)
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        TripPointButton(
+            text = stringResource(id = designR.string.budget_save_expense),
+            onClick = { onIntent(AddExpenseContract.Intent.SaveClicked) },
+            enabled = uiState.amount.isNotBlank() && uiState.date.isNotBlank(),
+            isLoading = uiState.isLoading,
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
+    }
+}
+
+@Composable
+private fun ExpenseFormFields(
+    uiState: AddExpenseContract.State,
+    onIntent: (AddExpenseContract.Intent) -> Unit,
+    onShowDatePicker: () -> Unit
+) {
+    TripPointTextField(
+        value = uiState.amount,
+        onValueChange = { onIntent(AddExpenseContract.Intent.AmountChanged(it)) },
+        label = stringResource(id = designR.string.budget_amount_label),
+        placeholder = "0.00"
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    TripPointDropdown(
+        value = uiState.category,
+        onValueChange = { onIntent(AddExpenseContract.Intent.CategoryChanged(it)) },
+        label = stringResource(id = designR.string.budget_category_label),
+        options = listOf(
+            stringResource(id = designR.string.budget_category_food),
+            stringResource(id = designR.string.budget_category_transport),
+            stringResource(id = designR.string.budget_category_activities),
+            stringResource(id = designR.string.budget_category_accommodation),
+            stringResource(id = designR.string.budget_category_other)
+        )
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    TripPointTextField(
+        value = uiState.date,
+        onValueChange = { },
+        label = stringResource(id = designR.string.budget_date_label),
+        placeholder = "YYYY-MM-DD",
+        readOnly = true,
+        trailingIcon = {
+            IconButton(onClick = onShowDatePicker) {
+                Icon(imageVector = Icons.Default.CalendarToday, contentDescription = null)
+            }
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onShowDatePicker() }
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    TripPointTextField(
+        value = uiState.description,
+        onValueChange = { onIntent(AddExpenseContract.Intent.DescriptionChanged(it)) },
+        label = stringResource(id = designR.string.budget_description_label),
+        placeholder = "e.g. Starbucks Coffee"
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    PayerSelectionField(uiState, onIntent)
+}
+
+@Composable
+private fun PayerSelectionField(
+    uiState: AddExpenseContract.State,
+    onIntent: (AddExpenseContract.Intent) -> Unit
+) {
+    if (uiState.members.isNotEmpty()) {
+        TripPointDropdown(
+            value = uiState.paidBy,
+            onValueChange = { selected ->
+                val member = uiState.members.find {
+                    (it.userName ?: it.userId) == selected
+                }
+                onIntent(AddExpenseContract.Intent.PaidByChanged(member?.userId ?: selected))
+            },
+            label = stringResource(id = designR.string.budget_paid_by_label),
+            options = uiState.members.map { it.userName ?: it.userId },
+            modifier = Modifier.fillMaxWidth()
+        )
+    } else {
+        TripPointTextField(
+            value = uiState.paidBy,
+            onValueChange = { onIntent(AddExpenseContract.Intent.PaidByChanged(it)) },
+            label = stringResource(id = designR.string.budget_paid_by_label),
+            placeholder = stringResource(id = designR.string.budget_paid_by_placeholder)
+        )
     }
 }
 

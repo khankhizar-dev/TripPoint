@@ -88,7 +88,7 @@ fun ExpenseListScreen(
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add Expense")
+                Icon(Icons.Default.Add, contentDescription = null)
             }
         }
     ) { innerPadding ->
@@ -118,10 +118,10 @@ private fun ExpenseListContent(
         }
     } else if (uiState.expenses.isEmpty()) {
         TripPointEmptyState(
-            title = "No expenses yet",
-            subtitle = "Start tracking your spending for this trip.",
+            title = stringResource(id = designR.string.budget_no_expenses_title),
+            subtitle = stringResource(id = designR.string.budget_no_expenses_desc),
             imageResId = designR.drawable.illustration_empty_trip,
-            actionText = "Add Expense",
+            actionText = stringResource(id = designR.string.budget_add_expense_title),
             onActionClick = { onIntent(ExpenseListContract.Intent.AddExpenseClicked) }
         )
     } else {
@@ -132,7 +132,7 @@ private fun ExpenseListContent(
         ) {
             items(uiState.expenses) { expense ->
                 val paidByName = uiState.members.find { it.userId == expense.paidBy }?.userName 
-                    ?: expense.paidBy?.take(8) ?: "Unknown"
+                    ?: expense.paidBy?.take(8) ?: stringResource(id = designR.string.budget_unknown_user)
                 
                 ExpenseItem(
                     expense = expense, 
@@ -163,7 +163,7 @@ private fun ExpenseItem(expense: Expense, paidByName: String, onClick: () -> Uni
                         fontWeight = FontWeight.Bold
                     )
                     Text(
-                        text = "Paid by $paidByName • ${expense.date}",
+                        text = stringResource(id = designR.string.budget_paid_by_prefix, paidByName, expense.date),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )

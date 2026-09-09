@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -37,6 +36,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.core.designsystem.components.AlertVariant
@@ -48,19 +48,22 @@ import com.android.trippoint.core.designsystem.components.TripPointIconButton
 import com.android.trippoint.core.designsystem.components.TripPointInfoCard
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import com.android.trippoint.documents.domain.model.Document
+import com.android.trippoint.core.designsystem.R as designR
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun DocumentDetailsRoute(
+    tripId: String,
     documentId: String,
     viewModel: DocumentDetailsViewModel,
     onNavigateBack: () -> Unit,
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val context = androidx.compose.ui.platform.LocalContext.current
 
-    LaunchedEffect(documentId) {
-        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument(documentId))
+    LaunchedEffect(tripId, documentId) {
+        viewModel.onIntent(DocumentDetailsContract.Intent.LoadDocument(tripId, documentId))
     }
 
     LaunchedEffect(viewModel.effect) {
@@ -69,6 +72,10 @@ fun DocumentDetailsRoute(
                 DocumentDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 is DocumentDetailsContract.Effect.ShowMessage -> {
                     snackbarHostState.showSnackbar(effect.message)
+                }
+                is DocumentDetailsContract.Effect.ShowMessageResId -> {
+                    val message = context.resources.getString(effect.resId)
+                    snackbarHostState.showSnackbar(message)
                 }
             }
         }
@@ -90,7 +97,7 @@ fun DocumentDetailsScreen(
     Scaffold(
         topBar = {
             TripPointTopAppBar(
-                title = uiState.document?.title ?: "Document Details",
+                title = uiState.document?.title ?: stringResource(id = designR.string.documents_details_title),
                 onNavClick = { onIntent(DocumentDetailsContract.Intent.BackClicked) }
             )
         },
@@ -108,18 +115,21 @@ fun DocumentDetailsScreen(
             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                 LoadingIndicator()
             }
-        } else if (uiState.error != null) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(24.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
-            }
         } else {
-            uiState.document?.let { document ->
-                DocumentDetailsContent(document, innerPadding)
+            val errorMessage = uiState.error ?: uiState.errorResId?.let { stringResource(id = it) }
+            if (errorMessage != null) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    TripPointAlert(message = errorMessage, variant = AlertVariant.Error)
+                }
+            } else {
+                uiState.document?.let { document ->
+                    DocumentDetailsContent(document, innerPadding)
+                }
             }
         }
     }
@@ -176,34 +186,27 @@ private fun DocumentDetailsContent(document: Document, innerPadding: PaddingValu
             verticalAlignment = Alignment.CenterVertically
         ) {
             TripPointChip(text = document.type.name, isSelected = true, onClick = {})
-            Spacer(modifier = Modifier.width(8.dp))
-            TripPointChip(text = "India", isSelected = false, onClick = {}) // Mock region
         }
         
         Spacer(modifier = Modifier.height(32.dp))
         
         // Details Cards
-        TripPointInfoCard(title = "Expiry Date") {
+        TripPointInfoCard(title = stringResource(id = designR.string.documents_expiry_label)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = document.expiryDate ?: "Never",
+                    text = document.expiryDate ?: stringResource(id = designR.string.documents_expiry_never),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
-                )
-                Text(
-                    text = "(3 years left)", // Mock logic
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        TripPointInfoCard(title = "Document Number") {
+        TripPointInfoCard(title = stringResource(id = designR.string.documents_ref_label)) {
             Text(
                 text = document.referenceNumber ?: "N/A", 
                 style = MaterialTheme.typography.titleMedium, 
@@ -213,8 +216,12 @@ private fun DocumentDetailsContent(document: Document, innerPadding: PaddingValu
         
         Spacer(modifier = Modifier.height(16.dp))
         
-        TripPointInfoCard(title = "Issued By") {
-            Text(text = "Govt. of India", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+        TripPointInfoCard(title = stringResource(id = designR.string.documents_filter_issued_by)) {
+            Text(
+                text = stringResource(id = designR.string.documents_default_issuer), 
+                style = MaterialTheme.typography.titleMedium, 
+                fontWeight = FontWeight.Bold
+            )
         }
         
         Spacer(modifier = Modifier.height(32.dp))

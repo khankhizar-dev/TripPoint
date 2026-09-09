@@ -6,6 +6,7 @@ import com.android.trippoint.core.common.UiState
 
 class ScanDocumentContract {
     sealed class Intent : UiIntent {
+        data class LoadTripId(val tripId: String) : Intent()
         object CaptureClicked : Intent()
         data class AutoCaptureToggled(val enabled: Boolean) : Intent()
         object BackClicked : Intent()
@@ -13,6 +14,7 @@ class ScanDocumentContract {
     }
 
     data class State(
+        val tripId: String = "",
         val isAutoCaptureEnabled: Boolean = true,
         val isFlashEnabled: Boolean = false,
         val isProcessing: Boolean = false,

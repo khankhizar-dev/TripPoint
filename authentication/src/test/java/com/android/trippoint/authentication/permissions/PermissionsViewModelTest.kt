@@ -40,7 +40,7 @@ class PermissionsViewModelTest {
     }
 
     @Test
-    fun `allow clicked updates steps and sends effect`() = runTest {
+    fun `allow clicked sends effect and permission handled updates steps`() = runTest {
         viewModel.effect.test {
             // NOTIFICATIONS -> LOCATION
             viewModel.onIntent(PermissionsContract.Intent.AllowClicked)
@@ -48,6 +48,10 @@ class PermissionsViewModelTest {
                 PermissionsContract.Effect.RequestPermission(PermissionsContract.Step.NOTIFICATIONS),
                 awaitItem()
             )
+            // Should not change until handled
+            assertEquals(PermissionsContract.Step.NOTIFICATIONS, viewModel.uiState.value.currentStep)
+            
+            viewModel.onIntent(PermissionsContract.Intent.PermissionHandled)
             assertEquals(PermissionsContract.Step.LOCATION, viewModel.uiState.value.currentStep)
 
             // LOCATION -> CALENDAR
@@ -56,6 +60,7 @@ class PermissionsViewModelTest {
                 PermissionsContract.Effect.RequestPermission(PermissionsContract.Step.LOCATION),
                 awaitItem()
             )
+            viewModel.onIntent(PermissionsContract.Intent.PermissionHandled)
             assertEquals(PermissionsContract.Step.CALENDAR, viewModel.uiState.value.currentStep)
 
             // CALENDAR -> ALL SET
@@ -64,6 +69,7 @@ class PermissionsViewModelTest {
                 PermissionsContract.Effect.RequestPermission(PermissionsContract.Step.CALENDAR),
                 awaitItem()
             )
+            viewModel.onIntent(PermissionsContract.Intent.PermissionHandled)
             assertEquals(true, viewModel.uiState.value.isAllSet)
         }
     }
