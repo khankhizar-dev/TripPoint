@@ -31,6 +31,11 @@ class ChecklistDetailsViewModel : BaseViewModel<
             ChecklistDetailsContract.Intent.AiSuggestClicked -> {
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAiSuggest)
             }
+            ChecklistDetailsContract.Intent.ProgressClicked -> {
+                uiState.value.checklist?.id?.let {
+                    sendEffect(ChecklistDetailsContract.Effect.NavigateToProgress(it))
+                }
+            }
         }
     }
 

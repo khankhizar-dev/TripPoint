@@ -1,6 +1,7 @@
 package com.android.trippoint.checklist.details
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -56,6 +57,7 @@ fun ChecklistDetailsRoute(
     viewModel: ChecklistDetailsViewModel,
     onNavigateBack: () -> Unit,
     onNavigateToSection: (String) -> Unit,
+    onNavigateToProgress: (String) -> Unit,
     onNavigateToAddSection: () -> Unit,
     onNavigateToAddItem: () -> Unit,
     onNavigateToAiSuggest: () -> Unit
@@ -72,6 +74,9 @@ fun ChecklistDetailsRoute(
                 ChecklistDetailsContract.Effect.NavigateBack -> onNavigateBack()
                 is ChecklistDetailsContract.Effect.NavigateToSectionDetails -> {
                     onNavigateToSection(effect.id)
+                }
+                is ChecklistDetailsContract.Effect.NavigateToProgress -> {
+                    onNavigateToProgress(effect.checklistId)
                 }
                 ChecklistDetailsContract.Effect.NavigateToAddSection -> onNavigateToAddSection()
                 ChecklistDetailsContract.Effect.NavigateToAddItem -> onNavigateToAddItem()
@@ -157,7 +162,7 @@ private fun ChecklistDetailsContent(
         contentPadding = PaddingValues(bottom = 80.dp)
     ) {
         item {
-            ChecklistHeader(checklist)
+            ChecklistHeader(checklist, onIntent)
         }
         
         item {
@@ -187,7 +192,10 @@ private fun ChecklistDetailsContent(
 }
 
 @Composable
-private fun ChecklistHeader(checklist: Checklist) {
+private fun ChecklistHeader(
+    checklist: Checklist,
+    onIntent: (ChecklistDetailsContract.Intent) -> Unit
+) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -231,7 +239,9 @@ private fun ChecklistHeader(checklist: Checklist) {
         ) {
             TripPointCircularProgress(
                 progress = checklist.progress,
-                modifier = Modifier.size(80.dp)
+                modifier = Modifier
+                    .size(80.dp)
+                    .clickable { onIntent(ChecklistDetailsContract.Intent.ProgressClicked) }
             )
         }
     }

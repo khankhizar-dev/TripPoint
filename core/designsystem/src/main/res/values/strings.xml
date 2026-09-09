@@ -312,6 +312,16 @@
     <string name="checklist_category_electronics">Electronics</string>
     <string name="checklist_category_essentials">Essentials</string>
     <string name="checklist_category_documents">Documents</string>
+    <string name="checklist_progress_title">Overall Progress</string>
+    <string name="checklist_progress_good_job">Good progress! Keep going 🚀</string>
+    <string name="checklist_view_completed">View Completed Items</string>
+    <string name="checklist_templates_title">Templates</string>
+    <string name="checklist_template_weekend">Weekend Getaway</string>
+    <string name="checklist_template_family">Family Vacation</string>
+    <string name="checklist_template_business">Business Trip</string>
+    <string name="checklist_template_adventure">Adventure Trip</string>
+    <string name="checklist_template_beach">Beach Holiday</string>
+    <string name="checklist_template_items_count">%1$d Items</string>
 
     <!-- Errors -->
     <string name="error_failed_load_trip">Failed to load trip details</string>

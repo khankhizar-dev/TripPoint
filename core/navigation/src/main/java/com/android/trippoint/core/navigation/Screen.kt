@@ -219,7 +219,11 @@ sealed class Screen(val route: String) {
         }
     }
     object Checklists : Screen("checklists?tripId={tripId}") {
-        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) "checklists?tripId=$tripId" else "checklists"
+        fun createRoute(tripId: String? = null) = if (!tripId.isNullOrBlank()) {
+            "checklists?tripId=$tripId"
+        } else {
+            "checklists"
+        }
     }
     object ChecklistDetails : Screen("checklist_details/{checklistId}") {
         fun createRoute(id: String) = "checklist_details/$id"
@@ -230,4 +234,8 @@ sealed class Screen(val route: String) {
     object AddChecklistItem : Screen("add_checklist_item/{checklistId}/{sectionId}") {
         fun createRoute(checklistId: String, sectionId: String) = "add_checklist_item/$checklistId/$sectionId"
     }
+    object ChecklistProgress : Screen("checklist_progress/{checklistId}") {
+        fun createRoute(checklistId: String) = "checklist_progress/$checklistId"
+    }
+    object ChecklistTemplates : Screen("checklist_templates")
 }

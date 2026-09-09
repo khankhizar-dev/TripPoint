@@ -1,4 +1,4 @@
-package com.android.trippoint.checklist.details
+package com.android.trippoint.checklist.progress
 
 import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.checklist.domain.model.ChecklistSection
@@ -6,15 +6,11 @@ import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState
 
-class ChecklistDetailsContract {
+class ChecklistProgressContract {
     sealed class Intent : UiIntent {
-        data class LoadChecklist(val id: String) : Intent()
+        data class LoadProgress(val checklistId: String) : Intent()
+        object ViewCompletedClicked : Intent()
         object BackClicked : Intent()
-        data class SectionClicked(val id: String) : Intent()
-        object AddSectionClicked : Intent()
-        object AddItemClicked : Intent()
-        object AiSuggestClicked : Intent()
-        object ProgressClicked : Intent()
     }
 
     data class State(
@@ -26,10 +22,6 @@ class ChecklistDetailsContract {
 
     sealed class Effect : UiEffect {
         object NavigateBack : Effect()
-        data class NavigateToSectionDetails(val id: String) : Effect()
-        data class NavigateToProgress(val checklistId: String) : Effect()
-        object NavigateToAddSection : Effect()
-        object NavigateToAddItem : Effect()
-        object NavigateToAiSuggest : Effect()
+        data class NavigateToCompleted(val checklistId: String) : Effect()
     }
 }
