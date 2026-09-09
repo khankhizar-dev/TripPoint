@@ -28,9 +28,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.checklist.domain.model.Checklist
+import com.android.trippoint.core.common.utils.DateTimeUtils
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
-import com.android.trippoint.core.designsystem.components.TripPointBudgetCard
+import com.android.trippoint.core.designsystem.components.TripPointChecklistCard
 import com.android.trippoint.core.designsystem.components.TripPointEmptyState
 import com.android.trippoint.core.designsystem.components.TripPointTabs
 import com.android.trippoint.core.designsystem.components.TripPointTextField
@@ -195,10 +196,11 @@ private fun ChecklistCard(
     checklist: Checklist,
     onClick: () -> Unit
 ) {
-    TripPointBudgetCard(
+    TripPointChecklistCard(
         title = checklist.title,
-        totalBudget = checklist.dateRange,
-        spentSoFar = "${checklist.completedItems}/${checklist.totalItems}",
+        date = DateTimeUtils.formatIsoToDisplay(checklist.updatedAt),
+        completedItems = checklist.completedItems,
+        totalItems = checklist.totalItems,
         progress = checklist.progress,
         onClick = onClick,
         modifier = Modifier.fillMaxWidth()

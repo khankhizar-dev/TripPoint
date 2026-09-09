@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,10 +34,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.checklist.domain.model.ChecklistItem
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
+import com.android.trippoint.core.designsystem.components.TripPointButton
+import com.android.trippoint.core.designsystem.components.TripPointCheckbox
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
 import com.android.trippoint.core.designsystem.components.TripPointTextField
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
@@ -65,6 +70,7 @@ fun ChecklistItemsRoute(
                     onNavigateToAddItem(effect.tripId, effect.checklistId, effect.sectionId)
                 }
                 is ChecklistItemsContract.Effect.ShowError -> { /* Handle */ }
+                ChecklistItemsContract.Effect.SaveSuccess -> { /* Maybe show snackbar */ }
             }
         }
     }
@@ -95,6 +101,22 @@ fun ChecklistItemsScreen(
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ) {
                     Icon(Icons.Default.Add, contentDescription = "Add Item")
+                }
+            }
+        },
+        bottomBar = {
+            if (uiState.hasChanges) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(24.dp)
+                ) {
+                    TripPointButton(
+                        text = "Save Changes",
+                        onClick = { onIntent(ChecklistItemsContract.Intent.SaveClicked) },
+                        isLoading = uiState.isSaving,
+                        modifier = Modifier.fillMaxWidth()
+                    )
                 }
             }
         }
@@ -184,7 +206,7 @@ private fun ChecklistItemsList(
     
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(bottom = 80.dp)
+        contentPadding = PaddingValues(bottom = 100.dp)
     ) {
         groupedItems.forEach { (category, items) ->
             item {
@@ -200,10 +222,7 @@ private fun ChecklistItemsList(
                 ChecklistItemRow(item) {
                     onIntent(ChecklistItemsContract.Intent.ItemToggled(item.id))
                 }
-            }
-            
-            item {
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
             }
         }
     }
@@ -214,40 +233,63 @@ private fun ChecklistItemRow(
     item: ChecklistItem,
     onToggle: () -> Unit
 ) {
-    Row(
+    Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 24.dp),
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Checkbox(
-            checked = item.isCompleted,
-            onCheckedChange = { onToggle() },
-            colors = CheckboxDefaults.colors(
-                checkedColor = MaterialTheme.colorScheme.primary,
-                uncheckedColor = MaterialTheme.colorScheme.outline
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            TripPointCheckbox(
+                checked = item.isCompleted,
+                onCheckedChange = { onToggle() },
+                modifier = Modifier.size(24.dp)
             )
-        )
-        
-        Spacer(modifier = Modifier.size(12.dp))
-        
-        Column(modifier = Modifier.weight(1f)) {
-            val textColor = if (item.isCompleted) {
-                MaterialTheme.colorScheme.onSurfaceVariant
-            } else {
-                MaterialTheme.colorScheme.onSurface
-            }
-            Text(
-                text = item.name,
-                style = MaterialTheme.typography.bodyLarge,
-                color = textColor,
-                fontWeight = if (item.isEssential) FontWeight.Bold else FontWeight.Normal
-            )
-            if (item.notes != null) {
+            
+            Spacer(modifier = Modifier.size(16.dp))
+            
+            Column(modifier = Modifier.weight(1f)) {
+                val textColor = if (item.isCompleted) {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                } else {
+                    MaterialTheme.colorScheme.onSurface
+                }
+                val textDecoration = if (item.isCompleted) {
+                    TextDecoration.LineThrough
+                } else {
+                    TextDecoration.None
+                }
+                
                 Text(
-                    text = item.notes,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    text = item.name,
+                    style = MaterialTheme.typography.bodyLarge.copy(
+                        textDecoration = textDecoration
+                    ),
+                    color = textColor,
+                    fontWeight = if (item.isEssential) FontWeight.Bold else FontWeight.Normal
+                )
+                if (item.notes != null) {
+                    Text(
+                        text = item.notes,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            if (item.isEssential) {
+                Icon(
+                    imageVector = Icons.Default.Star,
+                    contentDescription = "Essential",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.secondary
                 )
             }
         }

@@ -617,8 +617,7 @@ data class UpdateChecklistInput(
 )
 
 data class CreateChecklistSectionInput(
-    val name: String,
-    val position: Int? = null
+    val name: String
 )
 
 data class UpdateChecklistSectionInput(
@@ -630,8 +629,7 @@ data class CreateChecklistItemInput(
     val name: String,
     val category: String,
     val essential: Boolean,
-    val dueDate: String? = null,
-    val position: Int? = null
+    val dueDate: String? = null
 )
 
 data class UpdateChecklistItemInput(
@@ -655,8 +653,7 @@ data class UpdateChecklistTemplateInput(
 )
 
 data class CreateChecklistTemplateSectionInput(
-    val name: String,
-    val position: Int? = null
+    val name: String
 )
 
 data class UpdateChecklistTemplateSectionInput(
@@ -667,8 +664,7 @@ data class UpdateChecklistTemplateSectionInput(
 data class CreateChecklistTemplateItemInput(
     val name: String,
     val category: String,
-    val essential: Boolean,
-    val position: Int? = null
+    val essential: Boolean
 )
 
 data class UpdateChecklistTemplateItemInput(

@@ -13,11 +13,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Error
@@ -70,7 +72,7 @@ fun ChecklistDetailsRoute(
     onNavigateToSection: (String, String, String) -> Unit,
     onNavigateToProgress: (String, String) -> Unit,
     onNavigateToAddSection: () -> Unit,
-    onNavigateToAddItem: (String, String) -> Unit,
+    onNavigateToAddItem: (String, String, String) -> Unit,
     onNavigateToAiSuggest: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -89,11 +91,11 @@ fun ChecklistDetailsRoute(
                 is ChecklistDetailsContract.Effect.NavigateToProgress -> {
                     onNavigateToProgress(effect.tripId, effect.checklistId)
                 }
+                ChecklistDetailsContract.Effect.NavigateToAddSection -> onNavigateToAddSection()
                 is ChecklistDetailsContract.Effect.NavigateToAddItem -> {
-                    onNavigateToAddItem(effect.tripId, effect.checklistId)
+                    onNavigateToAddItem(effect.tripId, effect.checklistId, effect.sectionId)
                 }
                 ChecklistDetailsContract.Effect.NavigateToAiSuggest -> onNavigateToAiSuggest()
-                else -> {}
             }
         }
     }
@@ -397,11 +399,24 @@ private fun ChecklistSectionItem(
                 )
             }
             
-            TripPointCircularProgress(
-                progress = if (section.totalItems > 0) section.completedItems.toFloat() / section.totalItems else 0f,
-                showPercentage = false,
-                modifier = Modifier.size(40.dp)
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                val progress = if (section.totalItems > 0) {
+                    section.completedItems.toFloat() / section.totalItems 
+                } else 0f
+                TripPointCircularProgress(
+                    progress = progress,
+                    showPercentage = false,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.outline
+                )
+            }
         }
     }
 }

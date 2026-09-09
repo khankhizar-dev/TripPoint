@@ -33,7 +33,7 @@ class ChecklistDetailsContract {
         data class NavigateToSectionDetails(val tripId: String, val checklistId: String, val id: String) : Effect()
         data class NavigateToProgress(val tripId: String, val checklistId: String) : Effect()
         object NavigateToAddSection : Effect()
-        data class NavigateToAddItem(val tripId: String, val checklistId: String) : Effect()
+        data class NavigateToAddItem(val tripId: String, val checklistId: String, val sectionId: String) : Effect()
         object NavigateToAiSuggest : Effect()
     }
 }

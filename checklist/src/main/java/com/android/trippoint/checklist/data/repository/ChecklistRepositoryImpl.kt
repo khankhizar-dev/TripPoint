@@ -73,7 +73,7 @@ class ChecklistRepositoryImpl(
         name: String, 
         position: Int?
     ): Result<ChecklistSection> = runCatching {
-        val input = CreateChecklistSectionInput(name = name, position = position)
+        val input = CreateChecklistSectionInput(name = name)
         val result = remoteDataSource.createChecklistSection(tripId, checklistId, input)
         result?.toDomain() ?: throw Exception("Failed to create section")
     }

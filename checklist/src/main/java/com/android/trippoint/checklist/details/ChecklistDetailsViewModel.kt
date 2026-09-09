@@ -30,9 +30,12 @@ class ChecklistDetailsViewModel(
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAddSection)
             }
             ChecklistDetailsContract.Intent.AddItemClicked -> {
+                val state = uiState.value
+                val sectionId = state.sections.firstOrNull()?.id ?: ""
                 sendEffect(ChecklistDetailsContract.Effect.NavigateToAddItem(
-                    uiState.value.tripId,
-                    uiState.value.id
+                    state.tripId,
+                    state.id,
+                    sectionId
                 ))
             }
             ChecklistDetailsContract.Intent.AiSuggestClicked -> {

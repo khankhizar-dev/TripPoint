@@ -15,18 +15,20 @@ class ChecklistItemsViewModel(
 >(
     ChecklistItemsContract.State()
 ) {
-    private var allItems = emptyList<ChecklistItem>()
+    private var originalItems = emptyList<ChecklistItem>()
+    private val modifiedItemIds = mutableSetOf<String>()
 
     override fun onIntent(intent: ChecklistItemsContract.Intent) {
         when (intent) {
             is ChecklistItemsContract.Intent.LoadSection -> {
                 loadSection(intent.tripId, intent.checklistId, intent.sectionId)
             }
-            is ChecklistItemsContract.Intent.ItemToggled -> toggleItem(intent.itemId)
+            is ChecklistItemsContract.Intent.ItemToggled -> toggleItemLocally(intent.itemId)
             is ChecklistItemsContract.Intent.SearchQueryChanged -> {
                 setState { copy(searchQuery = intent.query) }
-                filterItems()
+                filterItems(uiState.value.items, intent.query)
             }
+            ChecklistItemsContract.Intent.SaveClicked -> saveChanges()
             ChecklistItemsContract.Intent.AddItemClicked -> {
                 val state = uiState.value
                 val effect = ChecklistItemsContract.Effect.NavigateToAddItem(
@@ -52,22 +54,24 @@ class ChecklistItemsViewModel(
                     tripId = tripId, 
                     checklistId = checklistId, 
                     sectionId = sectionId,
-                    error = null
+                    error = null,
+                    hasChanges = false
                 ) 
             }
+            modifiedItemIds.clear()
             val result = repository.getChecklist(tripId, checklistId)
             
             if (result.isSuccess) {
                 val checklist = result.getOrThrow()
                 val section = checklist.sections.find { it.id == sectionId }
                 if (section != null) {
-                    allItems = section.items
+                    originalItems = section.items
                     setState { 
                         copy(
                             isLoading = false, 
                             section = section,
-                            items = allItems,
-                            filteredItems = allItems
+                            items = originalItems,
+                            filteredItems = originalItems
                         ) 
                     }
                 } else {
@@ -79,39 +83,66 @@ class ChecklistItemsViewModel(
         }
     }
 
-    private fun toggleItem(itemId: String) {
-        val state = uiState.value
-        val item = allItems.find { it.id == itemId } ?: return
-        val newCompleted = !item.isCompleted
+    private fun toggleItemLocally(itemId: String) {
+        val currentItems = uiState.value.items
+        val updatedItems = currentItems.map {
+            if (it.id == itemId) it.copy(isCompleted = !it.isCompleted) else it
+        }
         
+        val item = updatedItems.find { it.id == itemId } ?: return
+        val originalItem = originalItems.find { it.id == itemId }
+        
+        if (item.isCompleted != originalItem?.isCompleted) {
+            modifiedItemIds.add(itemId)
+        } else {
+            modifiedItemIds.remove(itemId)
+        }
+        
+        val completedCount = updatedItems.count { it.isCompleted }
+        setState { 
+            copy(
+                items = updatedItems,
+                hasChanges = modifiedItemIds.isNotEmpty(),
+                section = section?.copy(completedItems = completedCount)
+            ) 
+        }
+        filterItems(updatedItems, uiState.value.searchQuery)
+    }
+
+    private fun saveChanges() {
+        val state = uiState.value
+        val itemsToSync = state.items.filter { modifiedItemIds.contains(it.id) }
+        
+        if (itemsToSync.isEmpty()) return
+
         viewModelScope.launch {
-            val result = repository.updateItem(
-                tripId = state.tripId,
-                checklistId = state.checklistId,
-                sectionId = state.sectionId,
-                itemId = itemId,
-                isCompleted = newCompleted
-            )
+            setState { copy(isSaving = true) }
             
-            if (result.isSuccess) {
-                allItems = allItems.map {
-                    if (it.id == itemId) it.copy(isCompleted = newCompleted) else it
-                }
-                val completedCount = allItems.count { it.isCompleted }
-                setState { 
-                    copy(
-                        items = allItems,
-                        section = section?.copy(completedItems = completedCount)
-                    ) 
-                }
-                filterItems()
+            var allSuccess = true
+            itemsToSync.forEach { item ->
+                val result = repository.updateItem(
+                    tripId = state.tripId,
+                    checklistId = state.checklistId,
+                    sectionId = state.sectionId,
+                    itemId = item.id,
+                    isCompleted = item.isCompleted
+                )
+                if (result.isFailure) allSuccess = false
+            }
+            
+            if (allSuccess) {
+                originalItems = state.items
+                modifiedItemIds.clear()
+                setState { copy(isSaving = false, hasChanges = false) }
+                sendEffect(ChecklistItemsContract.Effect.SaveSuccess)
+            } else {
+                setState { copy(isSaving = false, error = "Failed to sync some items") }
             }
         }
     }
 
-    private fun filterItems() {
-        val query = uiState.value.searchQuery
-        val filtered = allItems.filter { 
+    private fun filterItems(items: List<ChecklistItem>, query: String) {
+        val filtered = items.filter { 
             it.name.contains(query, ignoreCase = true) 
         }
         setState { copy(filteredItems = filtered) }

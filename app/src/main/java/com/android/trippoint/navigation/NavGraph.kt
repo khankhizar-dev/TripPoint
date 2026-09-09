@@ -1592,14 +1592,17 @@ private fun NavGraphBuilder.addChecklistDetailsDestination(
                 val route = Screen.ChecklistItems.createRoute(cId, sId) + "?tripId=$tId"
                 navController.navigate(route) 
             },
-            onNavigateToProgress = { id -> 
-                navController.navigate(Screen.ChecklistProgress.createRoute(tripId, id)) 
+            onNavigateToProgress = { tId, cId -> 
+                navController.navigate(Screen.ChecklistProgress.createRoute(tId, cId)) 
             },
-            onNavigateToAddSection = { /* TODO */ },
-            onNavigateToAddItem = { tId, cId -> 
-                // Navigation logic will be handled inside the screen or we can default to a specific flow
-                // For now, we go to the first section or show a picker in a real app.
-                // Let's assume the screen itself will trigger NavigateToAddItem with a valid sectionId from its effect.
+            onNavigateToAddSection = { /* Manual section add handled in screen dialog */ },
+            onNavigateToAddItem = { tId, cId, sId -> 
+                if (sId.isNotEmpty()) {
+                    val route = Screen.AddChecklistItem.createRoute(cId, sId) + "?tripId=$tId"
+                    navController.navigate(route)
+                } else {
+                    // Show a toast or fallback if no sections exist yet
+                }
             },
             onNavigateToAiSuggest = { 
                 navController.navigate(Screen.ChecklistAiSuggest.createRoute(tripId)) 
@@ -1708,7 +1711,12 @@ private fun NavGraphBuilder.addChecklistProgressDestination(
             checklistId = checklistId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() },
-            onNavigateToCompleted = { _, _ -> /* TODO */ }
+            onNavigateToCompleted = { tId, cId -> 
+                val route = Screen.ChecklistDetails.createRoute(cId) + "?tripId=$tId"
+                navController.navigate(route) {
+                    popUpTo(Screen.ChecklistProgress.createRoute(tId, cId)) { inclusive = true }
+                }
+            }
         )
     }
 }
