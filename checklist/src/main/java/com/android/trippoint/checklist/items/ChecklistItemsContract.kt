@@ -11,6 +11,8 @@ class ChecklistItemsContract {
         data class LoadSection(val tripId: String, val checklistId: String, val sectionId: String) : Intent()
         data class ItemToggled(val itemId: String) : Intent()
         data class SearchQueryChanged(val query: String) : Intent()
+        data class TabSelected(val index: Int) : Intent()
+        data class DeleteItem(val itemId: String) : Intent()
         object SaveClicked : Intent()
         object AddItemClicked : Intent()
         object BackClicked : Intent()
@@ -25,6 +27,8 @@ class ChecklistItemsContract {
         val items: List<ChecklistItem> = emptyList(),
         val filteredItems: List<ChecklistItem> = emptyList(),
         val searchQuery: String = "",
+        val selectedTab: Int = 0, // 0: All, 1: My Tasks
+        val currentUserId: String? = null,
         val isLoading: Boolean = false,
         val isSaving: Boolean = false,
         val hasChanges: Boolean = false,
@@ -36,5 +40,6 @@ class ChecklistItemsContract {
         data class NavigateToAddItem(val tripId: String, val checklistId: String, val sectionId: String) : Effect()
         data class ShowError(val message: String) : Effect()
         object SaveSuccess : Effect()
+        object ItemDeleted : Effect()
     }
 }

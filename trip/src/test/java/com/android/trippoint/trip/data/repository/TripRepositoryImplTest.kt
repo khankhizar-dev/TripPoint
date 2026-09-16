@@ -127,7 +127,7 @@ class TripRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         val member = result.getOrNull()?.first()
-        assertEquals("OWNER", member?.role?.name)
+        assertEquals("ORGANIZER", member?.role?.name)
     }
 
     @Test
@@ -168,6 +168,26 @@ class TripRepositoryImplTest {
 
         assertTrue(result.isSuccess)
         assertEquals(1, result.getOrNull()?.size)
+    }
+
+    @Test
+    fun `removeTripMember returns boolean`() = runTest {
+        coEvery { remoteDataSource.removeTripMember("1", "u1") } returns true
+
+        val result = repository.removeTripMember("1", "u1")
+
+        assertTrue(result.isSuccess)
+        assertEquals(true, result.getOrNull())
+    }
+
+    @Test
+    fun `leaveTrip returns boolean`() = runTest {
+        coEvery { remoteDataSource.leaveTrip("1") } returns true
+
+        val result = repository.leaveTrip("1")
+
+        assertTrue(result.isSuccess)
+        assertEquals(true, result.getOrNull())
     }
 
     @Test

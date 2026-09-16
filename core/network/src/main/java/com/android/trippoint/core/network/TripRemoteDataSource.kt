@@ -159,6 +159,28 @@ class TripRemoteDataSource(
         return moshi.adapter(TripMemberDto::class.java).fromJsonValue(data)
     }
 
+    suspend fun removeTripMember(tripId: String, userId: String): Boolean {
+        val query = """
+            mutation RemoveTripMember(${'$'}tripId: ID!, ${'$'}userId: ID!) {
+              removeTripMember(tripId: ${'$'}tripId, userId: ${'$'}userId)
+            }
+        """.trimIndent()
+        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId, "userId" to userId))
+        val response = api.postGraphQl(request)
+        return response.body()?.data?.get("removeTripMember") as? Boolean ?: false
+    }
+
+    suspend fun leaveTrip(tripId: String): Boolean {
+        val query = """
+            mutation LeaveTrip(${'$'}tripId: ID!) {
+              leaveTrip(tripId: ${'$'}tripId)
+            }
+        """.trimIndent()
+        val request = GraphQlRequest(query = query, variables = mapOf("tripId" to tripId))
+        val response = api.postGraphQl(request)
+        return response.body()?.data?.get("leaveTrip") as? Boolean ?: false
+    }
+
     suspend fun getMyTripInvitations(): List<TripMemberDto> {
         val query = """
             query MyTripInvitations {

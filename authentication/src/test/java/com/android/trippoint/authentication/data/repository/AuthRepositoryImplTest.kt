@@ -85,13 +85,13 @@ class AuthRepositoryImplTest {
 
     @Test
     fun `updateProfile returns success and updates pref when remote call succeeds`() = runBlocking {
-        coEvery { remoteDataSource.updateProfile(any()) } returns true
+        coEvery { remoteDataSource.updateProfile(any()) } returns networkUser
 
         val input = UpdateProfileInput(firstName = "John")
         val result = repository.updateProfile(input)
 
         assertTrue(result.isSuccess)
-        assertTrue(result.getOrDefault(false))
+        assertEquals("John", result.getOrNull()?.firstName)
         verify { preferencesManager.setProfileSetupCompleted(true) }
     }
 
@@ -199,5 +199,24 @@ class AuthRepositoryImplTest {
         repository.logout()
 
         verify { preferencesManager.clearSession() }
+    }
+
+    @Test
+    fun `logoutAllDevices clears preferences`() = runBlocking {
+        coEvery { remoteDataSource.logoutAllDevices() } returns true
+
+        repository.logoutAllDevices()
+
+        verify { preferencesManager.clearSession() }
+    }
+
+    @Test
+    fun `verifyPasswordResetOtp calls remote`() = runBlocking {
+        coEvery { remoteDataSource.verifyPasswordResetOtp(any(), any()) } returns true
+
+        val result = repository.verifyPasswordResetOtp("test@email.com", "123456")
+
+        assertTrue(result.isSuccess)
+        coVerify { remoteDataSource.verifyPasswordResetOtp("test@email.com", "123456") }
     }
 }

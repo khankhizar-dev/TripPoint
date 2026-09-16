@@ -3,6 +3,7 @@ package com.android.trippoint.checklist.data.repository
 import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.checklist.domain.model.ChecklistItem
 import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
+import com.android.trippoint.checklist.domain.model.ChecklistPriority
 import com.android.trippoint.checklist.domain.model.ChecklistSection
 import com.android.trippoint.checklist.domain.model.ChecklistStatus
 import com.android.trippoint.checklist.domain.model.ChecklistTemplate
@@ -105,13 +106,17 @@ class ChecklistRepositoryImpl(
         name: String,
         category: ChecklistItemCategory,
         isEssential: Boolean,
-        dueDate: String?
+        dueDate: String?,
+        assigneeId: String?,
+        priority: ChecklistPriority?
     ): Result<ChecklistItem> = runCatching {
         val input = CreateChecklistItemInput(
             name = name,
             category = category.name,
             essential = isEssential,
-            dueDate = dueDate
+            dueDate = dueDate,
+            assigneeId = assigneeId,
+            priority = priority?.name
         )
         val result = remoteDataSource.addChecklistItem(tripId, checklistId, sectionId, input)
         result?.toDomain() ?: throw Exception("Failed to add item")
@@ -126,9 +131,11 @@ class ChecklistRepositoryImpl(
         category: ChecklistItemCategory?,
         isEssential: Boolean?,
         isCompleted: Boolean?,
-        dueDate: String?
+        dueDate: String?,
+        assigneeId: String?,
+        priority: ChecklistPriority?
     ): Result<ChecklistItem> = runCatching {
-        val result = if (isCompletedOnly(name, category, isEssential, isCompleted, dueDate)) {
+        val result = if (isCompletedOnly(name, category, isEssential, isCompleted, dueDate, assigneeId, priority)) {
             remoteDataSource.completeChecklistItem(tripId, checklistId, sectionId, itemId, isCompleted!!)
         } else {
             val input = UpdateChecklistItemInput(
@@ -136,7 +143,9 @@ class ChecklistRepositoryImpl(
                 category = category?.name,
                 essential = isEssential,
                 completed = isCompleted,
-                dueDate = dueDate
+                dueDate = dueDate,
+                assigneeId = assigneeId,
+                priority = priority?.name
             )
             remoteDataSource.updateChecklistItem(tripId, checklistId, sectionId, itemId, input)
         }
@@ -148,9 +157,12 @@ class ChecklistRepositoryImpl(
         category: ChecklistItemCategory?, 
         isEssential: Boolean?, 
         isCompleted: Boolean?, 
-        dueDate: String?
+        dueDate: String?,
+        assigneeId: String?,
+        priority: ChecklistPriority?
     ): Boolean {
-        return isCompleted != null && name == null && category == null && isEssential == null && dueDate == null
+        return isCompleted != null && name == null && category == null && isEssential == null && 
+               dueDate == null && assigneeId == null && priority == null
     }
 
     override suspend fun deleteItem(
@@ -242,10 +254,20 @@ class ChecklistRepositoryImpl(
         sectionId = sectionId,
         name = name,
         isCompleted = completed,
-        category = ChecklistItemCategory.valueOf(category),
+        category = try { ChecklistItemCategory.valueOf(category) } catch (_: Exception) { ChecklistItemCategory.OTHER },
         isEssential = essential,
         dueDate = dueDate,
-        position = position
+        position = position,
+        assigneeId = assigneeId,
+        assigneeName = assigneeName,
+        assigneePhotoUrl = assigneePhotoUrl,
+        priority = try { 
+            val p = priority
+            if (p != null) ChecklistPriority.valueOf(p) 
+            else ChecklistPriority.MEDIUM 
+        } catch (_: Exception) { 
+            ChecklistPriority.MEDIUM 
+        }
     )
 
     private fun ChecklistTemplateDto.toDomain() = ChecklistTemplate(
@@ -271,7 +293,7 @@ class ChecklistRepositoryImpl(
         id = id,
         sectionId = sectionId,
         name = name,
-        category = ChecklistItemCategory.valueOf(category),
+        category = try { ChecklistItemCategory.valueOf(category) } catch (_: Exception) { ChecklistItemCategory.OTHER },
         isEssential = essential,
         position = position
     )

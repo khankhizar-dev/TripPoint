@@ -2,6 +2,7 @@ package com.android.trippoint.trip.overview
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -78,7 +79,10 @@ fun TripOverviewRoute(
     onNavigateToAddTask: (String) -> Unit,
     onNavigateToAddNote: (String) -> Unit,
     onNavigateToAddBooking: (String) -> Unit,
-    onNavigateToBudgets: (String) -> Unit
+    onNavigateToBudgets: (String) -> Unit,
+    onNavigateToMembers: (String) -> Unit,
+    onNavigateToDiscussion: (String) -> Unit,
+    onNavigateToActivity: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
@@ -103,19 +107,17 @@ fun TripOverviewRoute(
                 is TripOverviewContract.Effect.NavigateToAddTask -> onNavigateToAddTask(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddNote -> onNavigateToAddNote(effect.tripId)
                 is TripOverviewContract.Effect.NavigateToAddBooking -> onNavigateToAddBooking(effect.tripId)
-                is TripOverviewContract.Effect.NavigateToAddExpense -> {
-                    onNavigateToBudgets(effect.tripId)
-                }
                 is TripOverviewContract.Effect.NavigateToBudgets -> onNavigateToBudgets(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToAddExpense -> onNavigateToBudgets(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToMembers -> onNavigateToMembers(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToDiscussion -> onNavigateToDiscussion(effect.tripId)
+                is TripOverviewContract.Effect.NavigateToActivity -> onNavigateToActivity(effect.tripId)
                 is TripOverviewContract.Effect.ShowError -> { /* Handle error */ }
             }
         }
     }
 
-    TripOverviewScreen(
-        uiState = uiState,
-        onIntent = viewModel::onIntent
-    )
+    TripOverviewScreen(uiState = uiState, onIntent = viewModel::onIntent)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -182,40 +184,24 @@ private fun TripOverviewMenu(
     onIntent: (TripOverviewContract.Intent) -> Unit
 ) {
     DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-        DropdownMenuItem(
-            text = { Text(stringResource(id = designR.string.trip_overview_menu_upcoming)) },
-            onClick = {
-                onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.UPCOMING))
-                onDismiss()
-            }
+        val statuses = listOf(
+            TripStatus.UPCOMING to designR.string.trip_overview_menu_upcoming,
+            TripStatus.IN_PROGRESS to designR.string.trip_overview_menu_in_progress,
+            TripStatus.COMPLETED to designR.string.trip_overview_menu_completed
         )
-        DropdownMenuItem(
-            text = { Text(stringResource(id = designR.string.trip_overview_menu_in_progress)) },
-            onClick = {
-                onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.IN_PROGRESS))
-                onDismiss()
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(id = designR.string.trip_overview_menu_completed)) },
-            onClick = {
-                onIntent(TripOverviewContract.Intent.UpdateStatus(TripStatus.COMPLETED))
-                onDismiss()
-            }
-        )
+        statuses.forEach { (status, resId) ->
+            DropdownMenuItem(
+                text = { Text(stringResource(id = resId)) },
+                onClick = { onIntent(TripOverviewContract.Intent.UpdateStatus(status)); onDismiss() }
+            )
+        }
         DropdownMenuItem(
             text = { Text(stringResource(id = designR.string.trip_overview_menu_archive)) },
-            onClick = {
-                onIntent(TripOverviewContract.Intent.ArchiveTrip)
-                onDismiss()
-            }
+            onClick = { onIntent(TripOverviewContract.Intent.ArchiveTrip); onDismiss() }
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = designR.string.trip_overview_menu_delete)) },
-            onClick = {
-                onIntent(TripOverviewContract.Intent.DeleteTrip)
-                onDismiss()
-            }
+            onClick = { onIntent(TripOverviewContract.Intent.DeleteTrip); onDismiss() }
         )
     }
 }
@@ -227,59 +213,15 @@ private fun TripOverviewContent(
     onIntent: (TripOverviewContract.Intent) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-    ) {
+    Column(modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState())) {
         AsyncImage(
             model = trip.imageUrl,
             contentDescription = null,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(240.dp),
+            modifier = Modifier.fillMaxWidth().height(240.dp),
             contentScale = ContentScale.Crop
         )
 
-        Column(modifier = Modifier.padding(24.dp)) {
-            Text(
-                text = trip.title,
-                style = MaterialTheme.typography.displayLarge
-            )
-            Text(
-                text = stringResource(id = designR.string.create_trip_date_range, trip.startDate, trip.endDate),
-                style = MaterialTheme.typography.bodyMedium
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                trip.travelers.take(3).forEachIndexed { index, traveler ->
-                    AsyncImage(
-                        model = traveler.photoUrl,
-                        contentDescription = null,
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(Color.LightGray)
-                    )
-                    if (index < 2) Spacer(modifier = Modifier.width((-8).dp)) // Overlap effect
-                }
-                if (trip.travelers.size > 3) {
-                    Box(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.surfaceVariant),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = "+${trip.travelers.size - 3}",
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
-            }
-        }
+        TripOverviewHeader(trip, onIntent)
 
         TabRow(
             selectedTabIndex = selectedTab,
@@ -293,19 +235,19 @@ private fun TripOverviewContent(
             }
         ) {
             val tabs = listOf(
-                stringResource(id = designR.string.trip_overview_tab_overview),
-                stringResource(id = designR.string.trip_overview_tab_timeline),
-                stringResource(id = designR.string.trip_overview_tab_bookings),
-                stringResource(id = designR.string.trip_overview_tab_tasks),
-                stringResource(id = designR.string.trip_overview_tab_budget)
+                designR.string.trip_overview_tab_overview,
+                designR.string.trip_overview_tab_timeline,
+                designR.string.trip_overview_tab_bookings,
+                designR.string.trip_overview_tab_tasks,
+                designR.string.trip_overview_tab_budget
             )
-            tabs.forEachIndexed { index, title ->
+            tabs.forEachIndexed { index, resId ->
                 Tab(
                     selected = selectedTab == index,
                     onClick = { onIntent(TripOverviewContract.Intent.TabSelected(index)) },
                     text = {
                         Text(
-                            text = title,
+                            text = stringResource(id = resId),
                             style = MaterialTheme.typography.titleMedium,
                             color = if (selectedTab == index) MaterialTheme.colorScheme.primary 
                                     else MaterialTheme.colorScheme.onSurfaceVariant
@@ -325,6 +267,43 @@ private fun TripOverviewContent(
                 onBudgetClick = { onIntent(TripOverviewContract.Intent.AddExpenseClicked) },
                 onTasksClick = { onIntent(TripOverviewContract.Intent.AddTaskClicked) }
             )
+        }
+    }
+}
+
+@Composable
+private fun TripOverviewHeader(trip: Trip, onIntent: (TripOverviewContract.Intent) -> Unit) {
+    Column(modifier = Modifier.padding(24.dp)) {
+        Text(text = trip.title, style = MaterialTheme.typography.displayLarge)
+        Text(
+            text = stringResource(id = designR.string.create_trip_date_range, trip.startDate, trip.endDate),
+            style = MaterialTheme.typography.bodyMedium
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.clickable { onIntent(TripOverviewContract.Intent.TravelersClicked) }
+        ) {
+            trip.travelers.take(3).forEachIndexed { index, traveler ->
+                AsyncImage(
+                    model = traveler.photoUrl,
+                    contentDescription = null,
+                    modifier = Modifier.size(32.dp).clip(CircleShape).background(Color.LightGray)
+                )
+                if (index < 2) Spacer(modifier = Modifier.width((-8).dp))
+            }
+            if (trip.travelers.size > 3) {
+                Box(
+                    modifier = Modifier
+                        .size(32.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(text = "+${trip.travelers.size - 3}", style = MaterialTheme.typography.labelSmall)
+                }
+            }
         }
     }
 }
@@ -359,10 +338,7 @@ private fun QuickActionsSection(onIntent: (TripOverviewContract.Intent) -> Unit)
     )
     Spacer(modifier = Modifier.height(16.dp))
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             QuickActionButton(
                 text = stringResource(id = designR.string.trip_overview_action_add_booking),
                 onClick = { onIntent(TripOverviewContract.Intent.AddBookingClicked) },
@@ -374,10 +350,7 @@ private fun QuickActionsSection(onIntent: (TripOverviewContract.Intent) -> Unit)
                 modifier = Modifier.weight(1f)
             )
         }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             QuickActionButton(
                 text = stringResource(id = designR.string.trip_overview_action_add_expense),
                 onClick = { onIntent(TripOverviewContract.Intent.AddExpenseClicked) },
@@ -389,15 +362,23 @@ private fun QuickActionsSection(onIntent: (TripOverviewContract.Intent) -> Unit)
                 modifier = Modifier.weight(1f)
             )
         }
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+            QuickActionButton(
+                text = "Discussion",
+                onClick = { onIntent(TripOverviewContract.Intent.DiscussionClicked) },
+                modifier = Modifier.weight(1f)
+            )
+            QuickActionButton(
+                text = "Activity Feed",
+                onClick = { onIntent(TripOverviewContract.Intent.ActivityClicked) },
+                modifier = Modifier.weight(1f)
+            )
+        }
     }
 }
 
 @Composable
-private fun QuickActionButton(
-    text: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun QuickActionButton(text: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         onClick = onClick,
         modifier = modifier,
@@ -412,15 +393,8 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun StatsSection(
-    trip: Trip,
-    onBudgetClick: () -> Unit,
-    onTasksClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
+private fun StatsSection(trip: Trip, onBudgetClick: () -> Unit, onTasksClick: () -> Unit) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(16.dp)) {
         StatItem(
             label = stringResource(id = designR.string.trip_overview_budget_label),
             value = trip.budget.ifBlank { stringResource(id = designR.string.budget_not_set) },
@@ -437,12 +411,7 @@ private fun StatsSection(
 }
 
 @Composable
-private fun StatItem(
-    label: String, 
-    value: String, 
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
+private fun StatItem(label: String, value: String, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
         onClick = onClick,
         modifier = modifier,
@@ -456,14 +425,14 @@ private fun StatItem(
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = label, 
-                style = MaterialTheme.typography.labelSmall,
+                style = MaterialTheme.typography.labelSmall, 
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = value, 
-                style = MaterialTheme.typography.headlineMedium,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium, 
+                fontWeight = FontWeight.Bold, 
                 color = MaterialTheme.colorScheme.onSurface
             )
         }
@@ -477,22 +446,11 @@ fun TripOverviewScreenPreview() {
         TripOverviewScreen(
             uiState = TripOverviewContract.State(
                 trip = Trip(
-                    id = "1",
-                    ownerId = "owner1",
-                    title = "Bali, Indonesia",
-                    location = "Denpasar, Bali",
-                    startDate = "12 May 2025",
-                    endDate = "18 May 2025",
-                    status = TripStatus.IN_PROGRESS,
-                    imageUrl = "",
-                    progress = 0.6f,
-                    budget = "$1,240",
-                    tasksCount = 20,
-                    completedTasksCount = 12,
-                    travelers = listOf(
-                        Traveler("1", "John", ""),
-                        Traveler("2", "Jane", "")
-                    )
+                    id = "1", ownerId = "owner1", title = "Bali, Indonesia",
+                    location = "Denpasar, Bali", startDate = "12 May 2025", endDate = "18 May 2025",
+                    status = TripStatus.IN_PROGRESS, imageUrl = "", progress = 0.6f,
+                    budget = "$1,240", tasksCount = 20, completedTasksCount = 12,
+                    travelers = listOf(Traveler("1", "John", ""), Traveler("2", "Jane", ""))
                 )
             ),
             onIntent = {}

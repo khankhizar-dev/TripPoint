@@ -26,6 +26,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
+import com.android.trippoint.checklist.domain.model.ChecklistPriority
 import com.android.trippoint.core.designsystem.components.AlertVariant
 import com.android.trippoint.core.designsystem.components.TripPointAlert
 import com.android.trippoint.core.designsystem.components.TripPointButton
@@ -59,10 +60,7 @@ fun AddChecklistItemRoute(
         }
     }
 
-    AddChecklistItemScreen(
-        uiState = uiState,
-        onIntent = viewModel::onIntent
-    )
+    AddChecklistItemScreen(uiState = uiState, onIntent = viewModel::onIntent)
 }
 
 @Composable
@@ -85,68 +83,8 @@ fun AddChecklistItemScreen(
                 .padding(horizontal = 24.dp)
                 .verticalScroll(rememberScrollState())
         ) {
-            val error = uiState.error
-            if (error != null) {
-                TripPointAlert(message = error, variant = AlertVariant.Error)
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            TripPointTextField(
-                value = uiState.name,
-                onValueChange = { onIntent(AddChecklistItemContract.Intent.NameChanged(it)) },
-                label = stringResource(id = designR.string.checklist_item_name_label),
-                placeholder = stringResource(id = designR.string.checklist_item_name_placeholder)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TripPointDropdown(
-                value = uiState.category.name,
-                onValueChange = { onIntent(AddChecklistItemContract.Intent.CategoryChanged(it)) },
-                label = stringResource(id = designR.string.checklist_item_category_label),
-                options = ChecklistItemCategory.entries.map { it.name }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            TripPointTextField(
-                value = uiState.notes,
-                onValueChange = { onIntent(AddChecklistItemContract.Intent.NotesChanged(it)) },
-                label = stringResource(id = designR.string.checklist_item_notes_label),
-                placeholder = stringResource(id = designR.string.checklist_item_notes_placeholder),
-                singleLine = false,
-                modifier = Modifier.height(120.dp)
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            SwitchRow(
-                label = stringResource(id = designR.string.checklist_item_essential_label),
-                checked = uiState.isEssential,
-                onCheckedChange = { onIntent(AddChecklistItemContract.Intent.EssentialToggled(it)) }
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            SwitchRow(
-                label = stringResource(id = designR.string.checklist_item_remind_me_label),
-                checked = uiState.remindMe,
-                onCheckedChange = { onIntent(AddChecklistItemContract.Intent.RemindMeToggled(it)) }
-            )
-
-            if (uiState.remindMe) {
-                Spacer(modifier = Modifier.height(16.dp))
-                // Mock for date/time picker
-                TripPointTextField(
-                    value = uiState.reminderTime,
-                    onValueChange = { onIntent(AddChecklistItemContract.Intent.ReminderTimeChanged(it)) },
-                    label = "Reminder Date & Time",
-                    placeholder = "24 May, 9:30 AM"
-                )
-            }
-
+            AddChecklistItemContent(uiState, onIntent)
+            
             Spacer(modifier = Modifier.height(48.dp))
 
             TripPointButton(
@@ -159,6 +97,120 @@ fun AddChecklistItemScreen(
             
             Spacer(modifier = Modifier.height(32.dp))
         }
+    }
+}
+
+@Composable
+private fun AddChecklistItemContent(
+    uiState: AddChecklistItemContract.State,
+    onIntent: (AddChecklistItemContract.Intent) -> Unit
+) {
+    if (uiState.error != null) {
+        TripPointAlert(message = uiState.error, variant = AlertVariant.Error)
+        Spacer(modifier = Modifier.height(16.dp))
+    }
+
+    BasicInfoSection(uiState, onIntent)
+    Spacer(modifier = Modifier.height(24.dp))
+    AssignmentSection(uiState, onIntent)
+    Spacer(modifier = Modifier.height(24.dp))
+    AdditionalOptionsSection(uiState, onIntent)
+}
+
+@Composable
+private fun BasicInfoSection(
+    uiState: AddChecklistItemContract.State,
+    onIntent: (AddChecklistItemContract.Intent) -> Unit
+) {
+    TripPointTextField(
+        value = uiState.name,
+        onValueChange = { onIntent(AddChecklistItemContract.Intent.NameChanged(it)) },
+        label = stringResource(id = designR.string.checklist_item_name_label),
+        placeholder = stringResource(id = designR.string.checklist_item_name_placeholder)
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    TripPointDropdown(
+        value = uiState.category.name,
+        onValueChange = { onIntent(AddChecklistItemContract.Intent.CategoryChanged(it)) },
+        label = stringResource(id = designR.string.checklist_item_category_label),
+        options = ChecklistItemCategory.entries.map { it.name }
+    )
+}
+
+@Composable
+private fun AssignmentSection(
+    uiState: AddChecklistItemContract.State,
+    onIntent: (AddChecklistItemContract.Intent) -> Unit
+) {
+    TripPointDropdown(
+        value = uiState.priority.name,
+        onValueChange = { 
+            onIntent(AddChecklistItemContract.Intent.PriorityChanged(ChecklistPriority.valueOf(it))) 
+        },
+        label = "Priority",
+        options = ChecklistPriority.entries.map { it.name }
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    val assigneeOptions = listOf("None") + uiState.members.map { 
+        it.userName ?: "User ${it.userId}" 
+    }
+    val currentAssigneeName = if (uiState.assigneeId == null) "None" 
+    else uiState.members.find { it.userId == uiState.assigneeId }
+        ?.let { it.userName ?: "User ${it.userId}" } ?: "None"
+
+    TripPointDropdown(
+        value = currentAssigneeName,
+        onValueChange = { name ->
+            val selectedMember = uiState.members.find { (it.userName ?: "User ${it.userId}") == name }
+            onIntent(AddChecklistItemContract.Intent.AssigneeChanged(selectedMember?.userId))
+        },
+        label = "Assigned To",
+        options = assigneeOptions
+    )
+}
+
+@Composable
+private fun AdditionalOptionsSection(
+    uiState: AddChecklistItemContract.State,
+    onIntent: (AddChecklistItemContract.Intent) -> Unit
+) {
+    TripPointTextField(
+        value = uiState.notes,
+        onValueChange = { onIntent(AddChecklistItemContract.Intent.NotesChanged(it)) },
+        label = stringResource(id = designR.string.checklist_item_notes_label),
+        placeholder = stringResource(id = designR.string.checklist_item_notes_placeholder),
+        singleLine = false,
+        modifier = Modifier.height(120.dp)
+    )
+
+    Spacer(modifier = Modifier.height(24.dp))
+
+    SwitchRow(
+        label = stringResource(id = designR.string.checklist_item_essential_label),
+        checked = uiState.isEssential,
+        onCheckedChange = { onIntent(AddChecklistItemContract.Intent.EssentialToggled(it)) }
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    SwitchRow(
+        label = stringResource(id = designR.string.checklist_item_remind_me_label),
+        checked = uiState.remindMe,
+        onCheckedChange = { onIntent(AddChecklistItemContract.Intent.RemindMeToggled(it)) }
+    )
+
+    if (uiState.remindMe) {
+        Spacer(modifier = Modifier.height(16.dp))
+        TripPointTextField(
+            value = uiState.reminderTime,
+            onValueChange = { onIntent(AddChecklistItemContract.Intent.ReminderTimeChanged(it)) },
+            label = "Reminder Date & Time",
+            placeholder = "24 May, 9:30 AM"
+        )
     }
 }
 

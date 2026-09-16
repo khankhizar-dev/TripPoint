@@ -1,5 +1,6 @@
 package com.android.trippoint.trip.invite
 
+import android.content.Intent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +38,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
@@ -53,6 +55,7 @@ fun InvitePeopleRoute(
     onNavigateToSummary: (String) -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     LaunchedEffect(tripId) {
         viewModel.onIntent(InvitePeopleContract.Intent.LoadTrip(tripId))
@@ -63,6 +66,15 @@ fun InvitePeopleRoute(
             when (effect) {
                 is InvitePeopleContract.Effect.NavigateToSummary -> onNavigateToSummary(effect.tripId)
                 InvitePeopleContract.Effect.NavigateBack -> onNavigateBack()
+                is InvitePeopleContract.Effect.ShareInviteLink -> {
+                    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, "Join my trip on TripPoint!")
+                        val message = "Hey! Join my trip on TripPoint using this link: ${effect.inviteUrl}"
+                        putExtra(Intent.EXTRA_TEXT, message)
+                    }
+                    context.startActivity(Intent.createChooser(shareIntent, "Share Invite Link"))
+                }
                 is InvitePeopleContract.Effect.ShowError -> { /* Handle */ }
             }
         }

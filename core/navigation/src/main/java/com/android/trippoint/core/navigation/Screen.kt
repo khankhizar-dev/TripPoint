@@ -32,6 +32,15 @@ sealed class Screen(val route: String) {
     object TripOverview : Screen("trip_overview/{tripId}") {
         fun createRoute(tripId: String) = "trip_overview/$tripId"
     }
+    object TripMembers : Screen("trip_members/{tripId}") {
+        fun createRoute(tripId: String) = "trip_members/$tripId"
+    }
+    object TripDiscussion : Screen("trip_discussion/{tripId}") {
+        fun createRoute(tripId: String) = "trip_discussion/$tripId"
+    }
+    object TripActivity : Screen("trip_activity/{tripId}") {
+        fun createRoute(tripId: String) = "trip_activity/$tripId"
+    }
     object CreateTrip : Screen("create_trip")
     object AddDetails : Screen("add_details/{tripId}") {
         fun createRoute(tripId: String) = "add_details/$tripId"

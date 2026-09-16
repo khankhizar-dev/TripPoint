@@ -106,7 +106,8 @@ class AuthRemoteDataSourceTest {
         )
         val result = dataSource.updateProfile(input)
 
-        assertEquals(true, result)
+        assertNotNull(result)
+        assertEquals("johndoe", result?.username)
         
         val recordedRequest = mockWebServer.takeRequest()
         val requestBody = recordedRequest.body.readUtf8()

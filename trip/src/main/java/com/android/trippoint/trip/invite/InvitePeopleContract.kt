@@ -35,6 +35,7 @@ class InvitePeopleContract {
     sealed class Effect : UiEffect {
         data class NavigateToSummary(val tripId: String) : Effect()
         object NavigateBack : Effect()
+        data class ShareInviteLink(val tripId: String, val inviteUrl: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }

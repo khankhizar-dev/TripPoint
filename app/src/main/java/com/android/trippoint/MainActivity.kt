@@ -11,21 +11,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.navigation.compose.rememberNavController
-import com.android.trippoint.core.designsystem.theme.TripPointTheme
-import com.android.trippoint.core.network.NetworkModule
-import com.android.trippoint.core.network.TripRemoteDataSource
-import com.android.trippoint.core.network.BookingRemoteDataSource
-import com.android.trippoint.core.network.BudgetRemoteDataSource
-import com.android.trippoint.core.network.ItineraryRemoteDataSource
-import com.android.trippoint.core.database.preferences.PreferencesManager
-import com.android.trippoint.trip.data.repository.TripRepositoryImpl
-import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
+import com.android.trippoint.authentication.data.repository.AuthRepositoryImpl
 import com.android.trippoint.booking.data.repository.BookingRepositoryImpl
 import com.android.trippoint.budget.data.repository.BudgetRepositoryImpl
 import com.android.trippoint.checklist.data.repository.ChecklistRepositoryImpl
+import com.android.trippoint.core.database.preferences.PreferencesManager
+import com.android.trippoint.core.designsystem.theme.TripPointTheme
+import com.android.trippoint.core.network.AuthRemoteDataSource
+import com.android.trippoint.core.network.BookingRemoteDataSource
+import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.CollaborationRemoteDataSource
 import com.android.trippoint.core.network.DocumentRemoteDataSource
+import com.android.trippoint.core.network.ItineraryRemoteDataSource
+import com.android.trippoint.core.network.NetworkModule
+import com.android.trippoint.core.network.TripRemoteDataSource
 import com.android.trippoint.documents.data.repository.DocumentRepositoryImpl
+import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
+import com.android.trippoint.trip.collaboration.data.repository.CollaborationRepositoryImpl
+import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 
 class MainActivity : ComponentActivity() {
     @Suppress("LongMethod")
@@ -135,6 +139,30 @@ class MainActivity : ComponentActivity() {
                     ChecklistRepositoryImpl(com.android.trippoint.core.network.ChecklistRemoteDataSource(api))
                 }
 
+                val authRepository = remember {
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    AuthRepositoryImpl(AuthRemoteDataSource(api), preferencesManager)
+                }
+
+                val collaborationRepository = remember {
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    CollaborationRepositoryImpl(CollaborationRemoteDataSource(api), authRepository)
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavGraph(
                         navController = navController,
@@ -144,6 +172,8 @@ class MainActivity : ComponentActivity() {
                         budgetRepository = budgetRepository,
                         documentRepository = documentRepository,
                         checklistRepository = checklistRepository,
+                        authRepository = authRepository,
+                        collaborationRepository = collaborationRepository,
                         getTripOverviewUseCase = getTripOverviewUseCase,
                         preferencesManager = preferencesManager,
                         modifier = Modifier.padding(innerPadding)

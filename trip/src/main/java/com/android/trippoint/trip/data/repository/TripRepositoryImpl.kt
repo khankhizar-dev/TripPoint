@@ -142,6 +142,24 @@ class TripRepositoryImpl(
         }
     }
 
+    override suspend fun removeTripMember(tripId: String, userId: String): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.removeTripMember(tripId, userId)
+            Result.success(success)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun leaveTrip(tripId: String): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.leaveTrip(tripId)
+            Result.success(success)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun getMyTripInvitations(): Result<List<TripMember>> {
         return try {
             val dtos = remoteDataSource.getMyTripInvitations()
@@ -175,7 +193,15 @@ class TripRepositoryImpl(
             tripId = tripId,
             userId = userId,
             userName = name.ifBlank { null },
-            role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
+            role = try {
+                when (role) {
+                    "OWNER" -> TravelerRole.ORGANIZER
+                    "MEMBER" -> TravelerRole.EDITOR
+                    else -> TravelerRole.valueOf(role)
+                }
+            } catch (_: Exception) {
+                TravelerRole.VIEWER
+            },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,
             joinedAt = joinedAt

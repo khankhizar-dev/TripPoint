@@ -50,6 +50,21 @@ class TripOverviewViewModel(
                     sendEffect(TripOverviewContract.Effect.NavigateToAddNote(it))
                 }
             }
+            TripOverviewContract.Intent.DiscussionClicked -> {
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToDiscussion(it))
+                }
+            }
+            TripOverviewContract.Intent.ActivityClicked -> {
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToActivity(it))
+                }
+            }
+            TripOverviewContract.Intent.TravelersClicked -> {
+                uiState.value.trip?.id?.let {
+                    sendEffect(TripOverviewContract.Effect.NavigateToMembers(it))
+                }
+            }
             is TripOverviewContract.Intent.UpdateStatus -> updateTripStatus(intent.status)
             TripOverviewContract.Intent.ArchiveTrip -> archiveTrip()
             TripOverviewContract.Intent.DeleteTrip -> deleteTrip()

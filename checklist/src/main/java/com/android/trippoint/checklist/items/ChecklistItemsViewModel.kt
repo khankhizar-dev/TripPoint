@@ -1,13 +1,15 @@
 package com.android.trippoint.checklist.items
 
 import androidx.lifecycle.viewModelScope
+import com.android.trippoint.authentication.domain.repository.AuthRepository
 import com.android.trippoint.checklist.domain.model.ChecklistItem
 import com.android.trippoint.checklist.domain.repository.ChecklistRepository
 import com.android.trippoint.core.common.BaseViewModel
 import kotlinx.coroutines.launch
 
 class ChecklistItemsViewModel(
-    private val repository: ChecklistRepository
+    private val repository: ChecklistRepository,
+    private val authRepository: AuthRepository
 ) : BaseViewModel<
     ChecklistItemsContract.State,
     ChecklistItemsContract.Intent,
@@ -18,6 +20,10 @@ class ChecklistItemsViewModel(
     private var originalItems = emptyList<ChecklistItem>()
     private val modifiedItemIds = mutableSetOf<String>()
 
+    init {
+        setState { copy(currentUserId = authRepository.getUserId()) }
+    }
+
     override fun onIntent(intent: ChecklistItemsContract.Intent) {
         when (intent) {
             is ChecklistItemsContract.Intent.LoadSection -> {
@@ -26,8 +32,13 @@ class ChecklistItemsViewModel(
             is ChecklistItemsContract.Intent.ItemToggled -> toggleItemLocally(intent.itemId)
             is ChecklistItemsContract.Intent.SearchQueryChanged -> {
                 setState { copy(searchQuery = intent.query) }
-                filterItems(uiState.value.items, intent.query)
+                filterItems(uiState.value.items, intent.query, uiState.value.selectedTab)
             }
+            is ChecklistItemsContract.Intent.TabSelected -> {
+                setState { copy(selectedTab = intent.index) }
+                filterItems(uiState.value.items, uiState.value.searchQuery, intent.index)
+            }
+            is ChecklistItemsContract.Intent.DeleteItem -> deleteItem(intent.itemId)
             ChecklistItemsContract.Intent.SaveClicked -> saveChanges()
             ChecklistItemsContract.Intent.AddItemClicked -> {
                 val state = uiState.value
@@ -70,10 +81,10 @@ class ChecklistItemsViewModel(
                         copy(
                             isLoading = false, 
                             section = section,
-                            items = originalItems,
-                            filteredItems = originalItems
+                            items = originalItems
                         ) 
                     }
+                    filterItems(originalItems, uiState.value.searchQuery, uiState.value.selectedTab)
                 } else {
                     setState { copy(isLoading = false, error = "Section not found") }
                 }
@@ -106,7 +117,7 @@ class ChecklistItemsViewModel(
                 section = section?.copy(completedItems = completedCount)
             ) 
         }
-        filterItems(updatedItems, uiState.value.searchQuery)
+        filterItems(updatedItems, uiState.value.searchQuery, uiState.value.selectedTab)
     }
 
     private fun saveChanges() {
@@ -141,10 +152,31 @@ class ChecklistItemsViewModel(
         }
     }
 
-    private fun filterItems(items: List<ChecklistItem>, query: String) {
-        val filtered = items.filter { 
+    private fun deleteItem(itemId: String) {
+        viewModelScope.launch {
+            val state = uiState.value
+            setState { copy(isLoading = true) }
+            val result = repository.deleteItem(state.tripId, state.checklistId, state.sectionId, itemId)
+            
+            if (result.isSuccess) {
+                loadSection(state.tripId, state.checklistId, state.sectionId)
+                sendEffect(ChecklistItemsContract.Effect.ItemDeleted)
+            } else {
+                setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
+            }
+        }
+    }
+
+    private fun filterItems(items: List<ChecklistItem>, query: String, tabIndex: Int) {
+        var filtered = items.filter { 
             it.name.contains(query, ignoreCase = true) 
         }
+        
+        if (tabIndex == 1) { // My Tasks
+            val currentUserId = uiState.value.currentUserId
+            filtered = filtered.filter { it.assigneeId == currentUserId }
+        }
+        
         setState { copy(filteredItems = filtered) }
     }
 }

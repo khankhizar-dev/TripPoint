@@ -59,12 +59,12 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun updateProfile(input: UpdateProfileInput): Result<Boolean> {
+    override suspend fun updateProfile(input: UpdateProfileInput): Result<User?> {
         return try {
-            val success = remoteDataSource.updateProfile(input)
-            if (success) {
+            val user = remoteDataSource.updateProfile(input)
+            if (user != null) {
                 preferencesManager.setProfileSetupCompleted(true)
-                Result.success(true)
+                Result.success(user.toDomain())
             } else {
                 Result.failure(Exception("Failed to update profile. Please check your information."))
             }
@@ -119,6 +119,15 @@ class AuthRepositoryImpl(
         }
     }
 
+    override suspend fun verifyPasswordResetOtp(email: String, otp: String): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.verifyPasswordResetOtp(email, otp)
+            Result.success(success)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     override suspend fun resetPassword(input: ResetPasswordInput): Result<Boolean> {
         return try {
             val success = remoteDataSource.resetPassword(input)
@@ -132,21 +141,15 @@ class AuthRepositoryImpl(
         return try {
             val user = remoteDataSource.getMe()
             if (user == null) {
-                // If we have a token but getMe returns null, it might be an auth error.
-                // We clear session ONLY if we are sure it's an auth failure.
-                // For now, we trust the remote source to return null on auth failure.
                 preferencesManager.clearSession()
             } else {
                 preferencesManager.setUserId(user.id)
-                // Consider profile complete if username or fullName is set
                 if (user.username != null || user.fullName != null) {
                     preferencesManager.setProfileSetupCompleted(true)
                 }
             }
             Result.success(user?.toDomain())
         } catch (e: Exception) {
-            // Do NOT clear session on network errors or other transient issues.
-            // Let the caller handle the failure (e.g. show offline state).
             Result.failure(e)
         }
     }
@@ -172,6 +175,18 @@ class AuthRepositoryImpl(
     override suspend fun logout(): Result<Boolean> {
         return try {
             val success = remoteDataSource.logout()
+            if (success) {
+                preferencesManager.clearSession()
+            }
+            Result.success(success)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    override suspend fun logoutAllDevices(): Result<Boolean> {
+        return try {
+            val success = remoteDataSource.logoutAllDevices()
             if (success) {
                 preferencesManager.clearSession()
             }

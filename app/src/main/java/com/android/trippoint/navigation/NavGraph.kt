@@ -112,6 +112,12 @@ import com.android.trippoint.itinerary.notes.NotesRoute
 import com.android.trippoint.itinerary.notes.NotesViewModel
 import com.android.trippoint.itinerary.task.AddTaskRoute
 import com.android.trippoint.itinerary.task.AddTaskViewModel
+import com.android.trippoint.authentication.domain.repository.AuthRepository
+import com.android.trippoint.trip.collaboration.activity.ActivityFeedRoute
+import com.android.trippoint.trip.collaboration.activity.ActivityFeedViewModel
+import com.android.trippoint.trip.collaboration.discussion.DiscussionRoute
+import com.android.trippoint.trip.collaboration.discussion.DiscussionViewModel
+import com.android.trippoint.trip.collaboration.domain.repository.CollaborationRepository
 import com.android.trippoint.trip.create.CreateTripRoute
 import com.android.trippoint.trip.create.CreateTripViewModel
 import com.android.trippoint.trip.details.AddDetailsRoute
@@ -120,6 +126,8 @@ import com.android.trippoint.trip.domain.repository.TripRepository
 import com.android.trippoint.trip.domain.usecase.GetTripOverviewUseCase
 import com.android.trippoint.trip.invite.InvitePeopleRoute
 import com.android.trippoint.trip.invite.InvitePeopleViewModel
+import com.android.trippoint.trip.members.TripMembersRoute
+import com.android.trippoint.trip.members.TripMembersViewModel
 import com.android.trippoint.trip.overview.TripOverviewRoute
 import com.android.trippoint.trip.overview.TripOverviewViewModel
 import com.android.trippoint.trip.summary.TripSummaryRoute
@@ -146,6 +154,8 @@ fun AppNavGraph(
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
     checklistRepository: ChecklistRepository,
+    authRepository: AuthRepository,
+    collaborationRepository: CollaborationRepository,
     getTripOverviewUseCase: GetTripOverviewUseCase,
     preferencesManager: PreferencesManager,
     modifier: Modifier = Modifier
@@ -161,7 +171,8 @@ fun AppNavGraph(
         bookingNavGraph(navController, bookingRepository, tripRepository)
         budgetNavGraph(navController, budgetRepository)
         documentsNavGraph(navController, documentRepository)
-        checklistNavGraph(navController, checklistRepository)
+        checklistNavGraph(navController, checklistRepository, authRepository, tripRepository)
+        tripMembersNavGraph(navController, tripRepository, collaborationRepository)
     }
 }
 
@@ -412,7 +423,10 @@ private fun NavGraphBuilder.tripNavGraph(
             onNavigateToAddTask = { id -> navController.navigate(Screen.AddTask.createRoute(id, "today")) },
             onNavigateToAddNote = { id -> navController.navigate(Screen.AddNote.createRoute(id)) },
             onNavigateToAddBooking = { id -> navController.navigate(Screen.AddBookingOptions.createRoute(id)) },
-            onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) }
+            onNavigateToBudgets = { id -> navController.navigate(Screen.Budgets.createRoute(id)) },
+            onNavigateToMembers = { id -> navController.navigate(Screen.TripMembers.createRoute(id)) },
+            onNavigateToDiscussion = { id -> navController.navigate(Screen.TripDiscussion.createRoute(id)) },
+            onNavigateToActivity = { id -> navController.navigate(Screen.TripActivity.createRoute(id)) }
         )
     }
     composable(Screen.CreateTrip.route) {
@@ -1515,12 +1529,14 @@ private fun NavGraphBuilder.addAddDocumentDestination(
 
 private fun NavGraphBuilder.checklistNavGraph(
     navController: NavHostController,
-    checklistRepository: ChecklistRepository
+    checklistRepository: ChecklistRepository,
+    authRepository: AuthRepository,
+    tripRepository: TripRepository
 ) {
     addChecklistListDestination(navController, checklistRepository)
     addChecklistDetailsDestination(navController, checklistRepository)
-    addChecklistItemsDestination(navController, checklistRepository)
-    addAddChecklistItemDestination(navController, checklistRepository)
+    addChecklistItemsDestination(navController, checklistRepository, authRepository)
+    addAddChecklistItemDestination(navController, checklistRepository, tripRepository)
     addChecklistProgressDestination(navController, checklistRepository)
     addChecklistTemplatesDestination(navController, checklistRepository)
     addAiSuggestDestination(navController)
@@ -1613,7 +1629,8 @@ private fun NavGraphBuilder.addChecklistDetailsDestination(
 
 private fun NavGraphBuilder.addChecklistItemsDestination(
     navController: NavHostController,
-    checklistRepository: ChecklistRepository
+    checklistRepository: ChecklistRepository,
+    authRepository: AuthRepository
 ) {
     composable(
         route = Screen.ChecklistItems.route + "?tripId={tripId}",
@@ -1630,7 +1647,7 @@ private fun NavGraphBuilder.addChecklistItemsDestination(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return ChecklistItemsViewModel(checklistRepository) as T
+                    return ChecklistItemsViewModel(checklistRepository, authRepository) as T
                 }
             }
         )
@@ -1642,7 +1659,7 @@ private fun NavGraphBuilder.addChecklistItemsDestination(
             onNavigateBack = { navController.popBackStack() },
             onNavigateToAddItem = { tId, cId, sId -> 
                 val route = Screen.AddChecklistItem.createRoute(cId, sId) + "?tripId=$tId"
-                navController.navigate(route) 
+                navController.navigate(route)
             }
         )
     }
@@ -1650,7 +1667,8 @@ private fun NavGraphBuilder.addChecklistItemsDestination(
 
 private fun NavGraphBuilder.addAddChecklistItemDestination(
     navController: NavHostController,
-    checklistRepository: ChecklistRepository
+    checklistRepository: ChecklistRepository,
+    tripRepository: TripRepository
 ) {
     composable(
         route = Screen.AddChecklistItem.route + "?tripId={tripId}",
@@ -1667,7 +1685,7 @@ private fun NavGraphBuilder.addAddChecklistItemDestination(
             factory = object : ViewModelProvider.Factory {
                 @Suppress("UNCHECKED_CAST")
                 override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                    return AddChecklistItemViewModel(checklistRepository) as T
+                    return AddChecklistItemViewModel(checklistRepository, tripRepository) as T
                 }
             }
         )
@@ -1764,6 +1782,75 @@ private fun NavGraphBuilder.addAiSuggestDestination(navController: NavHostContro
         val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
         val viewModel: AiSuggestViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
         AiSuggestRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+}
+
+private fun NavGraphBuilder.tripMembersNavGraph(
+    navController: NavHostController,
+    tripRepository: TripRepository,
+    collaborationRepository: CollaborationRepository
+) {
+    composable(
+        route = Screen.TripMembers.route,
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: TripMembersViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return TripMembersViewModel(tripRepository) as T
+                }
+            }
+        )
+        TripMembersRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToInvite = { tId ->
+                navController.navigate(Screen.InvitePeople.createRoute(tId))
+            }
+        )
+    }
+
+    composable(
+        route = Screen.TripDiscussion.route,
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: DiscussionViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return DiscussionViewModel(collaborationRepository) as T
+                }
+            }
+        )
+        DiscussionRoute(
+            tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+
+    composable(
+        route = Screen.TripActivity.route,
+        arguments = listOf(androidx.navigation.navArgument("tripId") { type = androidx.navigation.NavType.StringType })
+    ) { backStackEntry ->
+        val tripId = backStackEntry.arguments?.getString("tripId") ?: ""
+        val viewModel: ActivityFeedViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ActivityFeedViewModel(collaborationRepository) as T
+                }
+            }
+        )
+        ActivityFeedRoute(
             tripId = tripId,
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }

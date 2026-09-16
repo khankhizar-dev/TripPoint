@@ -101,21 +101,12 @@ class AuthRemoteDataSource(
         return response.body()?.data?.get("resetPassword") as? Boolean ?: false
     }
 
-    suspend fun updateProfile(input: UpdateProfileInput): Boolean {
+    suspend fun updateProfile(input: UpdateProfileInput): User? {
         val query = """
             mutation UpdateProfile(${'$'}input: UpdateProfileInput!) {
               updateProfile(input: ${'$'}input) {
-                id
-                email
-                firstName
-                lastName
-                fullName
-                username
-                phoneNumber
-                dateOfBirth
-                nationality
-                profilePhotoUrl
-                country
+                id email firstName lastName fullName username 
+                phoneNumber dateOfBirth nationality profilePhotoUrl country
               }
             }
         """.trimIndent()
@@ -126,11 +117,8 @@ class AuthRemoteDataSource(
         )
 
         val response = api.postGraphQl(request)
-        val body = response.body()
-        if (body?.errors != null && body.errors.isNotEmpty()) {
-            android.util.Log.e("AuthRemoteDataSource", "GraphQL Errors: ${body.errors}")
-        }
-        return response.isSuccessful && body?.data?.get("updateProfile") != null
+        val data = response.body()?.data?.get("updateProfile") ?: return null
+        return moshi.adapter(User::class.java).fromJsonValue(data)
     }
 
     suspend fun updatePreferences(input: UpdatePreferencesInput): UserPreferences? {
@@ -242,6 +230,29 @@ class AuthRemoteDataSource(
         return response.body()?.data?.get("changePassword") as? Boolean ?: false
     }
 
+    suspend fun verifyPasswordResetOtp(email: String, otp: String): Boolean {
+        val query = """
+            mutation VerifyPasswordResetOtp(${'$'}input: VerifyPasswordResetOtpInput!) {
+              verifyPasswordResetOtp(input: ${'$'}input)
+            }
+        """.trimIndent()
+
+        val request = GraphQlRequest(
+            query = query,
+            variables = mapOf("input" to mapOf("email" to email, "otp" to otp))
+        )
+
+        val response = api.postGraphQl(request)
+        return response.body()?.data?.get("verifyPasswordResetOtp") as? Boolean ?: false
+    }
+
+    suspend fun logoutAllDevices(): Boolean {
+        val query = "mutation { logoutAllDevices }"
+        val request = GraphQlRequest(query = query)
+        val response = api.postGraphQl(request)
+        return response.body()?.data?.get("logoutAllDevices") as? Boolean ?: false
+    }
+
     suspend fun logout(): Boolean {
         val query = "mutation { logout }"
         val request = GraphQlRequest(query = query)
@@ -319,4 +330,9 @@ data class ResetPasswordInput(
     val email: String,
     val otp: String,
     val newPassword: String
+)
+
+data class VerifyPasswordResetOtpInput(
+    val email: String,
+    val otp: String
 )

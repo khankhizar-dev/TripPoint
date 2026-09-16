@@ -11,6 +11,7 @@ class ChecklistListContract {
         data class TabSelected(val index: Int) : Intent()
         data class SearchQueryChanged(val query: String) : Intent()
         data class ChecklistClicked(val id: String) : Intent()
+        data class ArchiveChecklist(val id: String) : Intent()
         object CreateChecklistClicked : Intent()
         object BackClicked : Intent()
     }
@@ -30,5 +31,6 @@ class ChecklistListContract {
         data class NavigateToDetails(val tripId: String, val id: String) : Effect()
         data class NavigateToCreate(val tripId: String) : Effect()
         data class ShowError(val message: String) : Effect()
+        object ChecklistArchived : Effect()
     }
 }
