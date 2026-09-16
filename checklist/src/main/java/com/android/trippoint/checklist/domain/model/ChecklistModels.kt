@@ -42,8 +42,18 @@ data class ChecklistItem(
     val isEssential: Boolean = false,
     val dueDate: String? = null,
     val position: Int = 0,
-    val notes: String? = null
+    val notes: String? = null,
+    val assigneeId: String? = null,
+    val assigneeName: String? = null,
+    val assigneePhotoUrl: String? = null,
+    val priority: ChecklistPriority = ChecklistPriority.MEDIUM
 )
+
+enum class ChecklistPriority {
+    LOW,
+    MEDIUM,
+    HIGH
+}
 
 enum class ChecklistItemCategory {
     CLOTHING,

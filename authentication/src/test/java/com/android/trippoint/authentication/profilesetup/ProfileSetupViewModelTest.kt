@@ -92,7 +92,10 @@ class ProfileSetupViewModelTest {
         viewModel.onIntent(ProfileSetupContract.Intent.NextClicked) // ABOUT -> PREFERENCES
         viewModel.onIntent(ProfileSetupContract.Intent.NextClicked) // PREFERENCES -> REVIEW
         
-        coEvery { authRepository.updateProfile(any()) } returns Result.success(true)
+        val dummyUser = com.android.trippoint.authentication.domain.model.User(
+            id = "1", email = "test@example.com", firstName = "John", lastName = "Doe"
+        )
+        coEvery { authRepository.updateProfile(any()) } returns Result.success(dummyUser)
 
         viewModel.effect.test {
             viewModel.onIntent(ProfileSetupContract.Intent.NextClicked)

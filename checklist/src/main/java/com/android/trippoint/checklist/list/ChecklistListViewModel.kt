@@ -32,6 +32,7 @@ class ChecklistListViewModel(
             is ChecklistListContract.Intent.ChecklistClicked -> {
                 sendEffect(ChecklistListContract.Effect.NavigateToDetails(uiState.value.tripId, intent.id))
             }
+            is ChecklistListContract.Intent.ArchiveChecklist -> archiveChecklist(intent.id)
             ChecklistListContract.Intent.CreateChecklistClicked -> {
                 sendEffect(ChecklistListContract.Effect.NavigateToCreate(uiState.value.tripId))
             }
@@ -43,13 +44,27 @@ class ChecklistListViewModel(
 
     private fun loadChecklists(tripId: String) {
         viewModelScope.launch {
-            setState { copy(isLoading = true, tripId = tripId) }
+            setState { copy(isLoading = true, tripId = tripId, error = null) }
             val result = repository.getChecklists(tripId)
             
             if (result.isSuccess) {
                 allChecklists = result.getOrDefault(emptyList())
                 setState { copy(isLoading = false, checklists = allChecklists) }
                 filterChecklists()
+            } else {
+                setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
+            }
+        }
+    }
+
+    private fun archiveChecklist(id: String) {
+        viewModelScope.launch {
+            setState { copy(isLoading = true) }
+            val result = repository.archiveChecklist(uiState.value.tripId, id)
+            
+            if (result.isSuccess) {
+                loadChecklists(uiState.value.tripId)
+                sendEffect(ChecklistListContract.Effect.ChecklistArchived)
             } else {
                 setState { copy(isLoading = false, error = result.exceptionOrNull()?.message) }
             }

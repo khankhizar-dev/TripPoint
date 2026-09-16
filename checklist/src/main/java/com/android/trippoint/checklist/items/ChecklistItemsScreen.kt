@@ -1,5 +1,6 @@
 package com.android.trippoint.checklist.items
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,18 +12,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,16 +36,21 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.android.trippoint.checklist.domain.model.ChecklistItem
+import com.android.trippoint.checklist.domain.model.ChecklistPriority
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
 import com.android.trippoint.core.designsystem.components.TripPointButton
 import com.android.trippoint.core.designsystem.components.TripPointCheckbox
 import com.android.trippoint.core.designsystem.components.TripPointLinearProgress
+import com.android.trippoint.core.designsystem.components.TripPointTabs
 import com.android.trippoint.core.designsystem.components.TripPointTextField
 import com.android.trippoint.core.designsystem.components.TripPointTopAppBar
 import com.android.trippoint.core.designsystem.R as designR
@@ -71,6 +80,7 @@ fun ChecklistItemsRoute(
                 }
                 is ChecklistItemsContract.Effect.ShowError -> { /* Handle */ }
                 ChecklistItemsContract.Effect.SaveSuccess -> { /* Maybe show snackbar */ }
+                ChecklistItemsContract.Effect.ItemDeleted -> { /* Maybe show snackbar */ }
             }
         }
     }
@@ -156,6 +166,15 @@ fun ChecklistItemsScreen(
                     )
                     
                     Spacer(modifier = Modifier.height(24.dp))
+
+                    TripPointTabs(
+                        tabs = listOf("All Tasks", "My Tasks"),
+                        selectedTabIndex = uiState.selectedTab,
+                        onTabSelected = { onIntent(ChecklistItemsContract.Intent.TabSelected(it)) },
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                    
+                    Spacer(modifier = Modifier.height(16.dp))
                     
                     ChecklistItemsList(uiState, onIntent)
                 }
@@ -219,9 +238,11 @@ private fun ChecklistItemsList(
             }
             
             items(items) { item ->
-                ChecklistItemRow(item) {
-                    onIntent(ChecklistItemsContract.Intent.ItemToggled(item.id))
-                }
+                ChecklistItemRow(
+                    item = item, 
+                    onToggle = { onIntent(ChecklistItemsContract.Intent.ItemToggled(item.id)) },
+                    onDelete = { onIntent(ChecklistItemsContract.Intent.DeleteItem(item.id)) }
+                )
                 Spacer(modifier = Modifier.height(12.dp))
             }
         }
@@ -231,7 +252,8 @@ private fun ChecklistItemsList(
 @Composable
 private fun ChecklistItemRow(
     item: ChecklistItem,
-    onToggle: () -> Unit
+    onToggle: () -> Unit,
+    onDelete: () -> Unit
 ) {
     Card(
         modifier = Modifier
@@ -267,14 +289,22 @@ private fun ChecklistItemRow(
                     TextDecoration.None
                 }
                 
-                Text(
-                    text = item.name,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        textDecoration = textDecoration
-                    ),
-                    color = textColor,
-                    fontWeight = if (item.isEssential) FontWeight.Bold else FontWeight.Normal
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = item.name,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            textDecoration = textDecoration
+                        ),
+                        color = textColor,
+                        fontWeight = if (item.isEssential) FontWeight.Bold else FontWeight.Normal,
+                        modifier = Modifier.weight(1f, fill = false)
+                    )
+                    if (item.priority != ChecklistPriority.MEDIUM) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        PriorityChip(item.priority)
+                    }
+                }
+                
                 if (item.notes != null) {
                     Text(
                         text = item.notes,
@@ -282,16 +312,71 @@ private fun ChecklistItemRow(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+
+                if (item.assigneeId != null) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    AssigneeRow(item)
+                }
             }
             
-            if (item.isEssential) {
+            IconButton(onClick = onDelete) {
                 Icon(
-                    imageVector = Icons.Default.Star,
-                    contentDescription = "Essential",
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.secondary
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Delete",
+                    tint = MaterialTheme.colorScheme.error.copy(alpha = 0.6f),
+                    modifier = Modifier.size(20.dp)
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun PriorityChip(priority: ChecklistPriority) {
+    val color = when (priority) {
+        ChecklistPriority.HIGH -> MaterialTheme.colorScheme.error
+        ChecklistPriority.LOW -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.outline
+    }
+    
+    Box(
+        modifier = Modifier
+            .clip(RoundedCornerShape(4.dp))
+            .background(color.copy(alpha = 0.1f))
+            .padding(horizontal = 6.dp, vertical = 2.dp)
+    ) {
+        Text(
+            text = priority.name,
+            style = MaterialTheme.typography.labelSmall,
+            color = color,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
+@Composable
+private fun AssigneeRow(item: ChecklistItem) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(20.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            if (item.assigneePhotoUrl != null) {
+                AsyncImage(
+                    model = item.assigneePhotoUrl,
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = item.assigneeName ?: "Assigned",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

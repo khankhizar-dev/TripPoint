@@ -26,7 +26,7 @@ data class Traveler(
     val id: String,
     val name: String,
     val photoUrl: String,
-    val role: TravelerRole = TravelerRole.MEMBER,
+    val role: TravelerRole = TravelerRole.VIEWER,
     val status: InvitationStatus = InvitationStatus.ACCEPTED
 )
 
@@ -39,8 +39,9 @@ enum class TripStatus {
 }
 
 enum class TravelerRole {
-    OWNER,
-    MEMBER
+    ORGANIZER,
+    EDITOR,
+    VIEWER
 }
 
 enum class InvitationStatus {

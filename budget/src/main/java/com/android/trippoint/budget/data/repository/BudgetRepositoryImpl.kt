@@ -241,7 +241,15 @@ class BudgetRepositoryImpl(
             tripId = tripId,
             userId = userId,
             userName = name.ifBlank { null },
-            role = try { TravelerRole.valueOf(role) } catch (_: Exception) { TravelerRole.MEMBER },
+            role = try {
+                when (role) {
+                    "OWNER" -> TravelerRole.ORGANIZER
+                    "MEMBER" -> TravelerRole.EDITOR
+                    else -> TravelerRole.valueOf(role)
+                }
+            } catch (_: Exception) {
+                TravelerRole.VIEWER
+            },
             status = try { InvitationStatus.valueOf(status) } catch (_: Exception) { InvitationStatus.PENDING },
             invitedAt = invitedAt,
             joinedAt = joinedAt

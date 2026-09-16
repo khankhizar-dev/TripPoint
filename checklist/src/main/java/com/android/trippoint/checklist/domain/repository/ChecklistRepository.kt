@@ -3,6 +3,7 @@ package com.android.trippoint.checklist.domain.repository
 import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.checklist.domain.model.ChecklistItem
 import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
+import com.android.trippoint.checklist.domain.model.ChecklistPriority
 import com.android.trippoint.checklist.domain.model.ChecklistSection
 import com.android.trippoint.checklist.domain.model.ChecklistStatus
 import com.android.trippoint.checklist.domain.model.ChecklistTemplate
@@ -37,6 +38,7 @@ interface ChecklistRepository {
     
     suspend fun deleteSection(tripId: String, checklistId: String, sectionId: String): Result<Boolean>
     
+    @Suppress("LongParameterList")
     suspend fun addItem(
         tripId: String, 
         checklistId: String, 
@@ -44,9 +46,12 @@ interface ChecklistRepository {
         name: String, 
         category: ChecklistItemCategory, 
         isEssential: Boolean, 
-        dueDate: String?
+        dueDate: String?,
+        assigneeId: String? = null,
+        priority: ChecklistPriority? = null
     ): Result<ChecklistItem>
     
+    @Suppress("LongParameterList")
     suspend fun updateItem(
         tripId: String,
         checklistId: String,
@@ -56,7 +61,9 @@ interface ChecklistRepository {
         category: ChecklistItemCategory? = null,
         isEssential: Boolean? = null,
         isCompleted: Boolean? = null,
-        dueDate: String? = null
+        dueDate: String? = null,
+        assigneeId: String? = null,
+        priority: ChecklistPriority? = null
     ): Result<ChecklistItem>
 
     suspend fun deleteItem(tripId: String, checklistId: String, sectionId: String, itemId: String): Result<Boolean>

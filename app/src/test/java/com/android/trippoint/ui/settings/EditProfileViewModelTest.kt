@@ -61,7 +61,8 @@ class EditProfileViewModelTest {
 
     @Test
     fun `saveProfile success navigates back`() = runTest {
-        coEvery { authRepository.updateProfile(any()) } returns Result.success(true)
+        val user = User("1", "test@example.com", "John", "Doe")
+        coEvery { authRepository.updateProfile(any()) } returns Result.success(user)
 
         viewModel.onIntent(EditProfileContract.Intent.FullNameChanged("John Doe"))
         

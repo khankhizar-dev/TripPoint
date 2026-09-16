@@ -35,7 +35,8 @@ class ChecklistRemoteDataSource(
                     sections {
                         id checklistId name position totalItems completedItems progress
                         items {
-                            id sectionId createdBy name category essential completed dueDate position createdAt updatedAt
+                            id sectionId createdBy name category essential completed dueDate position 
+                            assigneeId assigneeName assigneePhotoUrl priority createdAt updatedAt
                         }
                         createdAt updatedAt
                     }
@@ -170,7 +171,8 @@ class ChecklistRemoteDataSource(
         val query = """
             mutation AddChecklistItem(${'$'}tripId: ID!, ${'$'}checklistId: ID!, ${'$'}sectionId: ID!, ${'$'}input: CreateChecklistItemInput!) {
                 addChecklistItem(tripId: ${'$'}tripId, checklistId: ${'$'}checklistId, sectionId: ${'$'}sectionId, input: ${'$'}input) {
-                    id sectionId createdBy name category essential completed dueDate position createdAt updatedAt
+                    id sectionId createdBy name category essential completed dueDate position 
+                    assigneeId assigneeName assigneePhotoUrl priority createdAt updatedAt
                 }
             }
         """.trimIndent()
@@ -197,7 +199,8 @@ class ChecklistRemoteDataSource(
         val query = """
             mutation UpdateChecklistItem(${'$'}tripId: ID!, ${'$'}checklistId: ID!, ${'$'}sectionId: ID!, ${'$'}itemId: ID!, ${'$'}input: UpdateChecklistItemInput!) {
                 updateChecklistItem(tripId: ${'$'}tripId, checklistId: ${'$'}checklistId, sectionId: ${'$'}sectionId, itemId: ${'$'}itemId, input: ${'$'}input) {
-                    id sectionId name category essential completed dueDate position updatedAt
+                    id sectionId name category essential completed dueDate position 
+                    assigneeId assigneeName assigneePhotoUrl priority updatedAt
                 }
             }
         """.trimIndent()
@@ -568,6 +571,10 @@ data class ChecklistItemDto(
     val completed: Boolean,
     val dueDate: String?,
     val position: Int,
+    val assigneeId: String? = null,
+    val assigneeName: String? = null,
+    val assigneePhotoUrl: String? = null,
+    val priority: String? = null,
     val createdAt: String? = null,
     val updatedAt: String? = null
 )
@@ -629,7 +636,9 @@ data class CreateChecklistItemInput(
     val name: String,
     val category: String,
     val essential: Boolean,
-    val dueDate: String? = null
+    val dueDate: String? = null,
+    val assigneeId: String? = null,
+    val priority: String? = null
 )
 
 data class UpdateChecklistItemInput(
@@ -638,7 +647,9 @@ data class UpdateChecklistItemInput(
     val essential: Boolean? = null,
     val completed: Boolean? = null,
     val dueDate: String? = null,
-    val position: Int? = null
+    val position: Int? = null,
+    val assigneeId: String? = null,
+    val priority: String? = null
 )
 
 data class CreateChecklistTemplateInput(

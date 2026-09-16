@@ -26,7 +26,12 @@ class InvitePeopleViewModel(
             }
             is InvitePeopleContract.Intent.InviteClicked -> inviteUser(intent.userId)
             InvitePeopleContract.Intent.ManualInviteClicked -> inviteManual()
-            InvitePeopleContract.Intent.InviteViaLink -> { /* Handle */ }
+            InvitePeopleContract.Intent.InviteViaLink -> {
+                val tripId = uiState.value.tripId
+                // Generate a placeholder invite URL
+                val inviteUrl = "https://trippoint.com/join/$tripId"
+                sendEffect(InvitePeopleContract.Effect.ShareInviteLink(tripId, inviteUrl))
+            }
             InvitePeopleContract.Intent.BackClicked -> sendEffect(InvitePeopleContract.Effect.NavigateBack)
             InvitePeopleContract.Intent.NextClicked -> {
                 sendEffect(InvitePeopleContract.Effect.NavigateToSummary(uiState.value.tripId))

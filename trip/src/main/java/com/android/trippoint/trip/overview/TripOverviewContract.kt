@@ -15,6 +15,9 @@ class TripOverviewContract {
         object AddTaskClicked : Intent()
         object AddExpenseClicked : Intent()
         object AddNoteClicked : Intent()
+        object DiscussionClicked : Intent()
+        object ActivityClicked : Intent()
+        object TravelersClicked : Intent()
         data class UpdateStatus(val status: TripStatus) : Intent()
         object ArchiveTrip : Intent()
         object DeleteTrip : Intent()
@@ -38,6 +41,9 @@ class TripOverviewContract {
         data class NavigateToAddBooking(val tripId: String) : Effect()
         data class NavigateToBudgets(val tripId: String) : Effect()
         data class NavigateToAddExpense(val tripId: String) : Effect()
+        data class NavigateToMembers(val tripId: String) : Effect()
+        data class NavigateToDiscussion(val tripId: String) : Effect()
+        data class NavigateToActivity(val tripId: String) : Effect()
         data class ShowError(val message: String) : Effect()
     }
 }

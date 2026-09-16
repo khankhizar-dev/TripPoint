@@ -435,4 +435,11 @@
     <string name="filter_sort_show">Show</string>
     <string name="filter_sort_sort_by">Sort By</string>
     <string name="filter_sort_apply">Apply</string>
+
+    <!-- Trip Members -->
+    <string name="trip_members_title">Trip Members</string>
+    <string name="trip_members_search_placeholder">Search members</string>
+    <string name="trip_members_count">%1$d Members</string>
+    <string name="trip_members_unknown">Unknown User</string>
+    <string name="trip_members_remove">Remove Member</string>
 </resources>

@@ -23,5 +23,7 @@ interface TripRepository {
     suspend fun inviteTripMember(tripId: String, email: String): Result<TripMember>
     suspend fun acceptTripInvitation(tripId: String): Result<TripMember>
     suspend fun declineTripInvitation(tripId: String): Result<TripMember>
+    suspend fun removeTripMember(tripId: String, userId: String): Result<Boolean>
+    suspend fun leaveTrip(tripId: String): Result<Boolean>
     suspend fun getMyTripInvitations(): Result<List<TripMember>>
 }

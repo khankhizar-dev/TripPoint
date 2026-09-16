@@ -1,9 +1,11 @@
 package com.android.trippoint.checklist.add_item
 
 import com.android.trippoint.checklist.domain.model.ChecklistItemCategory
+import com.android.trippoint.checklist.domain.model.ChecklistPriority
 import com.android.trippoint.core.common.UiEffect
 import com.android.trippoint.core.common.UiIntent
 import com.android.trippoint.core.common.UiState
+import com.android.trippoint.core.common.model.TripMember
 
 class AddChecklistItemContract {
     sealed class Intent : UiIntent {
@@ -11,6 +13,8 @@ class AddChecklistItemContract {
         data class NameChanged(val value: String) : Intent()
         data class CategoryChanged(val value: String) : Intent()
         data class NotesChanged(val value: String) : Intent()
+        data class PriorityChanged(val value: ChecklistPriority) : Intent()
+        data class AssigneeChanged(val value: String?) : Intent()
         data class EssentialToggled(val value: Boolean) : Intent()
         data class RemindMeToggled(val value: Boolean) : Intent()
         data class ReminderTimeChanged(val value: String) : Intent()
@@ -25,6 +29,9 @@ class AddChecklistItemContract {
         val name: String = "",
         val category: ChecklistItemCategory = ChecklistItemCategory.OTHER,
         val notes: String = "",
+        val priority: ChecklistPriority = ChecklistPriority.MEDIUM,
+        val assigneeId: String? = null,
+        val members: List<TripMember> = emptyList(),
         val isEssential: Boolean = false,
         val remindMe: Boolean = false,
         val reminderTime: String = "",

@@ -13,21 +13,27 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.android.trippoint.checklist.domain.model.Checklist
 import com.android.trippoint.core.common.utils.DateTimeUtils
 import com.android.trippoint.core.designsystem.components.ErrorView
 import com.android.trippoint.core.designsystem.components.LoadingIndicator
@@ -60,6 +66,7 @@ fun ChecklistListRoute(
                 is ChecklistListContract.Effect.NavigateToDetails -> onNavigateToDetails(effect.tripId, effect.id)
                 is ChecklistListContract.Effect.NavigateToCreate -> onNavigateToCreate(effect.tripId)
                 is ChecklistListContract.Effect.ShowError -> { /* Handle */ }
+                ChecklistListContract.Effect.ChecklistArchived -> { /* Handle */ }
             }
         }
     }
@@ -184,25 +191,34 @@ private fun ChecklistLazyList(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         items(uiState.filteredChecklists) { checklist ->
-            ChecklistCard(checklist) {
-                onIntent(ChecklistListContract.Intent.ChecklistClicked(checklist.id))
+            var showMenu by remember { mutableStateOf(false) }
+            
+            Box {
+                TripPointChecklistCard(
+                    title = checklist.title,
+                    date = DateTimeUtils.formatIsoToDisplay(checklist.updatedAt),
+                    completedItems = checklist.completedItems,
+                    totalItems = checklist.totalItems,
+                    progress = checklist.progress,
+                    onClick = { onIntent(ChecklistListContract.Intent.ChecklistClicked(checklist.id)) },
+                    onActionClick = { showMenu = true },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Archive") },
+                        onClick = { 
+                            onIntent(ChecklistListContract.Intent.ArchiveChecklist(checklist.id))
+                            showMenu = false
+                        },
+                        leadingIcon = { Icon(Icons.Default.Archive, contentDescription = null) }
+                    )
+                }
             }
         }
     }
-}
-
-@Composable
-private fun ChecklistCard(
-    checklist: Checklist,
-    onClick: () -> Unit
-) {
-    TripPointChecklistCard(
-        title = checklist.title,
-        date = DateTimeUtils.formatIsoToDisplay(checklist.updatedAt),
-        completedItems = checklist.completedItems,
-        totalItems = checklist.totalItems,
-        progress = checklist.progress,
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth()
-    )
 }
