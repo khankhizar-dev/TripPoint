@@ -22,6 +22,7 @@
             <option value="$PROJECT_DIR$/core/network" />
             <option value="$PROJECT_DIR$/documents" />
             <option value="$PROJECT_DIR$/itinerary" />
+            <option value="$PROJECT_DIR$/notification" />
             <option value="$PROJECT_DIR$/trip" />
           </set>
         </option>

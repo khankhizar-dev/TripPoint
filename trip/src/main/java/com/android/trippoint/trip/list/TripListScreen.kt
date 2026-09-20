@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.TravelExplore
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,6 +58,7 @@ fun TripListRoute(
     onNavigateToCreate: (String) -> Unit,
     onNavigateToBookings: (String?) -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
     userName: String? = null
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -76,6 +78,7 @@ fun TripListRoute(
         onIntent = viewModel::onIntent,
         onNavigateToBookings = { onNavigateToBookings(null) },
         onNavigateToProfile = onNavigateToProfile,
+        onNavigateToNotifications = onNavigateToNotifications,
         userName = userName
     )
 }
@@ -86,6 +89,7 @@ fun TripListScreen(
     onIntent: (TripListContract.Intent) -> Unit,
     onNavigateToBookings: () -> Unit,
     onNavigateToProfile: () -> Unit,
+    onNavigateToNotifications: () -> Unit,
     userName: String? = null
 ) {
     Scaffold(
@@ -94,7 +98,8 @@ fun TripListScreen(
                 userName = userName,
                 searchQuery = uiState.searchQuery,
                 onIntent = onIntent,
-                onNavigateToProfile = onNavigateToProfile
+                onNavigateToProfile = onNavigateToProfile,
+                onNavigateToNotifications = onNavigateToNotifications
             )
         },
         bottomBar = {
@@ -122,7 +127,8 @@ private fun TripListTopBar(
     userName: String?,
     searchQuery: String,
     onIntent: (TripListContract.Intent) -> Unit,
-    onNavigateToProfile: () -> Unit
+    onNavigateToProfile: () -> Unit,
+    onNavigateToNotifications: () -> Unit
 ) {
     Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)) {
         if (userName != null) {
@@ -142,12 +148,21 @@ private fun TripListTopBar(
                 text = stringResource(id = designR.string.trip_list_title),
                 style = MaterialTheme.typography.displayLarge
             )
-            IconButton(onClick = onNavigateToProfile) {
-                Icon(
-                    imageVector = Icons.Default.AccountCircle,
-                    contentDescription = "Profile",
-                    tint = MaterialTheme.colorScheme.primary
-                )
+            Row {
+                IconButton(onClick = onNavigateToNotifications) {
+                    Icon(
+                        imageVector = Icons.Default.Notifications,
+                        contentDescription = "Notifications",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+                IconButton(onClick = onNavigateToProfile) {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Profile",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -309,7 +324,8 @@ fun TripListScreenPreview() {
             ),
             onIntent = {},
             onNavigateToBookings = {},
-            onNavigateToProfile = {}
+            onNavigateToProfile = {},
+            onNavigateToNotifications = {}
         )
     }
 }
@@ -322,7 +338,8 @@ fun TripListLoadingPreview() {
             uiState = TripListContract.State(isLoading = true),
             onIntent = {},
             onNavigateToBookings = {},
-            onNavigateToProfile = {}
+            onNavigateToProfile = {},
+            onNavigateToNotifications = {}
         )
     }
 }
@@ -335,7 +352,8 @@ fun TripListOfflinePreview() {
             uiState = TripListContract.State(isOffline = true),
             onIntent = {},
             onNavigateToBookings = {},
-            onNavigateToProfile = {}
+            onNavigateToProfile = {},
+            onNavigateToNotifications = {}
         )
     }
 }

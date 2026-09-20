@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material.icons.outlined.QuestionMark
+import androidx.compose.material.icons.outlined.Schedule
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -45,12 +46,14 @@ import com.android.trippoint.core.designsystem.components.CompletionCard
 import com.android.trippoint.core.designsystem.components.ProfileHeader
 import com.android.trippoint.core.designsystem.components.SettingsListItem
 
+@Suppress("LongParameterList")
 @Composable
 fun SettingsRoute(
     onNavigateToLogin: () -> Unit,
     onNavigateToEditProfile: () -> Unit,
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
@@ -75,6 +78,7 @@ fun SettingsRoute(
         onNavigateToEditProfile = onNavigateToEditProfile,
         onNavigateToPreferences = onNavigateToPreferences,
         onNavigateToNotifications = onNavigateToNotifications,
+        onNavigateToReminders = onNavigateToReminders,
         onNavigateToSecurity = onNavigateToSecurity,
         onNavigateToDocuments = onNavigateToDocuments,
         onNavigateToSupport = onNavigateToSupport,
@@ -131,6 +135,7 @@ private fun rememberSettingsViewModel(
     return Pair(viewModel, uiState)
 }
 
+@Suppress("LongParameterList")
 @Composable
 fun SettingsScreen(
     uiState: SettingsContract.State,
@@ -138,6 +143,7 @@ fun SettingsScreen(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
@@ -160,6 +166,7 @@ fun SettingsScreen(
                 onNavigateToEditProfile = onNavigateToEditProfile,
                 onNavigateToPreferences = onNavigateToPreferences,
                 onNavigateToNotifications = onNavigateToNotifications,
+                onNavigateToReminders = onNavigateToReminders,
                 onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToDocuments = onNavigateToDocuments,
                 onNavigateToSupport = onNavigateToSupport,
@@ -189,6 +196,7 @@ private fun SettingsTopBar() {
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun SettingsContent(
     uiState: SettingsContract.State,
@@ -196,6 +204,7 @@ private fun SettingsContent(
     onNavigateToEditProfile: () -> Unit,
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
@@ -235,6 +244,7 @@ private fun SettingsContent(
             SettingsOptionsList(
                 onNavigateToPreferences = onNavigateToPreferences,
                 onNavigateToNotifications = onNavigateToNotifications,
+                onNavigateToReminders = onNavigateToReminders,
                 onNavigateToSecurity = onNavigateToSecurity,
                 onNavigateToDocuments = onNavigateToDocuments,
                 onNavigateToSupport = onNavigateToSupport,
@@ -250,10 +260,12 @@ private fun SettingsContent(
     }
 }
 
+@Suppress("LongParameterList")
 @Composable
 private fun SettingsOptionsList(
     onNavigateToPreferences: () -> Unit,
     onNavigateToNotifications: () -> Unit,
+    onNavigateToReminders: () -> Unit,
     onNavigateToSecurity: () -> Unit,
     onNavigateToDocuments: () -> Unit,
     onNavigateToSupport: () -> Unit,
@@ -269,6 +281,11 @@ private fun SettingsOptionsList(
             title = "Notifications",
             icon = Icons.Outlined.Notifications,
             onClick = onNavigateToNotifications
+        )
+        SettingsListItem(
+            title = "Reminders",
+            icon = Icons.Outlined.Schedule,
+            onClick = onNavigateToReminders
         )
         SettingsListItem(
             title = "Account & Security",

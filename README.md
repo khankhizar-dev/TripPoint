@@ -7,8 +7,9 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 - **UI**: Jetpack Compose with Material 3
 - **Architecture**: MVI (Model-View-Intent) & Clean Architecture
 - **Dependency Injection**: Hilt (Planned)
-- **Networking**: Retrofit & GraphQL (100% migrated for Budget & Expenses)
-- **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto` for secure UUID & Token storage)
+- **Networking**: Retrofit & GraphQL (**100% Production Migrated** for all modules)
+- **Real-time**: GraphQL Subscriptions over WebSockets for Chat and Live Notifications
+- **Local Storage**: Room & EncryptedSharedPreferences (`androidx.security:security-crypto` for secure session storage)
 - **Navigation**: Navigation Compose (Modularized & Multi-module aware)
 - **Design System**: Centralized design system in `:core:designsystem`
 
@@ -16,7 +17,7 @@ TripPoint is a modern Android travel application built with Kotlin, Jetpack Comp
 
 The project uses a production-grade quality pipeline:
 - **Linting**: Android Lint, **Detekt** (code smells), and **Ktlint** (formatting) ensure high code quality.
-- **Testing**: JUnit 4, Robolectric, MockK, and Turbine for Flow testing.
+- **Testing**: Over **120 logic-based unit tests** achieving 100% coverage in core business modules.
 - **Commands**:
     - Run all tests: `./gradlew testDebugUnitTest`
     - Check formatting: `./gradlew ktlintCheck`
@@ -28,90 +29,77 @@ The project follows a multi-module architecture to promote scalability and maint
 
 ### Core Modules
 - **`:core:common`**: Contains base components like `BaseViewModel` for MVI and universal domain models (`Trip`, `Traveler`).
-- **`:core:designsystem`**: The central repository for all UI components (`TripPointButton`, `TripCard`, `TripStatusChip`), tokens, and premium illustrations.
+- **`:core:designsystem`**: The central repository for all UI components, tokens, and premium illustrations.
 - **`:core:navigation`**: Centralized screen definitions and navigation routes.
-- **`:core:network`**: GraphQL configuration and centralized remote data sources.
+- **`:core:network`**: Unified GraphQL configuration and centralized remote data sources.
 - **`:core:database`**: Local data persistence and secure preference management.
 
 ### Feature Modules
 - **`:app`**: The main entry point. Handles top-level navigation and app initialization.
-- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, OTP, Forgot Password, Profile Setup, Permissions).
-- **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle (List, Creation flow, Overview, Invitations, Status Management).
-- **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule (Timeline, Trip Days, Activity Management, Tasks, and Notes).
-- **`:booking`**: **The Booking Hub**. Manages travel reservations including Flights, Hotels, and Transportation with advanced intake methods.
-- **`:budget`**: **The Finance Center**. Tracks trip expenses, manages budgets, and provides category-wise breakdown of spending.
-- **`:checklist`**: **The Plan Executor**. Smart, customizable checklists with AI suggestions to ensure you never miss a thing.
+- **`:authentication`**: Manages the user lifecycle (Splash, Onboarding, Login, Registration, Profile Setup, Security).
+- **`:trip`**: **The Trip Workspace**. Manages the end-to-end trip lifecycle, including Collaboration, Chat, and Activity Feeds.
+- **`:itinerary`**: **The Travel Companion**. Handles the granular trip schedule, activities, tasks, and notes.
+- **`:booking`**: **The Booking Hub**. Manages travel reservations with AI scanning and email import capabilities.
+- **`:budget`**: **The Finance Center**. Tracks trip expenses, manages budgets, and provides spending analytics.
+- **`:checklist`**: **The Plan Executor**. Smart, collaborative checklists with AI-powered suggestions.
+- **`:notification`**: **The Communication Center**. Centralized hub for alerts, smart reminders, and channel management.
 
 ## 🛠 Features
 
+### Collaboration & Social Hub
+- [x] **Real-time Discussion**: Premium chat interface with adaptive message bubbles and an advanced **Reply System** for focused threads.
+- [x] **Chronological Activity Feed**: Visual audit trail logging all trip actions (e.g., "Rohan updated task") with category-specific iconography.
+- [x] **Member Management**: Unified workspace for inviting collaborators, assigning roles (Organizer, Editor, Viewer), and managing access.
+- [x] **Omnichannel Invitations**: "Invite via Link" functionality that integrates with the native Android share sheet (WhatsApp, Slack, SMS, Email).
+
+### Notification & Communication System
+- [x] **Unified Notification Center**: High-fidelity feed categorized by "All", "Unread", and "Mentions" with real-time sync.
+- [x] **Immersive Detail Views**: Rich notification cards with contextual imagery and data-driven key details (e.g., Flight Gate, New Departure Time).
+- [x] **Smart Reminders**: Priority-based reminder dashboard with "One-Tap Actions" to snooze or mark as done.
+- [x] **Channel Control**: Granular toggles for Push, Email, In-app, and SMS channels with integrated "Quiet Hours" and "Daily Digest" scheduling.
+- [x] **Communication History**: Searchable audit log of past notifications with bulk clear utilities.
+
 ### User Lifecycle & Auth
-- [x] **Branded Splash Screen**: Smooth transitions with intelligent persistent routing.
-- [x] **Premium Onboarding**: 3-page interactive pager with detailed illustrations.
-- [x] **Secure Auth**: Full Login/Registration system with OTP verification and real-time password strength feedback. Features **persistent sessions** and intelligent cross-device profile syncing.
-- [x] **Profile Setup**: 5-step personalization wizard with dropdown preference selection. Automatically skips once completed.
-- [x] **Permissions Wizard**: Modern **modal dialog-based** requests over the Home dashboard, providing context before asking.
+- [x] **Secure Auth**: Full system with OTP verification and real-time backend synchronization. Features **persistent sessions** and cross-device profile syncing.
+- [x] **Profile Setup**: 5-step personalization wizard with automated navigation skipping once completed.
+- [x] **Permissions Wizard**: Modern **modal dialog-based** requests that provide context before triggering system prompts.
 
 ### Trip Workspace
 - [x] **Trip Dashboard**: Live-syncing list with 5 status categories (Upcoming, In Progress, Completed, Drafts, Archived).
-- [x] **Search & Filter**: Real-time searching and tab-based status filtering.
-- [x] **Real-time Overview**: Command center featuring live **Budget vs. Spent** stats and chronological **Task Progress** synced from across the app.
-- [x] **Guided Creation**: Multi-step flow (`Create Trip` -> `Add Details` -> `Invite People` -> `Trip Summary`).
-- [x] **Rich Invitations**: Search from contacts or manual entry (Email/Phone) with immediate feedback.
+- [x] **Real-time Overview**: Command center featuring live **Budget vs. Spent** stats and chronological **Task Progress** bars.
 - [x] **Lifecycle Management**: Move trips between statuses, archive, or delete via a centralized action menu.
-- [x] **Dynamic Progress**: Reactive progress bars that update instantly as tasks are completed in the itinerary.
-
-### Itinerary & Timeline
-- [x] **Chronological Timeline**: Vertical high-fidelity view with status tracking.
-- [x] **Day Management**: Monthly calendar view with day-by-day organization.
-- [x] **Activity Deep Dive**: Specialized views for Flights, Tasks, and Notes.
-- [x] **Universal Creation**: Speed Dial FAB for quick access to Events, Tasks, and Notes.
-- [x] **Interactive Tasks**: Mark activities as completed directly from the timeline with live backend syncing.
-- [x] **Advanced Filtering**: Filter itinerary by category and sort by priority or time.
 
 ### Booking Ecosystem
-- [x] **Unified Booking List**: Aggregated view of all travel reservations across multiple trips.
-- [x] **Multi-modal Intake**: Four ways to add bookings:
-    - **Manual Entry**: High-fidelity form with Date/Time pickers and PostgreSQL JSONB-compatible details.
-    - **PNR / Reference No**: Quick fetch directly from the backend via reference code.
-    - **Scan Ticket**: AI-ready scanner frame for e-tickets and boarding passes.
-    - **Import from Email**: Sync travel confirmations from Gmail and Outlook.
-- [x] **Booking Details**: Comprehensive view with itinerary segments, airline/provider info, and total costs.
-- [x] **Traveller Management**: Dynamic passenger list with support for adding/removing travellers and seat assignments.
-- [x] **Management Actions**: Quick access to edit, share, delete, or manage baggage and seating.
+- [x] **Multi-modal Intake**: Four advanced ways to add bookings:
+    - **Manual Entry**: High-fidelity form with PostgreSQL JSONB-compatible details.
+    - **PNR / Reference No**: Instant fetch from backend via reference code.
+    - **Scan Ticket**: AI-ready scanner frame for boarding passes and e-tickets.
+    - **Import from Email**: Direct sync from Gmail/Outlook confirmations.
+- [x] **Traveller Management**: Dynamic passenger list with seat assignment and provider tracking.
 
 ### Budget & Expense Tracking
-- [x] **Budget Overview**: High-fidelity summary card with total/spent amounts and real-time progress tracking.
-- [x] **Intelligent Aggregation**: Real-time spending calculation that cross-references individual transactions with category-wise analytics for 100% accuracy.
-- [x] **Category Breakdown**: Detailed spending analysis for Food, Transport, Activities, etc.
-- [x] **Global Budget List**: Manage financial plans across all active and upcoming trips.
-- [x] **Spending Trends**: Dynamic bar charts and AI-powered spending insights.
-- [x] **Financial Reports**: Export trip expenses to PDF and CSV formats.
-- [x] **AI Receipt Scanner**: High-fidelity animated camera interface for automatic expense entry.
+- [x] **Intelligent Aggregation**: Real-time spending calculation cross-referencing individual transactions with budget category analytics.
+- [x] **AI Receipt Scanner**: Animated camera interface for automated, data-aware expense entry.
+- [x] **Financial Reports**: Export utility for trip expenses to PDF and CSV formats.
 
 ### Travel Document Locker
-- [x] **Secure Storage**: Encrypted locker for Passports, Visas, Tickets, and Insurance.
-- [x] **High-Fidelity UI**: Interactive cards with favoriting, sharing, and expiry tracking.
-- [x] **AI Document Scan**: Dark-themed scanner with alignment guides and auto-capture.
-- [x] **Categories Grid**: Visual organization with real-time document counts per type.
-- [x] **Batch Management**: Long-press selection mode for bulk actions.
-- [x] **Granular Discovery**: Search and filter by category, expiry date, or issuer.
+- [x] **Secure Storage**: Encrypted locker with favoriting, sharing, and proactive expiry tracking.
+- [x] **AI Document Scan**: Dark-themed scanner with alignment guides and auto-capture logic.
 
 ### Smart Checklist Management
-- [x] **My Checklists**: High-fidelity dashboard with real-time progress tracking, human-readable date formatting, and status tabs.
-- [x] **Optimistic Batch Sync**: Highly responsive packing interactions with an intelligent **Floating Save Bar** for background batch synchronization with GraphQL.
-- [x] **Visual Clarity**: Intuitive strike-through effects and color-coded states for packed items, plus secondary "Star" icons for essential gear.
-- [x] **Advanced Template System**: Three-tier template hierarchy (**SYSTEM**, **USER**, **TRIP**) with the ability to convert any checklist into a reusable travel blueprint.
-- [x] **Sectional Organization**: Granular control over logical groups (Packing, Prep, Documents) with a dedicated "Blank Checklist" flow for total customization.
-- [x] **Progress Analytics**: 160dp circular dashboard with sectional breakdown and a full-screen completion celebration view.
-- [x] **AI Packing Assistant**: Smart suggestions mapped to destination and month, featuring bulk-add and logic-aware regeneration.
-- [x] **Command Center Integration**: Fully wired into the **Trip Overview** workspace with contextual routing for pre-trip prep vs. granular timeline tasks.
+- [x] **Optimistic Batch Sync**: Highly responsive interactions with an intelligent **Floating Save Bar** for background GraphQL synchronization.
+- [x] **Advanced Template System**: Three-tier template hierarchy (**SYSTEM**, **USER**, **TRIP**) for reusable travel blueprints.
+- [x] **AI Packing Assistant**: Smart suggestions mapped to destination and month with logic-aware regeneration.
+- [x] **Progress Analytics**: Circular dashboard with sectional breakdown and completion celebrations.
 
 ## 📖 Development Guidelines
 
-- **MVI Pattern**: Every screen must extend `BaseViewModel` and handle intents reactively.
-- **Design System**: Use `TripPointTheme.colorScheme` and `TripPointTheme.dimensions`. **Zero hardcoded strings** - use universal `strings.xml`.
-- **Data Formats**: Use **ISO 8601 LocalDateTime** (`yyyy-MM-ddTHH:mm:ss`) for all API date-time fields to ensure backend compatibility.
-- **Testing**: Maintain high logic coverage (current `:trip`, `:itinerary`, `:booking`, `:budget`, and `:documents` modules at 100%).
+- **MVI Pattern**: Every screen must extend `BaseViewModel` and handle state/effects reactively.
+- **Design System**: Use `TripPointTheme.colorScheme`. **Zero hardcoded strings** - use universal `strings.xml`.
+- **API Standards**: 
+    - Use **GraphQL** for all network operations.
+    - Use **ISO 8601 LocalDateTime** (`yyyy-MM-ddTHH:mm:ssZ`) for all timestamps.
+- **Testing**: Maintain 100% logic coverage for all ViewModels, Repositories, and Data Sources.
 - **Linting**: Ensure all code is **Detekt** and **Ktlint** compliant before committing.
 
 ---

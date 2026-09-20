@@ -21,7 +21,14 @@ sealed class Screen(val route: String) {
     object Profile : Screen("profile")
     object EditProfile : Screen("edit_profile")
     object Preferences : Screen("preferences")
-    object Notifications : Screen("notifications")
+    object Notifications : Screen("notification_center") // Renamed for clarity
+    object NotificationDetail : Screen("notification_detail/{notificationId}") {
+        fun createRoute(notificationId: String) = "notification_detail/$notificationId"
+    }
+    object NotificationPreferences : Screen("notification_preferences")
+    object NotificationChannels : Screen("notification_channels")
+    object NotificationHistory : Screen("notification_history")
+    object Reminders : Screen("reminders")
     object Security : Screen("security")
     object ChangePassword : Screen("change_password")
     object Devices : Screen("devices")

@@ -112,6 +112,19 @@ import com.android.trippoint.itinerary.notes.NotesRoute
 import com.android.trippoint.itinerary.notes.NotesViewModel
 import com.android.trippoint.itinerary.task.AddTaskRoute
 import com.android.trippoint.itinerary.task.AddTaskViewModel
+import com.android.trippoint.notification.center.NotificationCenterRoute
+import com.android.trippoint.notification.center.NotificationCenterViewModel
+import com.android.trippoint.notification.channels.ChannelsRoute
+import com.android.trippoint.notification.channels.ChannelsViewModel
+import com.android.trippoint.notification.detail.NotificationDetailRoute
+import com.android.trippoint.notification.detail.NotificationDetailViewModel
+import com.android.trippoint.notification.history.HistoryRoute
+import com.android.trippoint.notification.history.HistoryViewModel
+import com.android.trippoint.notification.preferences.NotificationPreferencesRoute
+import com.android.trippoint.notification.preferences.NotificationPreferencesViewModel
+import com.android.trippoint.notification.reminders.RemindersRoute
+import com.android.trippoint.notification.reminders.RemindersViewModel
+import com.android.trippoint.notification.domain.repository.NotificationRepository
 import com.android.trippoint.authentication.domain.repository.AuthRepository
 import com.android.trippoint.trip.collaboration.activity.ActivityFeedRoute
 import com.android.trippoint.trip.collaboration.activity.ActivityFeedViewModel
@@ -154,6 +167,7 @@ fun AppNavGraph(
     budgetRepository: BudgetRepository,
     documentRepository: DocumentRepository,
     checklistRepository: ChecklistRepository,
+    notificationRepository: NotificationRepository,
     authRepository: AuthRepository,
     collaborationRepository: CollaborationRepository,
     getTripOverviewUseCase: GetTripOverviewUseCase,
@@ -172,6 +186,7 @@ fun AppNavGraph(
         budgetNavGraph(navController, budgetRepository)
         documentsNavGraph(navController, documentRepository)
         checklistNavGraph(navController, checklistRepository, authRepository, tripRepository)
+        notificationNavGraph(navController, notificationRepository)
         tripMembersNavGraph(navController, tripRepository, collaborationRepository)
     }
 }
@@ -398,6 +413,9 @@ private fun NavGraphBuilder.tripNavGraph(
             },
             onNavigateToBudgets = { tripId ->
                 navController.navigate(Screen.Budgets.createRoute(tripId))
+            },
+            onNavigateToNotifications = {
+                navController.navigate(Screen.Notifications.route)
             }
         )
     }
@@ -509,8 +527,9 @@ private fun NavGraphBuilder.tripNavGraph(
                 }
             },
             onNavigateToEditProfile = { navController.navigate(Screen.EditProfile.route) },
-            onNavigateToPreferences = { navController.navigate(Screen.Preferences.route) },
+            onNavigateToPreferences = { navController.navigate(Screen.NotificationPreferences.route) },
             onNavigateToNotifications = { navController.navigate(Screen.Notifications.route) },
+            onNavigateToReminders = { navController.navigate(Screen.Reminders.route) },
             onNavigateToSecurity = { navController.navigate(Screen.Security.route) },
             onNavigateToDocuments = { navController.navigate(Screen.Documents.route) },
             onNavigateToSupport = { navController.navigate(Screen.Support.route) },
@@ -1852,6 +1871,114 @@ private fun NavGraphBuilder.tripMembersNavGraph(
         )
         ActivityFeedRoute(
             tripId = tripId,
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+}
+
+private fun NavGraphBuilder.notificationNavGraph(
+    navController: NavHostController,
+    notificationRepository: NotificationRepository
+) {
+    composable(Screen.Notifications.route) {
+        val vm: NotificationCenterViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return NotificationCenterViewModel(notificationRepository) as T
+                }
+            }
+        )
+        NotificationCenterRoute(
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToDetail = { id -> navController.navigate(Screen.NotificationDetail.createRoute(id)) },
+            onNavigateToHistory = { navController.navigate(Screen.NotificationHistory.route) },
+            viewModel = vm
+        )
+    }
+
+    composable(
+        route = Screen.NotificationDetail.route,
+        arguments = listOf(
+            androidx.navigation.navArgument("notificationId") { 
+                type = androidx.navigation.NavType.StringType 
+            }
+        )
+    ) { backStackEntry ->
+        val notificationId = backStackEntry.arguments?.getString("notificationId") ?: ""
+        val vm: NotificationDetailViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return NotificationDetailViewModel(notificationRepository) as T
+                }
+            }
+        )
+        NotificationDetailRoute(
+            notificationId = notificationId,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToTrip = { id -> navController.navigate(Screen.TripOverview.createRoute(id)) },
+            viewModel = vm
+        )
+    }
+
+    composable(Screen.NotificationPreferences.route) {
+        val viewModel: NotificationPreferencesViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return NotificationPreferencesViewModel(notificationRepository) as T
+                }
+            }
+        )
+        NotificationPreferencesRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() },
+            onNavigateToChannels = { navController.navigate(Screen.NotificationChannels.route) }
+        )
+    }
+
+    composable(Screen.Reminders.route) {
+        val viewModel: RemindersViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return RemindersViewModel(notificationRepository) as T
+                }
+            }
+        )
+        RemindersRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+
+    composable(Screen.NotificationChannels.route) {
+        val viewModel: ChannelsViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return ChannelsViewModel(notificationRepository) as T
+                }
+            }
+        )
+        ChannelsRoute(
+            viewModel = viewModel,
+            onNavigateBack = { navController.popBackStack() }
+        )
+    }
+
+    composable(Screen.NotificationHistory.route) {
+        val viewModel: HistoryViewModel = androidx.lifecycle.viewmodel.compose.viewModel(
+            factory = object : ViewModelProvider.Factory {
+                @Suppress("UNCHECKED_CAST")
+                override fun <T : ViewModel> create(modelClass: Class<T>): T {
+                    return HistoryViewModel(notificationRepository) as T
+                }
+            }
+        )
+        HistoryRoute(
             viewModel = viewModel,
             onNavigateBack = { navController.popBackStack() }
         )

@@ -20,14 +20,17 @@ import com.android.trippoint.core.designsystem.theme.TripPointTheme
 import com.android.trippoint.core.network.AuthRemoteDataSource
 import com.android.trippoint.core.network.BookingRemoteDataSource
 import com.android.trippoint.core.network.BudgetRemoteDataSource
+import com.android.trippoint.core.network.ChecklistRemoteDataSource
 import com.android.trippoint.core.network.CollaborationRemoteDataSource
 import com.android.trippoint.core.network.DocumentRemoteDataSource
 import com.android.trippoint.core.network.ItineraryRemoteDataSource
 import com.android.trippoint.core.network.NetworkModule
+import com.android.trippoint.core.network.NotificationRemoteDataSource
 import com.android.trippoint.core.network.TripRemoteDataSource
 import com.android.trippoint.documents.data.repository.DocumentRepositoryImpl
 import com.android.trippoint.itinerary.data.repository.ItineraryRepositoryImpl
 import com.android.trippoint.navigation.AppNavGraph
+import com.android.trippoint.notification.data.repository.NotificationRepositoryImpl
 import com.android.trippoint.trip.collaboration.data.repository.CollaborationRepositoryImpl
 import com.android.trippoint.trip.data.repository.TripRepositoryImpl
 
@@ -136,7 +139,7 @@ class MainActivity : ComponentActivity() {
                             preferencesManager.setRefreshToken(refresh)
                         }
                     )
-                    ChecklistRepositoryImpl(com.android.trippoint.core.network.ChecklistRemoteDataSource(api))
+                    ChecklistRepositoryImpl(ChecklistRemoteDataSource(api))
                 }
 
                 val authRepository = remember {
@@ -163,6 +166,18 @@ class MainActivity : ComponentActivity() {
                     CollaborationRepositoryImpl(CollaborationRemoteDataSource(api), authRepository)
                 }
 
+                val notificationRepository = remember {
+                    val api = NetworkModule.provideTripPointApi(
+                        authTokenProvider = { preferencesManager.getAuthToken() },
+                        refreshTokenProvider = { preferencesManager.getRefreshToken() },
+                        onTokenRefreshed = { token, refresh ->
+                            preferencesManager.setAuthToken(token)
+                            preferencesManager.setRefreshToken(refresh)
+                        }
+                    )
+                    NotificationRepositoryImpl(NotificationRemoteDataSource(api))
+                }
+
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                     AppNavGraph(
                         navController = navController,
@@ -172,6 +187,7 @@ class MainActivity : ComponentActivity() {
                         budgetRepository = budgetRepository,
                         documentRepository = documentRepository,
                         checklistRepository = checklistRepository,
+                        notificationRepository = notificationRepository,
                         authRepository = authRepository,
                         collaborationRepository = collaborationRepository,
                         getTripOverviewUseCase = getTripOverviewUseCase,
