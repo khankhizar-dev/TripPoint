@@ -39,7 +39,8 @@ fun HomeRoute(
     onNavigateToTripDetails: (String) -> Unit,
     onNavigateToCreateTrip: (String) -> Unit,
     onNavigateToBookings: (String?) -> Unit,
-    onNavigateToBudgets: (String?) -> Unit
+    onNavigateToBudgets: (String?) -> Unit,
+    onNavigateToNotifications: () -> Unit
 ) {
     val context = LocalContext.current
     val preferencesManager = PreferencesManager(context)
@@ -91,7 +92,8 @@ fun HomeRoute(
         onNavigateToProfile = onNavigateToProfile,
         onNavigateToTripDetails = onNavigateToTripDetails,
         onNavigateToCreateTrip = { onNavigateToCreateTrip("") }, // Pass empty or dynamic tripId if needed
-        onNavigateToBookings = onNavigateToBookings
+        onNavigateToBookings = onNavigateToBookings,
+        onNavigateToNotifications = onNavigateToNotifications
     )
 }
 
@@ -103,7 +105,8 @@ fun HomeScreen(
     onNavigateToProfile: () -> Unit,
     onNavigateToTripDetails: (String) -> Unit,
     onNavigateToCreateTrip: () -> Unit,
-    onNavigateToBookings: (String?) -> Unit
+    onNavigateToBookings: (String?) -> Unit,
+    onNavigateToNotifications: () -> Unit
 ) {
     // We delegate the main UI to TripListRoute which has its own Scaffold
     // The user greeting can be added as a custom header if we modify TripListScreen,
@@ -115,6 +118,7 @@ fun HomeScreen(
         onNavigateToCreate = { onNavigateToCreateTrip() },
         onNavigateToBookings = onNavigateToBookings,
         onNavigateToProfile = onNavigateToProfile,
+        onNavigateToNotifications = onNavigateToNotifications,
         userName = uiState.user?.fullName ?: uiState.user?.firstName
     )
 }
